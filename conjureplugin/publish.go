@@ -37,7 +37,6 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		paramsToPublishKeys = append(paramsToPublishKeys, params.SortedKeys[i])
 		paramsToPublish = append(paramsToPublish, param)
 	}
-
 	// nothing to publish
 	if len(paramsToPublish) == 0 {
 		return nil
@@ -63,7 +62,37 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 	for i, param := range paramsToPublish {
 		key := paramsToPublishKeys[i]
 		currDir := path.Join(tmpDir, fmt.Sprintf("conjure-%s", key))
+		irFileName := fmt.Sprintf("%s-ir.ir.json", key)
+		keyAsDistID := distgo.DistID(key)
 		if err := os.Mkdir(currDir, 0755); err != nil {
+			return errors.WithStack(err)
+		}
+		projectInfo := distgo.ProjectInfo{
+			ProjectDir: currDir,
+			Version:    version,
+		}
+		productOutputInfo := distgo.ProductOutputInfo{
+			DistOutputInfos: &distgo.DistOutputInfos{
+				DistIDs: []distgo.DistID{keyAsDistID},
+				DistInfos: map[distgo.DistID]distgo.DistOutputInfo{
+					keyAsDistID: {
+						DistNameTemplateRendered: irFileName,
+						DistArtifactNames: []string{
+							irFileName,
+						},
+						PackagingExtension: "json",
+					},
+				},
+			},
+			PublishOutputInfo: &distgo.PublishOutputInfo{
+				// TODO: allow this to be specified in config?
+				GroupID: "",
+			},
+		}
+
+		// Use distgo to generate the path of the file we are going to publish
+		directoryPath := distgo.ProductDistOutputDir(projectInfo, productOutputInfo, keyAsDistID)
+		if err := os.MkdirAll(directoryPath, 0755); err != nil {
 			return errors.WithStack(err)
 		}
 
@@ -71,39 +100,15 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		if err != nil {
 			return err
 		}
-		irFileName := fmt.Sprintf("%s-%s.ir.json", key, version)
-		irFilePath := path.Join(currDir, irFileName)
+
+		irFilePath := path.Join(directoryPath, irFileName)
 		if err := ioutil.WriteFile(irFilePath, irBytes, 0644); err != nil {
 			return errors.WithStack(err)
 		}
 
 		if err := publisher.RunPublish(distgo.ProductTaskOutputInfo{
-			Project: distgo.ProjectInfo{
-				ProjectDir: projectDir,
-				Version:    version,
-			},
-			Product: distgo.ProductOutputInfo{
-				ID: distgo.ProductID(key),
-				DistOutputInfos: &distgo.DistOutputInfos{
-					DistOutputDir: param.OutputDir,
-					DistIDs: []distgo.DistID{
-						distgo.DistID(key),
-					},
-					DistInfos: map[distgo.DistID]distgo.DistOutputInfo{
-						distgo.DistID(key): {
-							DistNameTemplateRendered: irFileName,
-							DistArtifactNames: []string{
-								irFileName,
-							},
-							PackagingExtension: "json",
-						},
-					},
-				},
-				PublishOutputInfo: &distgo.PublishOutputInfo{
-					// TODO: allow this to be specified in config?
-					GroupID: "",
-				},
-			},
+			Project: projectInfo,
+			Product: productOutputInfo,
 		}, nil, flagVals, dryRun, stdout); err != nil {
 			return err
 		}

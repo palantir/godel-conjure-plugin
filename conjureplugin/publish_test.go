@@ -83,9 +83,9 @@ projects:
 	lines := strings.Split(outputBuf.String(), "\n")
 	assert.Equal(t, 3, len(lines), "Expected output to have 3 lines:\n%s", outputBuf.String())
 
-	wantRegexp := regexp.QuoteMeta("[DRY RUN]") + " Uploading .*?" + regexp.QuoteMeta(".ir.json") + " to " + regexp.QuoteMeta("http://artifactory.domain.com/artifactory/repo/com/palantir/foo/project-1/") + "[^/]+/project-1-.*?" + regexp.QuoteMeta(".ir.json")
+	wantRegexp := regexp.QuoteMeta("[DRY RUN]") + " Uploading .*?" + regexp.QuoteMeta(".ir.json") + " to " + regexp.QuoteMeta("http://artifactory.domain.com/artifactory/repo/com/palantir/foo/") + ".*?" + "/project-1-ir.*?" + regexp.QuoteMeta(".ir.json")
 	assert.Regexp(t, wantRegexp, lines[0])
 
-	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta("http://artifactory.domain.com/artifactory/repo/com/palantir/foo/project-1/") + "[^/]+/project-1-.*?" + regexp.QuoteMeta(".pom")
+	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta("http://artifactory.domain.com/artifactory/repo/com/palantir/foo/") + ".*?" + regexp.QuoteMeta(".pom")
 	assert.Regexp(t, wantRegexp, lines[1])
 }

@@ -237,10 +237,11 @@ projects:
 	lines := strings.Split(outputBuf.String(), "\n")
 	assert.Equal(t, 3, len(lines), "Expected output to have 3 lines:\n%s", outputBuf.String())
 
-	wantRegexp := regexp.QuoteMeta("[DRY RUN]") + " Uploading .*?" + regexp.QuoteMeta(".ir.json") + " to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/project-1/") + "[^/]+/project-1-.*?" + regexp.QuoteMeta(".ir.json")
+	wantRegexp := regexp.QuoteMeta("[DRY RUN]") + " Uploading .*?" + regexp.QuoteMeta(".ir.json") + " to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/") + ".*?" + "/project-1-ir.*?" + regexp.QuoteMeta(".ir.json")
 	assert.Regexp(t, wantRegexp, lines[0])
+	fmt.Println(lines[0])
 
-	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/project-1/") + "[^/]+/project-1-.*?" + regexp.QuoteMeta(".pom")
+	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/") + ".*?" + regexp.QuoteMeta(".pom")
 	assert.Regexp(t, wantRegexp, lines[1])
 }
 
@@ -318,7 +319,7 @@ projects:
   sls-health-api:
     # comment
     output-dir: conjure
-    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/sls-health-api/3.2.0/health-api-3.2.0.json
+    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
 `,
 				},
 				WantOutput: "",
@@ -329,7 +330,7 @@ projects:
   sls-health-api:
     # comment
     output-dir: conjure
-    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/sls-health-api/3.2.0/health-api-3.2.0.json
+    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
 `,
 				},
 			},
