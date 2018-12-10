@@ -29,11 +29,9 @@
   name = "github.com/go-bindata/go-bindata"
   version = "1.0.0"
 
-# Need first release after 2.0 for "Read" function, but no such release exists yet.
-# Once the next release is available, update this constraint to that version.
 [[constraint]]
   name = "github.com/mholt/archiver"
-  branch = "master"
+  version = "2.1.0"
 
 [[constraint]]
   name = "github.com/pkg/errors"
