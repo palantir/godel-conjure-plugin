@@ -4,7 +4,7 @@ working_dir: &working_dir
 darwin-linux-no-cgo: &darwin-linux-no-cgo
   <<: *working_dir
   docker:
-    - image: nmiyake/go:go-darwin-linux-no-cgo-1.11.2-t138
+    - image: nmiyake/go:go-darwin-linux-no-cgo-1.11.2-java-8u181-t138
       environment:
         CGO_ENABLED: 0
 
