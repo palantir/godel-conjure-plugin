@@ -239,7 +239,6 @@ projects:
 
 	wantRegexp := regexp.QuoteMeta("[DRY RUN]") + " Uploading .*?" + regexp.QuoteMeta(".ir.json") + " to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/") + ".*?" + "/project-1-ir.*?" + regexp.QuoteMeta(".ir.json")
 	assert.Regexp(t, wantRegexp, lines[0])
-	fmt.Println(lines[0])
 
 	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/") + ".*?" + regexp.QuoteMeta(".pom")
 	assert.Regexp(t, wantRegexp, lines[1])
