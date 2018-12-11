@@ -116,8 +116,7 @@
   revision = "ebd802b4f1c2b52d221ca35f624d3312b765422c"
 
 [[projects]]
-  branch = "develop"
-  digest = "1:de86072ea9eaf68a5d36af594cc1f8df2ca0a91149b69d63e3cdd626bb62d716"
+  digest = "1:fd5e23ab771775c27564c706266e890612ed79c2edc730bd7e8c43a325df011d"
   name = "github.com/palantir/conjure-go"
   packages = [
     "conjure",
@@ -127,7 +126,8 @@
     "conjure/visitors",
   ]
   pruneopts = "UT"
-  revision = "ac7d8e3a4e03c7f7a01980ac8fb0c288eef7a1d4"
+  revision = "fd40b72c7444aacb4cfe357b3cb285526d151ed1"
+  version = "2.0.0"
 
 [[projects]]
   digest = "1:62e516988833f683d36991a3747965e49fb8dafb397915257faff88f99b68725"
