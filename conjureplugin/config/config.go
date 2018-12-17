@@ -56,6 +56,7 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 			OutputDir:  currConfig.OutputDir,
 			IRProvider: irProvider,
 			Publish:    publishVal,
+			ArtifactID: currConfig.ArtifactID,
 		}
 	}
 	return conjureplugin.ConjureProjectParams{

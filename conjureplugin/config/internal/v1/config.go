@@ -32,6 +32,8 @@ type SingleConjureConfig struct {
 	// If this value is not explicitly specified in configuration, it is treated as "true" for YAML sources of IR and
 	// "false" for all other sources.
 	Publish *bool `yaml:"publish"`
+	// ArtifactID will be appended to the groupId if publishing is enabled for this config
+	ArtifactID string `yaml:"artifact-id"`
 }
 
 type LocatorType string

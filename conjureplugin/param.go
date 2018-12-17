@@ -32,5 +32,6 @@ type ConjureProjectParam struct {
 	IRProvider   IRProvider
 	IROutputPath string
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
-	Publish bool
+	Publish    bool
+	ArtifactID string
 }

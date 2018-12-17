@@ -116,6 +116,7 @@ projects:
  project:
    output-dir: outputDir
    ir-locator: http://foo.com/ir.json
+   artifact-id: baz
    publish: true
 `,
 			config.ConjurePluginConfig{
@@ -126,7 +127,8 @@ projects:
 							Type:    v1.LocatorTypeAuto,
 							Locator: "http://foo.com/ir.json",
 						},
-						Publish: boolPtr(true),
+						Publish:    boolPtr(true),
+						ArtifactID: "baz",
 					},
 				},
 			},
