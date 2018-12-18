@@ -199,7 +199,6 @@ projects:
   project-1:
     output-dir: conjure-output
     ir-locator: ` + yamlDir + `
-    artifact-id: baz
 `
 	)
 
@@ -238,7 +237,7 @@ projects:
 	lines := strings.Split(outputBuf.String(), "\n")
 	assert.Equal(t, 3, len(lines), "Expected output to have 3 lines:\n%s", outputBuf.String())
 
-	wantRegexp := regexp.QuoteMeta("[DRY RUN]") + " Uploading .*?" + regexp.QuoteMeta(".ir.json") + " to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/baz/") + ".*?" + regexp.QuoteMeta("/baz-") + ".*?" + regexp.QuoteMeta(".project-1.ir.json")
+	wantRegexp := regexp.QuoteMeta("[DRY RUN]") + " Uploading .*?" + regexp.QuoteMeta(".ir.json") + " to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/project-1/") + ".*?" + regexp.QuoteMeta("/project-1-") + ".*?" + regexp.QuoteMeta(".ir.json")
 	assert.Regexp(t, wantRegexp, lines[0])
 
 	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/") + ".*?" + regexp.QuoteMeta(".pom")
