@@ -1,5 +1,7 @@
 godel-conjure-plugin
 ====================
+[![](https://godoc.org/github.com/palantir/godel-conjure-plugin?status.svg)](http://godoc.org/github.com/palantir/godel-conjure-plugin)
+
 godel-conjure-plugin is a [godel](https://github.com/palantir/godel) plugin for [conjure-go](https://github.com/palantir/conjure-go/).
 The plugin runs conjure-go based on project configuration. It also runs as part of the `--verify` task and verifies that
 the running the task would not alter the content of the output directory.
