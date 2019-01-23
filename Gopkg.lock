@@ -199,6 +199,23 @@
   version = "v2.12.0"
 
 [[projects]]
+  digest = "1:7be494b8940c57cf644ba4018968112e92bc2300b2b7b216da1cb5464639eab3"
+  name = "github.com/palantir/godel-conjure-plugin"
+  packages = [
+    "cmd",
+    "conjureplugin",
+    "conjureplugin/config",
+    "conjureplugin/config/internal/legacy",
+    "conjureplugin/config/internal/v0",
+    "conjureplugin/config/internal/v1",
+    "ir-gen-cli-bundler/conjureircli",
+    "ir-gen-cli-bundler/conjureircli/internal",
+  ]
+  pruneopts = "UT"
+  revision = "e7309d29db4c1d294f9cb044f872e88a9ec009c3"
+  version = "v4.0.0"
+
+[[projects]]
   digest = "1:0c421b56ea438f6f7490a92d446fca4e2676f40bee146f9210ac51067e11055b"
   name = "github.com/palantir/pkg"
   packages = [
@@ -357,6 +374,14 @@
     "github.com/palantir/distgo/publisher",
     "github.com/palantir/distgo/publisher/artifactory",
     "github.com/palantir/distgo/publisher/maven",
+    "github.com/palantir/godel-conjure-plugin/cmd",
+    "github.com/palantir/godel-conjure-plugin/conjureplugin",
+    "github.com/palantir/godel-conjure-plugin/conjureplugin/config",
+    "github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/legacy",
+    "github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v0",
+    "github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v1",
+    "github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli",
+    "github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli/internal",
     "github.com/palantir/godel/framework/pluginapi",
     "github.com/palantir/godel/framework/pluginapi/v2/pluginapi",
     "github.com/palantir/godel/framework/pluginapitester",
