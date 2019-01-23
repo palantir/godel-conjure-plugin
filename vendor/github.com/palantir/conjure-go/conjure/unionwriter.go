@@ -34,61 +34,49 @@ const (
 	unionReceiverName = "u"
 )
 
-func astForUnion(unionDefinition spec.UnionDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
+func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	if err := addImportPathsFromFields(unionDefinition.Union, info); err != nil {
+		return nil, err
+	}
+
 	unionTypeName := unionDefinition.TypeName.Name
-	allImports := NewStringSet()
 	fieldNameToGoType := make(map[string]string)
 
 	for _, fieldDefinition := range unionDefinition.Union {
-		typer, err := fieldDefinitionToTyper(fieldDefinition, customTypes)
+		typer, err := fieldDefinitionToTyper(fieldDefinition, info)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to process object %s", unionTypeName)
+			return nil, errors.Wrapf(err, "failed to process object %s", unionTypeName)
 		}
-		goType := typer.GoType(goPkgImportPath, importToAlias)
+		goType := typer.GoType(info)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to determine type for type %q in union type %q", goType, unionTypeName)
+			return nil, errors.Wrapf(err, "failed to determine type for type %q in union type %q", goType, unionTypeName)
 		}
 		fieldNameToGoType[string(fieldDefinition.FieldName)] = goType
 	}
-
-	marshalJSONAST, imports := marshalJSONAST(unionTypeName)
-	allImports.AddAll(imports)
-
-	marshalYAMLAST, imports := marshalYAMLAST(unionTypeName)
-	allImports.AddAll(imports)
-
-	unmarshalJSONAST, imports := unmarshalJSONAST(unionTypeName)
-	allImports.AddAll(imports)
-
-	unmarshalYAMLAST, imports := unmarshalYAMLAST(unionTypeName)
-	allImports.AddAll(imports)
-
-	acceptMethodAST, imports := acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType)
-	allImports.AddAll(imports)
 
 	components := []astgen.ASTDecl{
 		unionStructAST(unionTypeName, unionDefinition, fieldNameToGoType),
 		unionStructDeserializerAST(unionTypeName, unionDefinition, fieldNameToGoType),
 		unionStructDeserializerToStructAST(unionTypeName, unionDefinition),
 		toSerializerFuncAST(unionTypeName, unionDefinition, fieldNameToGoType),
-		marshalJSONAST,
-		unmarshalJSONAST,
-		marshalYAMLAST,
-		unmarshalYAMLAST,
-		acceptMethodAST,
+		unionMarshalJSONAST(unionTypeName, info),
+		unionUnmarshalJSONAST(unionTypeName, info),
+		newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
+		newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
+		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info),
 		unionTypeVisitorInterfaceAST(unionTypeName, unionDefinition, fieldNameToGoType),
 	}
 	components = append(components, newFunctionASTs(unionTypeName, unionDefinition, fieldNameToGoType)...)
-	return components, allImports, nil
+	return components, nil
 }
 
-func fieldDefinitionToTyper(fieldDefinition spec.FieldDefinition, customTypes types.CustomConjureTypes) (types.Typer, error) {
+func fieldDefinitionToTyper(fieldDefinition spec.FieldDefinition, info types.PkgInfo) (types.Typer, error) {
 	newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 	name := string(fieldDefinition.FieldName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to process object %s", name)
 	}
-	typer, err := newConjureTypeProvider.ParseType(customTypes)
+	typer, err := newConjureTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to process object %s", name)
 	}
@@ -121,7 +109,7 @@ func unionStructDeserializerAST(unionTypeName string, unionDefinition spec.Union
 		{
 			Name: "Type",
 			Type: expression.StringType,
-			Tag:  fmt.Sprintf(`json:%q yaml:%q`, "type", "type"),
+			Tag:  fmt.Sprintf(`json:%q`, "type"),
 		},
 	}
 	for _, fieldDefinition := range unionDefinition.Union {
@@ -129,7 +117,7 @@ func unionStructDeserializerAST(unionTypeName string, unionDefinition spec.Union
 		structFields = append(structFields, &expression.StructField{
 			Name: transforms.Export(fieldName),
 			Type: expression.Type(fieldNameToGoType[fieldName]).Pointer(),
-			Tag:  fmt.Sprintf(`json:%q yaml:%q`, fieldName, fieldName),
+			Tag:  fmt.Sprintf(`json:%q`, fieldName),
 		})
 	}
 	return decl.NewStruct(
@@ -216,12 +204,12 @@ func toSerializerFuncAST(unionTypeName string, unionDefinition spec.UnionDefinit
 							&expression.StructField{
 								Name: "Type",
 								Type: expression.StringType,
-								Tag:  `json:"type" yaml:"type"`,
+								Tag:  `json:"type"`,
 							},
 							&expression.StructField{
 								Name: transforms.Export(fieldName),
 								Type: expression.Type(fieldNameToGoType[fieldName]),
-								Tag:  fmt.Sprintf(`json:%q yaml:%q`, fieldName, fieldName),
+								Tag:  fmt.Sprintf(`json:%q`, fieldName),
 							},
 						),
 						expression.NewKeyValue("Type", expression.StringVal(fieldName)),
@@ -238,12 +226,12 @@ func toSerializerFuncAST(unionTypeName string, unionDefinition spec.UnionDefinit
 							&expression.StructField{
 								Name: "Type",
 								Type: expression.StringType,
-								Tag:  `json:"type" yaml:"type"`,
+								Tag:  `json:"type"`,
 							},
 							&expression.StructField{
 								Name: transforms.Export(fieldName),
 								Type: expression.Type(fieldNameToGoType[fieldName]),
-								Tag:  fmt.Sprintf(`json:%q yaml:%q`, fieldName, fieldName),
+								Tag:  fmt.Sprintf(`json:%q`, fieldName),
 							},
 						),
 						expression.NewKeyValue("Type", expression.StringVal(fieldName)),
@@ -285,129 +273,52 @@ func deserializerStructName(unionTypeName string) string {
 	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
 }
 
-func marshalJSONAST(unionTypeName string) (astgen.ASTDecl, StringSet) {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalJSON",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("[]byte"),
-					expression.ErrorType,
-				},
+func unionMarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
+	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
+	return newMarshalJSONMethod(unionReceiverName, transforms.Export(unionTypeName),
+		&statement.Assignment{
+			LHS: []astgen.ASTExpr{
+				expression.VariableVal("ser"),
+				expression.VariableVal("err"),
 			},
-			Body: []astgen.ASTStmt{
-				&statement.Assignment{
-					LHS: []astgen.ASTExpr{
-						expression.VariableVal("ser"),
-						expression.VariableVal("err"),
-					},
-					Tok: token.DEFINE,
-					RHS: expression.NewCallFunction(
-						unionReceiverName,
-						"toSerializer",
-					),
-				},
-				ifErrNotNilReturnHelper(true, "nil", "err", nil),
-				statement.NewReturn(expression.NewCallFunction(
-					"json",
-					"Marshal",
-					expression.VariableVal("ser"),
-				)),
-			},
+			Tok: token.DEFINE,
+			RHS: expression.NewCallFunction(
+				unionReceiverName,
+				"toSerializer",
+			),
 		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(transforms.Export(unionTypeName)),
-	}, NewStringSet("encoding/json")
+		ifErrNotNilReturnHelper(true, "nil", "err", nil),
+		statement.NewReturn(&expression.CallExpression{
+			Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
+			Args: []astgen.ASTExpr{
+				expression.VariableVal("ser"),
+			},
+		}),
+	)
 }
 
-func marshalYAMLAST(unionTypeName string) (astgen.ASTDecl, StringSet) {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalYAML",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("interface{}"),
-					expression.ErrorType,
+func unionUnmarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
+	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
+	return newUnmarshalJSONMethod(unionReceiverName, transforms.Export(unionTypeName),
+		statement.NewDecl(decl.NewVar("deser", expression.Type(deserializerStructName(unionTypeName)))),
+		ifErrNotNilReturnErrStatement("err", statement.NewAssignment(
+			expression.VariableVal("err"),
+			token.DEFINE,
+			&expression.CallExpression{
+				Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+				Args: []astgen.ASTExpr{
+					expression.VariableVal(dataVarName),
+					expression.NewUnary(token.AND, expression.VariableVal("deser")),
 				},
 			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCallFunction(unionReceiverName, "toSerializer"),
-				),
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(transforms.Export(unionTypeName)),
-	}, nil
-}
-
-func unmarshalJSONAST(unionTypeName string) (astgen.ASTDecl, StringSet) {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalJSON",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("data", expression.Type("[]byte")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewDecl(decl.NewVar("deser", expression.Type(deserializerStructName(unionTypeName)))),
-				ifErrNotNilReturnErrStatement("err", statement.NewAssignment(
-					expression.VariableVal("err"),
-					token.DEFINE,
-					expression.NewCallFunction("json", "Unmarshal", expression.VariableVal("data"), expression.NewUnary(token.AND, expression.VariableVal("deser"))),
-				)),
-				statement.NewAssignment(
-					expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),
-					token.ASSIGN,
-					expression.NewCallFunction("deser", "toStruct"),
-				),
-				statement.NewReturn(expression.Nil),
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
-	}, NewStringSet("encoding/json")
-}
-
-func unmarshalYAMLAST(unionTypeName string) (astgen.ASTDecl, StringSet) {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalYAML",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("unmarshal", expression.Type("func(interface{}) error")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewDecl(decl.NewVar("deser", expression.Type(deserializerStructName(unionTypeName)))),
-				ifErrNotNilReturnErrStatement("err", statement.NewAssignment(
-					expression.VariableVal("err"),
-					token.DEFINE,
-					&expression.CallExpression{
-						Function: expression.VariableVal("unmarshal"),
-						Args: []astgen.ASTExpr{
-							expression.NewUnary(token.AND, expression.VariableVal("deser")),
-						},
-					},
-				)),
-				statement.NewAssignment(
-					expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),
-					token.ASSIGN,
-					expression.NewCallFunction("deser", "toStruct"),
-				),
-				statement.NewReturn(expression.Nil),
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
-	}, nil
+		)),
+		statement.NewAssignment(
+			expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),
+			token.ASSIGN,
+			expression.NewCallFunction("deser", "toStruct"),
+		),
+		statement.NewReturn(expression.Nil),
+	)
 }
 
 func unionTypeVisitorInterfaceAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) astgen.ASTDecl {
@@ -447,7 +358,8 @@ func visitorInterfaceName(unionTypeName string) string {
 	return transforms.Export(unionTypeName) + "Visitor"
 }
 
-func acceptMethodAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) (astgen.ASTDecl, StringSet) {
+func acceptMethodAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string, info types.PkgInfo) astgen.ASTDecl {
+	info.AddImports("fmt")
 	// start with default case
 	cases := []statement.CaseClause{
 		{
@@ -532,7 +444,7 @@ func acceptMethodAST(unionTypeName string, unionDefinition spec.UnionDefinition,
 		},
 		ReceiverName: unionReceiverName,
 		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
-	}, NewStringSet("fmt")
+	}
 }
 
 func newFunctionASTs(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) []astgen.ASTDecl {

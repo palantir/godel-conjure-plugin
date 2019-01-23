@@ -116,7 +116,7 @@
   revision = "ebd802b4f1c2b52d221ca35f624d3312b765422c"
 
 [[projects]]
-  digest = "1:fd5e23ab771775c27564c706266e890612ed79c2edc730bd7e8c43a325df011d"
+  digest = "1:76fa94b1e1a82078af7717277cebf62646545ddd57e31e26943bc100d4586a8f"
   name = "github.com/palantir/conjure-go"
   packages = [
     "conjure",
@@ -126,8 +126,8 @@
     "conjure/visitors",
   ]
   pruneopts = "UT"
-  revision = "fd40b72c7444aacb4cfe357b3cb285526d151ed1"
-  version = "2.0.0"
+  revision = "58d0f8c17332a18df620144eeccccf571e058a4c"
+  version = "v3.0.0"
 
 [[projects]]
   digest = "1:62e516988833f683d36991a3747965e49fb8dafb397915257faff88f99b68725"
@@ -149,7 +149,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:313e2cffaaafef03778f005da195fa5e26ca6cb25b2022554a4997efe8e9c9f3"
+  digest = "1:d128b4221763e0b8a20ebbbf961a566670108d5213877894b4efab400eeac5a3"
   name = "github.com/palantir/goastwriter"
   packages = [
     ".",
@@ -161,10 +161,10 @@
     "statement",
   ]
   pruneopts = "UT"
-  revision = "171a26f8d7be8b0d9297a9f5d58a19cd5afca006"
+  revision = "34415a3880d501916c27bbd19686f35773ba487b"
 
 [[projects]]
-  digest = "1:20aa82791c78c5769b36214f805ebbe9cb4aa4282d16441453739a1c1b1d698b"
+  digest = "1:de61c4bbf4944fbb1317373f01c018711910a5f045266f759a4b56044295f32d"
   name = "github.com/palantir/godel"
   packages = [
     "framework/artifactresolver",
@@ -195,22 +195,25 @@
     "pkg/versionedconfig",
   ]
   pruneopts = "UT"
-  revision = "52f53814b6828de524b640e638ca5a25978361dd"
-  version = "v2.9.1"
+  revision = "dfd68b0f0a0e0946acb41133903374ae8e12bce6"
+  version = "v2.12.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:3bc8e4c9036f7464741eb284d2f2809402b27a1950ba556ed92c9ad9f5153da0"
+  digest = "1:0c421b56ea438f6f7490a92d446fca4e2676f40bee146f9210ac51067e11055b"
   name = "github.com/palantir/pkg"
   packages = [
     "cobracli",
     "matcher",
     "pkgpath",
     "safehttp",
+    "safejson",
+    "safeyaml",
     "specdir",
+    "transform",
   ]
   pruneopts = "UT"
-  revision = "b99e4c174bb7f8375643e79008d03e193cdbec2e"
+  revision = "418f3ad7b9addf837f48d5f3b8c4325115abe88f"
+  version = "0.9.4"
 
 [[projects]]
   digest = "1:29803f52611cbcc1dfe55b456e9fdac362af7248b3d29d7ea1bec0a12e71dff4"
@@ -305,14 +308,24 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:95f24cc9a9a50da8aa144484a7c625c2e30dcbddf8e3bc336d2d92108b8c769e"
+  digest = "1:366b01ba5b7796687e15d90bd2a98e0f298ad32add9b880694bf1ca8ff7d598f"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/cgo",
+    "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
+    "go/types/typeutil",
     "imports",
+    "internal/fastwalk",
+    "internal/gopathwalk",
+    "internal/module",
+    "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "ac136b6c2db7c4d43955e4bc7174db36dc0539c0"
+  revision = "9279ec27fd88b9e004f857564a7b4123cc584f63"
 
 [[projects]]
   digest = "1:c4b907986044810b1542df64faf968e8b1c235113f26b06f16a1c86e0d6a48f8"

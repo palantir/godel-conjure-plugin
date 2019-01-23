@@ -31,35 +31,34 @@ import (
 	"github.com/palantir/conjure-go/conjure/visitors"
 )
 
-func astForObject(objectDefinition spec.ObjectDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
-	imports := make(StringSet)
+func astForObject(objectDefinition spec.ObjectDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	if err := addImportPathsFromFields(objectDefinition.Fields, info); err != nil {
+		return nil, err
+	}
+
 	containsCollection := false
 	var structFields []*expression.StructField
 
 	for _, fieldDefinition := range objectDefinition.Fields {
-		newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to create type provider for field %s for object %s",
-				fieldDefinition.FieldName,
-				objectDefinition.TypeName.Name,
-			)
-		}
-		typer, err := newConjureTypeProvider.ParseType(customTypes)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to parse type field %s for object %s",
-				fieldDefinition.FieldName,
-				objectDefinition.TypeName.Name,
-			)
-		}
-		goType := typer.GoType(goPkgImportPath, importToAlias)
-
 		conjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 		if err != nil {
-			return nil, nil, err
+			return nil, errors.Wrapf(err, "failed to create type provider for field %s for object %s",
+				fieldDefinition.FieldName,
+				objectDefinition.TypeName.Name,
+			)
 		}
-		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(customTypes, goPkgImportPath, importToAlias)
+		typer, err := conjureTypeProvider.ParseType(info)
 		if err != nil {
-			return nil, nil, err
+			return nil, errors.Wrapf(err, "failed to parse type field %s for object %s",
+				fieldDefinition.FieldName,
+				objectDefinition.TypeName.Name,
+			)
+		}
+		info.AddImports(typer.ImportPaths()...)
+
+		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(info)
+		if err != nil {
+			return nil, err
 		}
 		if collectionExpression != nil {
 			// if there is a map or slice field, the struct contains a collection
@@ -68,7 +67,6 @@ func astForObject(objectDefinition spec.ObjectDefinition, customTypes types.Cust
 		fieldName := string(fieldDefinition.FieldName)
 		tags := []string{
 			fmt.Sprintf("json:%q", fieldName),
-			fmt.Sprintf(`yaml:"%s,omitempty"`, fieldName),
 		}
 
 		comment := transforms.Documentation(fieldDefinition.Docs)
@@ -80,7 +78,7 @@ func astForObject(objectDefinition spec.ObjectDefinition, customTypes types.Cust
 		}
 		structFields = append(structFields, &expression.StructField{
 			Name:    transforms.ExportedFieldName(fieldName),
-			Type:    expression.Type(goType),
+			Type:    expression.Type(typer.GoType(info)),
 			Tag:     strings.Join(tags, " "),
 			Comment: comment,
 		})
@@ -94,31 +92,32 @@ func astForObject(objectDefinition spec.ObjectDefinition, customTypes types.Cust
 		for _, f := range []serdeFunc{
 			astForStructJSONMarshal,
 			astForStructJSONUnmarshal,
-			astForStructYAMLMarshal,
-			astForStructYAMLUnmarshal,
 		} {
-			decl, currImports, err := f(objectDefinition, customTypes, goPkgImportPath, importToAlias)
+			serdeDecl, err := f(objectDefinition, info)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
-			decls = append(decls, decl)
-			imports.AddAll(currImports)
+			decls = append(decls, serdeDecl)
 		}
 	}
-	return decls, imports, nil
+
+	decls = append(decls, newMarshalYAMLMethod(objReceiverName, objectDefinition.TypeName.Name, info))
+	decls = append(decls, newUnmarshalYAMLMethod(objReceiverName, objectDefinition.TypeName.Name, info))
+
+	return decls, nil
 }
 
 const (
 	objReceiverName = "o"
 )
 
-type serdeFunc func(objectDefinition spec.ObjectDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet, error)
+type serdeFunc func(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, error)
 
-func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet, error) {
+func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, error) {
 	var body []astgen.ASTStmt
-	marshalInit, error := structMarshalInitDecls(objectDefinition, objReceiverName, customTypes, goPkgImportPath, importToAlias)
-	if error != nil {
-		return nil, nil, error
+	marshalInit, err := structMarshalInitDecls(objectDefinition, objReceiverName, info)
+	if err != nil {
+		return nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -130,36 +129,25 @@ func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, customTypes
 		},
 	))
 
+	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
 	body = append(body, statement.NewReturn(
-		expression.NewCallFunction(
-			"json",
-			"Marshal",
-			&expression.CallExpression{
-				Function: expression.VariableVal(aliasTypeName),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(objReceiverName),
+		&expression.CallExpression{
+			Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
+			Args: []astgen.ASTExpr{
+				&expression.CallExpression{
+					Function: expression.VariableVal(aliasTypeName),
+					Args: []astgen.ASTExpr{
+						expression.VariableVal(objReceiverName),
+					},
 				},
 			},
-		),
+		},
 	))
 
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalJSON",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("[]byte"),
-					expression.ErrorType,
-				},
-			},
-			Body: body,
-		},
-		ReceiverName: objReceiverName,
-		ReceiverType: expression.Type(objectDefinition.TypeName.Name),
-	}, NewStringSet("encoding/json"), nil
+	return newMarshalJSONMethod(objReceiverName, objectDefinition.TypeName.Name, body...), nil
 }
 
-func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet, error) {
+func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, error) {
 	var body []astgen.ASTStmt
 	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
 	body = append(body, statement.NewDecl(
@@ -174,163 +162,39 @@ func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, customTyp
 		decl.NewVar(rawVarName, expression.Type(aliasTypeName)),
 	))
 
-	body = append(body, ifErrNotNilReturnErrStatement("err",
-		statement.NewAssignment(
-			expression.VariableVal("err"),
-			token.DEFINE,
-			expression.NewCallFunction(
-				"json",
-				"Unmarshal",
-				expression.VariableVal("data"), expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
-			),
-		),
-	))
-
-	marshalInit, error := structMarshalInitDecls(objectDefinition, rawVarName, customTypes, goPkgImportPath, importToAlias)
-	if error != nil {
-		return nil, nil, error
-	}
-	body = append(body, marshalInit...)
-
-	body = append(body, statement.NewAssignment(
-		expression.NewStar(expression.VariableVal(objReceiverName)),
-		token.ASSIGN,
-		&expression.CallExpression{
-			Function: expression.VariableVal(objectDefinition.TypeName.Name),
-			Args: []astgen.ASTExpr{
-				expression.VariableVal(rawVarName),
-			},
-		},
-	))
-
-	body = append(body, statement.NewReturn(expression.Nil))
-
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalJSON",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("data", expression.Type("[]byte")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: body,
-		},
-		ReceiverName: objReceiverName,
-		ReceiverType: expression.Type(objectDefinition.TypeName.Name).Pointer(),
-	}, NewStringSet("encoding/json"), nil
-}
-
-func astForStructYAMLMarshal(objectDefinition spec.ObjectDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet, error) {
-	var body []astgen.ASTStmt
-	marshalInit, error := structMarshalInitDecls(objectDefinition, objReceiverName, customTypes, goPkgImportPath, importToAlias)
-	if error != nil {
-		return nil, nil, error
-	}
-	body = append(body, marshalInit...)
-
-	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
-	body = append(body, statement.NewDecl(
-		&decl.Alias{
-			Name: aliasTypeName,
-			Type: expression.Type(objectDefinition.TypeName.Name),
-		},
-	))
-
-	body = append(body, statement.NewReturn(
-		&expression.CallExpression{
-			Function: expression.VariableVal(aliasTypeName),
-			Args: []astgen.ASTExpr{
-				expression.VariableVal(objReceiverName),
-			},
-		},
-		expression.Nil,
-	))
-
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalYAML",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("interface{}"),
-					expression.ErrorType,
-				},
-			},
-			Body: body,
-		},
-		ReceiverName: objReceiverName,
-		ReceiverType: expression.Type(objectDefinition.TypeName.Name),
-	}, NewStringSet(), nil
-}
-
-func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet, error) {
-	var body []astgen.ASTStmt
-	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
-	body = append(body, statement.NewDecl(
-		&decl.Alias{
-			Name: aliasTypeName,
-			Type: expression.Type(objectDefinition.TypeName.Name),
-		},
-	))
-
-	rawVarName := fmt.Sprint("raw", objectDefinition.TypeName.Name)
-	body = append(body, statement.NewDecl(
-		decl.NewVar(rawVarName, expression.Type(aliasTypeName)),
-	))
-
+	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
 	body = append(body, ifErrNotNilReturnErrStatement("err",
 		statement.NewAssignment(
 			expression.VariableVal("err"),
 			token.DEFINE,
 			&expression.CallExpression{
-				Function: expression.Type("unmarshal"),
+				Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
 				Args: []astgen.ASTExpr{
+					expression.VariableVal(dataVarName),
 					expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
 				},
 			},
 		),
 	))
 
-	marshalInit, error := structMarshalInitDecls(objectDefinition, rawVarName, customTypes, goPkgImportPath, importToAlias)
-	if error != nil {
-		return nil, nil, error
+	marshalInit, err := structMarshalInitDecls(objectDefinition, rawVarName, info)
+	if err != nil {
+		return nil, err
 	}
 	body = append(body, marshalInit...)
 
 	body = append(body, statement.NewAssignment(
 		expression.NewStar(expression.VariableVal(objReceiverName)),
 		token.ASSIGN,
-		&expression.CallExpression{
-			Function: expression.VariableVal(objectDefinition.TypeName.Name),
-			Args: []astgen.ASTExpr{
-				expression.VariableVal(rawVarName),
-			},
-		},
+		expression.NewCallExpression(expression.VariableVal(objectDefinition.TypeName.Name), expression.VariableVal(rawVarName)),
 	))
 
 	body = append(body, statement.NewReturn(expression.Nil))
 
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalYAML",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("unmarshal", expression.Type("func(interface{}) error")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: body,
-		},
-		ReceiverName: objReceiverName,
-		ReceiverType: expression.Type(objectDefinition.TypeName.Name).Pointer(),
-	}, NewStringSet(), error
+	return newUnmarshalJSONMethod(objReceiverName, objectDefinition.TypeName.Name, body...), nil
 }
 
-func structMarshalInitDecls(objectDefinition spec.ObjectDefinition, variableVal string, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTStmt, error) {
+func structMarshalInitDecls(objectDefinition spec.ObjectDefinition, variableVal string, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	var decls []astgen.ASTStmt
 	for _, fieldDefinition := range objectDefinition.Fields {
 		conjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
@@ -338,7 +202,7 @@ func structMarshalInitDecls(objectDefinition spec.ObjectDefinition, variableVal 
 			return nil, err
 		}
 
-		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(customTypes, goPkgImportPath, importToAlias)
+		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(info)
 		if err != nil {
 			return nil, err
 		}

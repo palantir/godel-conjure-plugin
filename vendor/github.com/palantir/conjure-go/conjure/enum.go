@@ -21,10 +21,12 @@ import (
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
-	"github.com/palantir/goastwriter/spec"
+	astspec "github.com/palantir/goastwriter/spec"
 	"github.com/palantir/goastwriter/statement"
 
+	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/transforms"
+	"github.com/palantir/conjure-go/conjure/types"
 )
 
 const (
@@ -32,120 +34,65 @@ const (
 	unknownEnumValue = "UNKNOWN"
 )
 
-type Enum struct {
-	Name    string
-	Values  []Value
-	Comment string
-}
+func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen.ASTDecl {
+	enumName := enumDefinition.TypeName.Name
 
-func (e *Enum) ASTDeclers() ([]astgen.ASTDecl, StringSet) {
-	var returnVal []astgen.ASTDecl
-
-	returnVal = append(returnVal, &decl.Alias{
-		Comment: e.Comment,
-		Name:    e.Name,
+	typeDef := &decl.Alias{
+		Comment: transforms.Documentation(enumDefinition.Docs),
+		Name:    enumName,
 		Type:    expression.StringType,
-	})
+	}
 
 	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
 
-	var vals []*spec.Value
-	for _, currVal := range e.Values {
-		vals = append(vals, &spec.Value{
-			Comment: currVal.Docs,
-			Names:   []string{e.Name + toCamelCase(currVal.Value)},
-			Type:    expression.Type(e.Name),
+	var vals []*astspec.Value
+	for _, currVal := range enumDefinition.Values {
+		vals = append(vals, &astspec.Value{
+			Comment: transforms.Documentation(currVal.Docs),
+			Names:   []string{enumName + toCamelCase(currVal.Value)},
+			Type:    expression.Type(enumName),
 			Values:  []astgen.ASTExpr{expression.StringVal(currVal.Value)},
 		})
 	}
-
-	vals = append(vals, &spec.Value{
-		Names:  []string{e.Name + toCamelCase(unknownEnumValue)},
-		Type:   expression.Type(e.Name),
+	vals = append(vals, &astspec.Value{
+		Names:  []string{enumName + toCamelCase(unknownEnumValue)},
+		Type:   expression.Type(enumName),
 		Values: []astgen.ASTExpr{expression.StringVal(unknownEnumValue)},
 	})
+	valsDecl := &decl.Const{Values: vals}
 
-	unmarshalDecl, imports := e.unmarshalJSONAST()
+	unmarshalDecl := enumUnmarshalTextAST(enumDefinition, info)
 
-	return append(
-		returnVal,
-		&decl.Const{Values: vals},
-		unmarshalDecl,
-	), imports
+	return []astgen.ASTDecl{typeDef, valsDecl, unmarshalDecl}
 }
 
-func (e *Enum) unmarshalJSONAST() (astgen.ASTDecl, StringSet) {
-	const (
-		stringVar = "s"
-		errVar    = "err"
-		dataVar   = "data"
-	)
-
-	imports := NewStringSet()
-
-	var stmts []astgen.ASTStmt
-
+func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTDecl {
 	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
 
-	stmts = append(stmts,
-		statement.NewDecl(decl.NewVar(stringVar, expression.StringType)),
-		ifErrNotNilReturnErrStatement(errVar, statement.NewAssignment(expression.VariableVal(errVar), token.DEFINE, expression.NewCallFunction(
-			"json",
-			"Unmarshal",
-			expression.VariableVal(dataVar),
-			expression.NewUnary(token.AND, expression.VariableVal(stringVar)),
-		))),
-	)
-	imports["encoding/json"] = struct{}{}
-
-	// start with default case
-	cases := []statement.CaseClause{
-		// default case
-		{
-			Body: []astgen.ASTStmt{
-				statement.NewAssignment(
+	info.AddImports("strings")
+	switchStmt := &statement.Switch{
+		Expression: expression.NewCallFunction("strings", "ToUpper", expression.NewCallExpression(expression.StringType, expression.VariableVal(dataVarName))),
+		Cases: []statement.CaseClause{
+			// default case
+			{
+				Body: []astgen.ASTStmt{statement.NewAssignment(
 					expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
 					token.ASSIGN,
-					expression.VariableVal(e.Name+toCamelCase(unknownEnumValue)),
+					expression.VariableVal(e.TypeName.Name+toCamelCase(unknownEnumValue)),
 				),
+				},
 			},
 		},
 	}
-
 	for _, currVal := range e.Values {
-		cases = append(cases, *statement.NewCaseClause(
+		switchStmt.Cases = append(switchStmt.Cases, *statement.NewCaseClause(
 			expression.StringVal(currVal.Value),
 			statement.NewAssignment(
 				expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
 				token.ASSIGN,
-				expression.VariableVal(e.Name+toCamelCase(currVal.Value)),
+				expression.VariableVal(e.TypeName.Name+toCamelCase(currVal.Value)),
 			),
 		))
 	}
-
-	stmts = append(stmts, &statement.Switch{
-		Expression: expression.NewCallFunction("strings", "ToUpper", expression.VariableVal(stringVar)),
-		Cases:      cases,
-	})
-	imports["strings"] = struct{}{}
-
-	stmts = append(stmts, statement.NewReturn(expression.Nil))
-
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalJSON",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam(dataVar, expression.Type("[]byte")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: stmts,
-		},
-		ReceiverName: enumReceiverName,
-		ReceiverType: expression.Type(transforms.Export(e.Name)).Pointer(),
-	}, imports
-
+	return newUnmarshalTextMethod(enumReceiverName, transforms.Export(e.TypeName.Name), switchStmt, statement.NewReturn(expression.Nil))
 }

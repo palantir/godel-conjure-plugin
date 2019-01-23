@@ -117,8 +117,29 @@ projects:
 
 package api
 
+import (
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
+)
+
 type TestCase struct {
-	Name string ` + "`" + `json:"name" yaml:"name,omitempty"` + "`" + `
+	Name string ` + "`" + `json:"name"` + "`" + `
+}
+
+func (o TestCase) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *TestCase) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 `
 		assert.Equal(t, wantContent, string(contentBytes), "Got:\n%s", string(contentBytes))
