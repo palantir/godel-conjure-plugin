@@ -30,7 +30,7 @@ import (
 
 // diffOnDisk generates the conjure files in memory and compares checksums to on-disk files.
 func diffOnDisk(conjureDefinition spec.ConjureDefinition, outputDir, projectDir string) (dirchecksum.ChecksumsDiff, error) {
-	files, err := conjure.GenerateOutputFiles(conjureDefinition, path.Join(projectDir, outputDir))
+	files, err := conjure.GenerateOutputFiles(conjureDefinition, conjure.OutputConfiguration{OutputDir: path.Join(projectDir, outputDir), ServerType: conjure.WitchcraftServer})
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "conjure failed")
 	}

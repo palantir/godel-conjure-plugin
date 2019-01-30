@@ -116,7 +116,8 @@
   revision = "ebd802b4f1c2b52d221ca35f624d3312b765422c"
 
 [[projects]]
-  digest = "1:76fa94b1e1a82078af7717277cebf62646545ddd57e31e26943bc100d4586a8f"
+  branch = "bm/server"
+  digest = "1:0d51870521c0971c4ce3b108fbb305f5855c5ae6219dea4e187fb36f9480ca4f"
   name = "github.com/palantir/conjure-go"
   packages = [
     "conjure",
@@ -124,10 +125,10 @@
     "conjure/transforms",
     "conjure/types",
     "conjure/visitors",
+    "conjure/werrorexpressions",
   ]
   pruneopts = "UT"
-  revision = "58d0f8c17332a18df620144eeccccf571e058a4c"
-  version = "v3.0.0"
+  revision = "b1547133938770874bcf3814d9eb6e5681419fbf"
 
 [[projects]]
   digest = "1:62e516988833f683d36991a3747965e49fb8dafb397915257faff88f99b68725"
@@ -214,6 +215,25 @@
   pruneopts = "UT"
   revision = "418f3ad7b9addf837f48d5f3b8c4325115abe88f"
   version = "0.9.4"
+
+[[projects]]
+  digest = "1:89b7c2365c6b481a9e1c83a203c817d117376f48330811a977d84ec198281c8b"
+  name = "github.com/palantir/witchcraft-go-error"
+  packages = [
+    ".",
+    "internal/errors",
+  ]
+  pruneopts = "UT"
+  revision = "adb1d93c5741a300abbcce7883ad61f825a4f1a7"
+  version = "1.0.0"
+
+[[projects]]
+  digest = "1:412711cba1f6195c9c8cc32ca04da9dfed10c07f2a21b1f5229e07c3f0a9fef0"
+  name = "github.com/palantir/witchcraft-go-params"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d5c8ded2ab5588d1a81f306247162cb54d2504d7"
+  version = "1.0.0"
 
 [[projects]]
   digest = "1:29803f52611cbcc1dfe55b456e9fdac362af7248b3d29d7ea1bec0a12e71dff4"

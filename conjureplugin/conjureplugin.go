@@ -51,7 +51,8 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				verifyFailedFn(k, diff.String())
 			}
 		} else {
-			if err := conjure.Generate(conjureDef, outputDir); err != nil {
+			// TODO(bmoylan) make server configurable
+			if err := conjure.Generate(conjureDef, conjure.OutputConfiguration{OutputDir: outputDir, ServerType: conjure.WitchcraftServer}); err != nil {
 				return err
 			}
 		}
