@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/palantir/conjure-go/conjure"
@@ -29,8 +28,8 @@ import (
 )
 
 // diffOnDisk generates the conjure files in memory and compares checksums to on-disk files.
-func diffOnDisk(conjureDefinition spec.ConjureDefinition, outputDir, projectDir string) (dirchecksum.ChecksumsDiff, error) {
-	files, err := conjure.GenerateOutputFiles(conjureDefinition, conjure.OutputConfiguration{OutputDir: path.Join(projectDir, outputDir), ServerType: conjure.WitchcraftServer})
+func diffOnDisk(conjureDefinition spec.ConjureDefinition, projectDir string, outputConf conjure.OutputConfiguration) (dirchecksum.ChecksumsDiff, error) {
+	files, err := conjure.GenerateOutputFiles(conjureDefinition, outputConf)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "conjure failed")
 	}

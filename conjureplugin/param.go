@@ -14,6 +14,10 @@
 
 package conjureplugin
 
+import (
+	"github.com/palantir/conjure-go/conjure"
+)
+
 type ConjureProjectParams struct {
 	SortedKeys []string
 	Params     map[string]ConjureProjectParam
@@ -31,6 +35,8 @@ type ConjureProjectParam struct {
 	OutputDir    string
 	IRProvider   IRProvider
 	IROutputPath string
+	// Server will optionally generate server code in addition to client code for services specified in this project.
+	Server conjure.ServerType
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
 }

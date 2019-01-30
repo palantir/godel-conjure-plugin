@@ -55,6 +55,7 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 		params[key] = conjureplugin.ConjureProjectParam{
 			OutputDir:  currConfig.OutputDir,
 			IRProvider: irProvider,
+			Server:     currConfig.Server,
 			Publish:    publishVal,
 		}
 	}

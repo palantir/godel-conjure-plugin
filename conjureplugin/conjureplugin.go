@@ -17,6 +17,7 @@ package conjureplugin
 import (
 	"fmt"
 	"io"
+	"path"
 	"strings"
 
 	"github.com/palantir/conjure-go/conjure"
@@ -42,8 +43,9 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return err
 		}
 
+		outputConf := conjure.OutputConfiguration{OutputDir: path.Join(projectDir, outputDir), ServerType: currParam.Server}
 		if verify {
-			diff, err := diffOnDisk(conjureDef, outputDir, projectDir)
+			diff, err := diffOnDisk(conjureDef, projectDir, outputConf)
 			if err != nil {
 				return err
 			}
@@ -52,7 +54,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			}
 		} else {
 			// TODO(bmoylan) make server configurable
-			if err := conjure.Generate(conjureDef, conjure.OutputConfiguration{OutputDir: outputDir, ServerType: conjure.WitchcraftServer}); err != nil {
+			if err := conjure.Generate(conjureDef, outputConf); err != nil {
 				return err
 			}
 		}
