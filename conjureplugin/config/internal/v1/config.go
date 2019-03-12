@@ -15,7 +15,6 @@
 package v1
 
 import (
-	"github.com/palantir/conjure-go/conjure"
 	"github.com/palantir/godel/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -33,7 +32,8 @@ type SingleConjureConfig struct {
 	// If this value is not explicitly specified in configuration, it is treated as "true" for YAML sources of IR and
 	// "false" for all other sources.
 	Publish *bool              `yaml:"publish"`
-	Server  conjure.ServerType `yaml:"server,omitempty"`
+	// Server indicates if we will generate server code. Currently this is behind a feature flag and is subject to change.
+	Server  bool  `yaml:"server,omitempty"`
 }
 
 type LocatorType string

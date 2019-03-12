@@ -21,9 +21,8 @@
 #  version = "2.4.0"
 
 [[constraint]]
-  branch = "bm/server"
+  revision = "d44b81b6a8d8af4ec43457c6c1a43dc43c3396d5"
   name = "github.com/palantir/conjure-go"
-#  version = "3.0.0"
 
 [[constraint]]
   name = "github.com/go-bindata/go-bindata"
