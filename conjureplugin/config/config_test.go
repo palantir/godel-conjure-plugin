@@ -17,7 +17,6 @@ package config_test
 import (
 	"testing"
 
-	"github.com/palantir/conjure-go/conjure"
 	"github.com/palantir/godel-conjure-plugin/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/conjureplugin/config"
 	"github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v1"
@@ -201,7 +200,7 @@ projects:
    ir-locator:
      type: remote
      locator: localhost:8080/ir.json
-   server: witchcraft
+   server: true
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -211,7 +210,7 @@ projects:
 							Type:    v1.LocatorTypeRemote,
 							Locator: "localhost:8080/ir.json",
 						},
-						Server: conjure.WitchcraftServer,
+						Server: true,
 					},
 				},
 			},
