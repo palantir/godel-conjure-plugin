@@ -43,7 +43,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return err
 		}
 
-		outputConf := conjure.OutputConfiguration{OutputDir: path.Join(projectDir, outputDir), ServerType: currParam.Server}
+		outputConf := conjure.OutputConfiguration{OutputDir: path.Join(projectDir, outputDir), GenerateServer: currParam.Server}
 		if verify {
 			diff, err := diffOnDisk(conjureDef, projectDir, outputConf)
 			if err != nil {
@@ -53,7 +53,6 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				verifyFailedFn(k, diff.String())
 			}
 		} else {
-			// TODO(bmoylan) make server configurable
 			if err := conjure.Generate(conjureDef, outputConf); err != nil {
 				return err
 			}

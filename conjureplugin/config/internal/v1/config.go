@@ -31,9 +31,9 @@ type SingleConjureConfig struct {
 	// Publish specifies whether or not the IR specified by this project should be included in the publish operation.
 	// If this value is not explicitly specified in configuration, it is treated as "true" for YAML sources of IR and
 	// "false" for all other sources.
-	Publish *bool              `yaml:"publish"`
+	Publish *bool `yaml:"publish"`
 	// Server indicates if we will generate server code. Currently this is behind a feature flag and is subject to change.
-	Server  bool  `yaml:"server,omitempty"`
+	Server bool `yaml:"server,omitempty"`
 }
 
 type LocatorType string
