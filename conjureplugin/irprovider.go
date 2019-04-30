@@ -70,6 +70,9 @@ func (p *urlIRProvider) IRBytes() ([]byte, error) {
 		return nil, errors.WithStack(err)
 	}
 	defer cleanup()
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.Errorf("expected response status 200 when fetching IR from remote source %s, but got %d", p.irURL, resp.StatusCode)
+	}
 	return ioutil.ReadAll(resp.Body)
 }
 
