@@ -16,7 +16,7 @@ package config
 
 import (
 	"github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/legacy"
-	"github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v1"
+	v1 "github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v1"
 	"github.com/palantir/godel/pkg/versionedconfig"
 	"github.com/pkg/errors"
 )

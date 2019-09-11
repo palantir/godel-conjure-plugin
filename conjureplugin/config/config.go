@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v1"
+	v1 "github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v1"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )

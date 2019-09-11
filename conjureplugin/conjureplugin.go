@@ -61,16 +61,20 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 	}
 
 	if verify && len(verifyFailedIndex) > 0 {
-		fmt.Fprintf(stdout, "Conjure output differs from what currently exists: %v\n", verifyFailedIndex)
+		logMessage(stdout, fmt.Sprintf("Conjure output differs from what currently exists: %v\n", verifyFailedIndex))
 		for _, currKey := range verifyFailedIndex {
-			fmt.Fprintf(stdout, "%s%d:\n", strings.Repeat(" ", indentLen), currKey)
+			logMessage(stdout, fmt.Sprintf("%s%d:\n", strings.Repeat(" ", indentLen), currKey))
 			for _, currErrLine := range strings.Split(verifyFailedErrors[currKey], "\n") {
-				fmt.Fprintf(stdout, "%s%s\n", strings.Repeat(" ", indentLen*2), currErrLine)
+				logMessage(stdout, fmt.Sprintf("%s%s\n", strings.Repeat(" ", indentLen*2), currErrLine))
 			}
 		}
 		return fmt.Errorf("conjure verify failed")
 	}
 	return nil
+}
+
+func logMessage(w io.Writer, message string) {
+	_, _ = fmt.Fprintf(w, message)
 }
 
 func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefinition, error) {

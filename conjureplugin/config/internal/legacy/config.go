@@ -15,7 +15,7 @@
 package legacy
 
 import (
-	"github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v0"
+	v0 "github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v0"
 	"github.com/palantir/godel/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
