@@ -83,8 +83,7 @@ projects:
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := fmt.Fprint(w, conjureSpecJSON)
-		require.NoError(t, err)
+		_, _ = fmt.Fprint(w, conjureSpecJSON)
 	}))
 	defer ts.Close()
 
