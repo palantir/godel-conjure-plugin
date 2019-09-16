@@ -116,7 +116,7 @@
   revision = "ebd802b4f1c2b52d221ca35f624d3312b765422c"
 
 [[projects]]
-  digest = "1:500d16a939de31dc868a67fa95cbeb5bc7cbd70c59d35e570d7c805c0d5c814f"
+  digest = "1:2e5c631a7074c11e3d9f4ad68bbeacb6ab51c5e9ad78714c1903bc39c5d40f50"
   name = "github.com/palantir/conjure-go"
   packages = [
     "conjure",
@@ -127,8 +127,8 @@
     "conjure/werrorexpressions",
   ]
   pruneopts = "UT"
-  revision = "24cd98b20961d5ecb3734cb114c600807d832861"
-  version = "v4.0.3"
+  revision = "a655527e82280aa461c838d52ebc275d9a18eca5"
+  version = "v4.1.1"
 
 [[projects]]
   digest = "1:62e516988833f683d36991a3747965e49fb8dafb397915257faff88f99b68725"
