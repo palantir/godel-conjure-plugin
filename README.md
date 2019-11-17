@@ -1,3 +1,7 @@
+<p align="right">
+<a href="https://autorelease.general.dmz.palantir.tech/palantir/godel-conjure-plugin"><img src="https://img.shields.io/badge/Perform%20an-Autorelease-success.svg" alt="Autorelease"></a>
+</p>
+
 godel-conjure-plugin
 ====================
 godel-conjure-plugin is a [godel](https://github.com/palantir/godel) plugin for [conjure-go](https://github.com/palantir/conjure-go/).
