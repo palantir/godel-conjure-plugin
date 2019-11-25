@@ -1,17 +1,17 @@
-executors:
-  darwin-linux-no-cgo-java-11:
-    docker:
-      - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.13.4-java-11-t28
-    working_directory: /go/src/github.com/palantir/godel-conjure-plugin
+owner-repo: &owner-repo
+  owner-repo: palantir/godel-conjure-plugin
 
 excutor: &executor
-  executor: darwin-linux-no-cgo-java-11
+  executor:
+    name: go/darwin-linux-no-cgo
+    version: 1.13.4-java-11-t28
+    <<: *owner-repo
 
 version: 2.1
 
 orbs:
-  go: palantir/go@0.0.13
-  godel: palantir/godel@0.0.11
+  go: palantir/go@0.0.15
+  godel: palantir/godel@0.0.15
 
 all-tags-filter: &all-tags-filter
   filters:
