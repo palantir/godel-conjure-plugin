@@ -17,9 +17,9 @@ package config_test
 import (
 	"testing"
 
-	"github.com/palantir/godel-conjure-plugin/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/conjureplugin/config"
-	v1 "github.com/palantir/godel-conjure-plugin/conjureplugin/config/internal/v1"
+	"github.com/palantir/godel-conjure-plugin/v4/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v4/conjureplugin/config"
+	v1 "github.com/palantir/godel-conjure-plugin/v4/conjureplugin/config/internal/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"

@@ -17,8 +17,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/palantir/godel-conjure-plugin/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/conjureplugin/config"
+	"github.com/palantir/godel-conjure-plugin/v4/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v4/conjureplugin/config"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

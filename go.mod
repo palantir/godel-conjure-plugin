@@ -1,4 +1,4 @@
-module github.com/palantir/godel-conjure-plugin
+module github.com/palantir/godel-conjure-plugin/v4
 
 go 1.13
 
