@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"github.com/palantir/godel-conjure-plugin/conjureplugin/config"
-	"github.com/palantir/godel/framework/pluginapi"
+	"github.com/palantir/godel/v2/framework/pluginapi"
 )
 
 var upgradeConfigCmd = pluginapi.CobraUpgradeConfigCmd(func(cfgBytes []byte) ([]byte, error) {

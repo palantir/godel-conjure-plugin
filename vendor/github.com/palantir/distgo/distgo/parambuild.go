@@ -17,7 +17,7 @@ package distgo
 import (
 	"fmt"
 
-	"github.com/palantir/godel/pkg/osarch"
+	"github.com/palantir/godel/v2/pkg/osarch"
 	"github.com/pkg/errors"
 )
 
@@ -46,8 +46,8 @@ type BuildParam struct {
 	MainPkg string
 
 	// BuildArgsScript is the content of a script that is written to a file and run before this product is built
-	// to provide supplemental build arguments for the product. The contents of this value are written to a file
-	// and executed with the project directory as the working directory. The script process inherits the environment
+	// to provide supplemental build arguments for the product. The content of this value is written to a file and
+	// executed. The script process uses the project directory as its working directory and inherits the environment
 	// variables of the Go process. Each line of output of the script is provided to the "build" command as a separate
 	// argument. For example, the following script would add the arguments "-ldflags" "-X" "main.year=$YEAR" to the
 	// build command:
@@ -60,7 +60,7 @@ type BuildParam struct {
 	BuildArgsScript string
 
 	// VersionVar is the path to a variable that is set with the version information for the build. For example,
-	// "github.com/palantir/godel/cmd/godel.Version". If specified, it is provided to the "build" command as an
+	// "github.com/palantir/godel/v2/cmd/godel.Version". If specified, it is provided to the "build" command as an
 	// ldflag.
 	VersionVar string
 
