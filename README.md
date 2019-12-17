@@ -37,7 +37,7 @@ projects:
     ir-locator: https://host.com/conjure-ir-file.json
 ```
 
-The top-level `conjure-projects` is a map where the key is the name of the Conjure task and the value is the
+The top-level `projects` is a map where the key is the name of the Conjure task and the value is the
 configuration for that task. `output-dir` specifies the base directory into which the output is written. The
 `ir-locator` parameter specifies how the IR should be retrieved.
 
