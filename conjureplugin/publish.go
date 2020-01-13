@@ -62,7 +62,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 	for i, param := range paramsToPublish {
 		key := paramsToPublishKeys[i]
 		currDir := path.Join(tmpDir, fmt.Sprintf("conjure-%s", key))
-		irFileName := fmt.Sprintf("%s-%s.ir.json", key, version)
+		irFileName := fmt.Sprintf("%s-%s.conjure.json", key, version)
 		keyAsDistID := distgo.DistID(key)
 		if err := os.Mkdir(currDir, 0755); err != nil {
 			return errors.WithStack(err)
