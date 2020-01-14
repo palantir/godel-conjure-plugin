@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fixes the publish location of the Conjure IR to use the ".conjure.json" suffix (rather than ".ir.json").
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/60
