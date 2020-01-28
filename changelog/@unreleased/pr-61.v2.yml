@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Bump conjure-go to 4.2.2
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/61
