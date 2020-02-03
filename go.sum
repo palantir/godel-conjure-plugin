@@ -105,8 +105,8 @@ github.com/openzipkin/zipkin-go v0.2.2/go.mod h1:NaW6tEwdmWMaCDZzg8sh+IBNOxHMPnh
 github.com/palantir/conjure-go-runtime v0.4.0/go.mod h1:7tsjwMKuzyqjGCpKI7bVbZ3T68nvoFFPj2UrcFIETtQ=
 github.com/palantir/conjure-go/v4 v4.2.0 h1:VhZ6/2SBZ7pLiXWMmu371+2NtVNmSJfwcFzGLBE83pQ=
 github.com/palantir/conjure-go/v4 v4.2.0/go.mod h1:VSVefkM94TdXRyP7wvBeURBNOFkYRJEtxPi8BeyKFi8=
-github.com/palantir/conjure-go/v4 v4.2.2 h1:ns+w+fJ3nVKqO+5iwokHfAWzSrVv1FXzbB1KcNDLuFs=
-github.com/palantir/conjure-go/v4 v4.2.2/go.mod h1:GOniyIB0YBoBkwm64Jo0o3CK8UmN0nXwHRZhLrUYbc4=
+github.com/palantir/conjure-go/v4 v4.3.0 h1:8uskvbK0QWClu4hj+FW5HC9PBbyUa2/GfPIJ+5Xnga8=
+github.com/palantir/conjure-go/v4 v4.3.0/go.mod h1:GOniyIB0YBoBkwm64Jo0o3CK8UmN0nXwHRZhLrUYbc4=
 github.com/palantir/distgo v1.2.0/go.mod h1:jOCcoLD92T/eN4VfRxczaDIWsqyy1f0yQZMFOt3cJCw=
 github.com/palantir/distgo v1.20.0 h1:cIE2mC2ZlFaRQVTq7cN3YeobdA/vI2HTfISLx0dMho0=
 github.com/palantir/distgo v1.20.0/go.mod h1:Jfsd7o7+kzCY8a3xpbPabr5IMjW6zSNOKLTNa8TJH4g=
