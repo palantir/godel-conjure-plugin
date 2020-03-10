@@ -31,7 +31,7 @@ github.com/nmiyake/pkg/dirs
 github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go/v4 v4.3.0
+# github.com/palantir/conjure-go/v4 v4.3.1
 github.com/palantir/conjure-go/v4/conjure
 github.com/palantir/conjure-go/v4/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v4/conjure/transforms
@@ -129,11 +129,14 @@ github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
+# golang.org/x/mod v0.2.0
+golang.org/x/mod/module
+golang.org/x/mod/semver
 # golang.org/x/sys v0.0.0-20190412213103-97732733099d
 golang.org/x/sys/unix
 # golang.org/x/text v0.3.0
 golang.org/x/text/transform
-# golang.org/x/tools v0.0.0-20191109212701-97ad0ed33101
+# golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/gcimporter
@@ -141,11 +144,13 @@ golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/go/packages
 golang.org/x/tools/imports
 golang.org/x/tools/internal/fastwalk
+golang.org/x/tools/internal/gocommand
 golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/imports
-golang.org/x/tools/internal/module
-golang.org/x/tools/internal/semver
-golang.org/x/tools/internal/span
+golang.org/x/tools/internal/packagesinternal
+# golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
+golang.org/x/xerrors
+golang.org/x/xerrors/internal
 # gopkg.in/cheggaaa/pb.v1 v1.0.22
 gopkg.in/cheggaaa/pb.v1
 # gopkg.in/yaml.v2 v2.2.7
