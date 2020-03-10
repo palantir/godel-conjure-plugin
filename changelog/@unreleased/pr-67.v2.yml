@@ -1,0 +1,10 @@
+type: fix
+fix:
+  description: |-
+    Update conjure-go dependency to v4.3.1
+
+    Fixes issue where Conjure packages ending in a major version
+    (v2 etc.) would be removed from imports in other generated
+    Conjure files.
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/67
