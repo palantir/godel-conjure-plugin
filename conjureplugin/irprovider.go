@@ -18,7 +18,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/palantir/godel-conjure-plugin/v4/ir-gen-cli-bundler/conjureircli"
+	"github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli"
 	"github.com/palantir/pkg/safehttp"
 	"github.com/pkg/errors"
 )

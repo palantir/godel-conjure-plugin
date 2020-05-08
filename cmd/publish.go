@@ -21,7 +21,7 @@ import (
 	"github.com/palantir/distgo/publisher"
 	"github.com/palantir/distgo/publisher/artifactory"
 	"github.com/palantir/distgo/publisher/maven"
-	"github.com/palantir/godel-conjure-plugin/v4/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v5/conjureplugin"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
