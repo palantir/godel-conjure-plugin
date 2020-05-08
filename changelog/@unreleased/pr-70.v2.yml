@@ -1,0 +1,6 @@
+type: break
+break:
+  description: |-
+    Bump godel-conjure-plugin module to v5 and bump conjure-go dependency to v5
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/70
