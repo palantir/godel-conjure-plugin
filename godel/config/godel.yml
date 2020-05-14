@@ -22,3 +22,4 @@ exclude:
   paths:
   - godel
   - ir-gen-cli-bundler/conjureircli/internal
+  - backcompat-cli-bundler/conjurebackcompatcli/internal
