@@ -40,12 +40,18 @@ func CheckBackcompatYaml(old []byte, new []byte) (isCompatible bool, rBytes []by
 		}
 	}()
 	oldIRBytes, err := conjureircli.YAMLtoIR(old)
+	if err != nil {
+		return false, nil, errors.Wrapf(err, "Failed to convert old yaml bytes to IR")
+	}
 	oldIRPath := path.Join(tmpDir, "old-ir.json")
 	if err := ioutil.WriteFile(oldIRPath, oldIRBytes, 0644); err != nil {
 		return false, nil, errors.WithStack(err)
 	}
 
 	newIRBytes, err := conjureircli.YAMLtoIR(new)
+	if err != nil {
+		return false, nil, errors.Wrapf(err, "Failed to convert new yaml bytes to IR")
+	}
 	newIRPath := path.Join(tmpDir, "new-ir.json")
 	if err := ioutil.WriteFile(newIRPath, newIRBytes, 0644); err != nil {
 		return false, nil, errors.WithStack(err)
