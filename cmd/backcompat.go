@@ -15,53 +15,41 @@
 package cmd
 
 import (
-    "github.com/palantir/distgo/distgo"
-    "github.com/palantir/distgo/publisher"
-    "github.com/palantir/distgo/publisher/artifactory"
-    "os"
+	"github.com/palantir/distgo/publisher"
+	"github.com/palantir/distgo/publisher/artifactory"
+	"os"
 
-    "github.com/palantir/godel-conjure-plugin/v5/conjureplugin"
-    "github.com/pkg/errors"
-    "github.com/spf13/cobra"
+	"github.com/palantir/godel-conjure-plugin/v5/conjureplugin"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+)
+
+var (
+	groupFlagVal          string
+	repositoryNameFlagVal string
+	artifactoryUrlFlagVal string
 )
 
 var backcompatCmd = &cobra.Command{
-    Use:   "checkConjureBackCompat",
-    Short: "Run conjure-backcompat based on project configuration",
-    RunE: func(cmd *cobra.Command, args []string) error {
-        parsedConfigSet, err := toProjectParams(configFileFlag)
-        if err != nil {
-            return err
-        }
-        if err := os.Chdir(projectDirFlag); err != nil {
-            return errors.Wrapf(err, "failed to set working directory")
-        }
+	Use:   "checkConjureBackCompat",
+	Short: "Run conjure-backcompat based on project configuration",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		parsedConfigSet, err := toProjectParams(configFileFlag)
+		if err != nil {
+			return err
+		}
+		if err := os.Chdir(projectDirFlag); err != nil {
+			return errors.Wrapf(err, "failed to set working directory")
+		}
 
-        publisherFlags, err := conjureplugin.PublisherFlags()
-        if err != nil {
-            return err
-        }
-        flagVals := make(map[distgo.PublisherFlagName]interface{})
-        for _, currFlag := range publisherFlags {
-            // if flag was not explicitly provided, don't add it to the flagVals map
-            if !cmd.Flags().Changed(string(currFlag.Name)) {
-                continue
-            }
-            val, err := currFlag.GetFlagValue(cmd.Flags())
-            if err != nil {
-                return err
-            }
-            flagVals[currFlag.Name] = val
-        }
-
-        return conjureplugin.BackCompat(parsedConfigSet, projectDirFlag, flagVals, cmd.OutOrStdout())
-    },
+		return conjureplugin.BackCompat(parsedConfigSet, projectDirFlag, groupFlagVal, repositoryNameFlagVal, artifactoryUrlFlagVal, cmd.OutOrStdout())
+	},
 }
 
 func init() {
-    backcompatCmd.Flags().StringVar(&groupIDFlagVal, string(publisher.GroupIDFlag.Name), "", publisher.GroupIDFlag.Description)
-    backcompatCmd.Flags().StringVar(&repositoryFlagVal, string(artifactory.PublisherRepositoryFlag.Name), "", artifactory.PublisherRepositoryFlag.Description)
-    backcompatCmd.Flags().StringVar(&urlFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", publisher.ConnectionInfoURLFlag.Description)
+	backcompatCmd.Flags().StringVar(&groupFlagVal, string(publisher.GroupIDFlag.Name), "", publisher.GroupIDFlag.Description)
+	backcompatCmd.Flags().StringVar(&repositoryNameFlagVal, string(artifactory.PublisherRepositoryFlag.Name), "", artifactory.PublisherRepositoryFlag.Description)
+	backcompatCmd.Flags().StringVar(&artifactoryUrlFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", publisher.ConnectionInfoURLFlag.Description)
 
-    rootCmd.AddCommand(backcompatCmd)
+	rootCmd.AddCommand(backcompatCmd)
 }

@@ -16,15 +16,13 @@ package conjureplugin
 
 import (
 	"fmt"
-	"github.com/palantir/distgo/distgo"
-	"github.com/palantir/distgo/publisher"
 	"github.com/palantir/godel-conjure-plugin/v5/backcompat-cli-bundler/conjurebackcompatcli"
 	"github.com/pkg/errors"
 	"io"
 	"os/exec"
 )
 
-func BackCompat(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, stdout io.Writer) error {
+func BackCompat(params ConjureProjectParams, projectDir, groupFlagVal, repositoryNameFlagVal, artifactoryUrlFlagVal string, stdout io.Writer) error {
 	k := 0
 	for key, currParam := range params.Params {
 		currentIRBytes, err := currParam.IRProvider.IRBytes()
@@ -67,12 +65,8 @@ func BackCompat(params ConjureProjectParams, projectDir string, flagVals map[dis
 		//outputDir := currParam.OutputDir
 
 		//outputConf := conjure.OutputConfiguration{OutputDir: path.Join(projectDir, outputDir), GenerateServer: currParam.Server}
-		groupID, ok := flagVals[publisher.GroupIDFlag.Name]
-		if !ok {
-			return errors.New(fmt.Sprintf("%s flag is not specified", publisher.GroupIDFlag.Name))
-		}
 
-		if isCompatible, out, err := conjurebackcompatcli.CheckBackcompat(currentIRBytes, groupID.(string), key, projectDir); err != nil {
+		if isCompatible, out, err := conjurebackcompatcli.CheckBackcompat(currentIRBytes, groupFlagVal, key, projectDir); err != nil {
 			return err
 		} else if !isCompatible {
 			return errors.New(fmt.Sprintf("check backcompat failed\n%s", out))
