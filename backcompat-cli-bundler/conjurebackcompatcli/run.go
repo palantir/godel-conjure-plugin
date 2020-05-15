@@ -125,12 +125,11 @@ func getLastTagIR(groupName, repoName, conjureIRDir string) ([]byte, error) {
 	return ioutil.ReadFile(OldIRPath)
 }
 
-func getLastTag(conjureIRDir string) (string, error) {
+func getLastTag(projectDir string) (string, error) {
 	cmd := exec.Command("git", "describe", "--abbrev=0 --tags")
-	cmd.Dir = conjureIRDir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to get last tag %v\nOutput:\n%s", cmd.Args, string(output))
+		return "", errors.Wrapf(err, "failed to get last tag %v\nOutput:\n%s\nDir:%s", cmd.Args, string(output), projectDir)
 	}
 	return string(output), nil
 }

@@ -19,7 +19,6 @@ import (
 	"github.com/palantir/godel-conjure-plugin/v5/backcompat-cli-bundler/conjurebackcompatcli"
 	"github.com/pkg/errors"
 	"io"
-	"os/exec"
 )
 
 func BackCompat(params ConjureProjectParams, projectDir, groupFlagVal, repositoryNameFlagVal, artifactoryUrlFlagVal string, stdout io.Writer) error {
@@ -75,14 +74,4 @@ func BackCompat(params ConjureProjectParams, projectDir, groupFlagVal, repositor
 	}
 
 	return nil
-}
-
-func getLastTag(projectDir string) (string, error) {
-	cmd := exec.Command("git", "describe", "--abbrev=0 --tags")
-	cmd.Dir = projectDir
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", errors.Wrapf(err, "failed to get last tag %v\nOutput:\n%s", cmd.Args, string(output))
-	}
-	return string(output), nil
 }
