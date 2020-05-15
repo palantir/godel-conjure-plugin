@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	conjurebackcompatcli_internal "github.com/palantir/godel-conjure-plugin/v5/backcompat-cli-bundler/conjurebackcompatcli/internal"
-	"github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli"
 	"github.com/pkg/errors"
 )
 
@@ -38,10 +37,10 @@ func CheckBackcompat(current []byte, groupName, repoName, conjureIRDir string) (
 	if err != nil {
 		return false, nil, err
 	}
-	return CheckBackcompatYaml(old, current)
+	return CheckBackcompatIRs(old, current)
 }
 
-func CheckBackcompatYaml(old []byte, new []byte) (isCompatible bool, rBytes []byte, rErr error) {
+func CheckBackcompatIRs(old []byte, new []byte) (isCompatible bool, rBytes []byte, rErr error) {
 	tmpDir, err := ioutil.TempDir("", "")
 	if err != nil {
 		return false, nil, errors.Wrapf(err, "failed to create temporary directory")
@@ -51,21 +50,13 @@ func CheckBackcompatYaml(old []byte, new []byte) (isCompatible bool, rBytes []by
 			rErr = errors.Wrapf(err, "failed to remove temporary directory")
 		}
 	}()
-	oldIRBytes, err := conjureircli.YAMLtoIR(old)
-	if err != nil {
-		return false, nil, errors.Wrapf(err, "Failed to convert old yaml bytes to IR")
-	}
 	oldIRPath := path.Join(tmpDir, "old-ir.json")
-	if err := ioutil.WriteFile(oldIRPath, oldIRBytes, 0644); err != nil {
+	if err := ioutil.WriteFile(oldIRPath, old, 0644); err != nil {
 		return false, nil, errors.WithStack(err)
 	}
 
-	newIRBytes, err := conjureircli.YAMLtoIR(new)
-	if err != nil {
-		return false, nil, errors.Wrapf(err, "Failed to convert new yaml bytes to IR")
-	}
 	newIRPath := path.Join(tmpDir, "new-ir.json")
-	if err := ioutil.WriteFile(newIRPath, newIRBytes, 0644); err != nil {
+	if err := ioutil.WriteFile(newIRPath, new, 0644); err != nil {
 		return false, nil, errors.WithStack(err)
 	}
 

@@ -31,19 +31,49 @@ func TestConjureBackCompat(t *testing.T) {
     }{
         {
             `
-types:
-  definitions:
-    default-package: com.palantir.conjure
-    objects:
-      BooleanExample: { fields: { value: boolean } }
-`,
+{
+  "version" : 1,
+  "errors" : [ ],
+  "types" : [ {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "BooleanExample",
+        "package" : "com.palantir.conjure"
+      },
+      "fields" : [ {
+        "fieldName" : "value",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BOOLEAN"
+        }
+      } ]
+    }
+  } ],
+  "services" : [ ]
+}`,
             `
-types:
-  definitions:
-    default-package: com.palantir.conjure
-    objects:
-      BooleanExample: { fields: { value: boolean } }
-`,
+{
+  "version" : 1,
+  "errors" : [ ],
+  "types" : [ {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "BooleanExample",
+        "package" : "com.palantir.conjure"
+      },
+      "fields" : [ {
+        "fieldName" : "value",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BOOLEAN"
+        }
+      } ]
+    }
+  } ],
+  "services" : [ ]
+}`,
             true,
             `{
   "results" : [ ]
@@ -52,37 +82,93 @@ types:
         },
         {
             `
-types:
- definitions:
-   default-package: com.palantir.test
-   objects:
-     Example: { fields: { value1: boolean, value2: boolean } }
-services:
-  Test:
-    name: test
-    package: com.palantir.test
-    base-path: "/test/v1"
-    endpoints:
-      get:
-       http: GET /some
-       returns: Example
-`,
+{
+  "version" : 1,
+  "errors" : [ ],
+  "types" : [ {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "Example",
+        "package" : "com.palantir.test"
+      },
+      "fields" : [ {
+        "fieldName" : "value1",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BOOLEAN"
+        }
+      }, {
+        "fieldName" : "value2",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BOOLEAN"
+        }
+      } ]
+    }
+  } ],
+  "services" : [ {
+    "serviceName" : {
+      "name" : "Test",
+      "package" : "com.palantir.test"
+    },
+    "endpoints" : [ {
+      "endpointName" : "get",
+      "httpMethod" : "GET",
+      "httpPath" : "/test/v1/some",
+      "args" : [ ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "Example",
+          "package" : "com.palantir.test"
+        }
+      },
+      "markers" : [ ]
+    } ]
+  } ]
+}`,
             `
-types:
- definitions:
-   default-package: com.palantir.test
-   objects:
-     Example: { fields: { value1: boolean } }
-services:
-  Test:
-    name: test
-    package: com.palantir.test
-    base-path: "/test/v1"
-    endpoints:
-      get:
-       http: GET /some
-       returns: Example
-`,
+{
+  "version" : 1,
+  "errors" : [ ],
+  "types" : [ {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "Example",
+        "package" : "com.palantir.test"
+      },
+      "fields" : [ {
+        "fieldName" : "value1",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BOOLEAN"
+        }
+      } ]
+    }
+  } ],
+  "services" : [ {
+    "serviceName" : {
+      "name" : "Test",
+      "package" : "com.palantir.test"
+    },
+    "endpoints" : [ {
+      "endpointName" : "get",
+      "httpMethod" : "GET",
+      "httpPath" : "/test/v1/some",
+      "args" : [ ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "Example",
+          "package" : "com.palantir.test"
+        }
+      },
+      "markers" : [ ]
+    } ]
+  } ]
+}`,
             false,
             `{
   "results" : [ {
@@ -95,7 +181,7 @@ services:
 `,
         },
     } {
-        isCompatible, out, err := conjurebackcompatcli.CheckBackcompatYaml([]byte(tc.old), []byte(tc.new))
+        isCompatible, out, err := conjurebackcompatcli.CheckBackcompatIRs([]byte(tc.old), []byte(tc.new))
         require.NoError(t, err, "Case %d", i)
         assert.Equal(t, tc.isCompatible, isCompatible)
         assert.Equal(t, tc.want, string(out), "Case %d\nGot:\n%s", i, out)
