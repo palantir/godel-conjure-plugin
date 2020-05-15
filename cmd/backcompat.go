@@ -16,6 +16,8 @@ package cmd
 
 import (
     "github.com/palantir/distgo/distgo"
+    "github.com/palantir/distgo/publisher"
+    "github.com/palantir/distgo/publisher/artifactory"
     "os"
 
     "github.com/palantir/godel-conjure-plugin/v5/conjureplugin"
@@ -24,7 +26,7 @@ import (
 )
 
 var backcompatCmd = &cobra.Command{
-    Use:   "backcompat",
+    Use:   "checkConjureBackCompat",
     Short: "Run conjure-backcompat based on project configuration",
     RunE: func(cmd *cobra.Command, args []string) error {
         parsedConfigSet, err := toProjectParams(configFileFlag)
@@ -57,5 +59,9 @@ var backcompatCmd = &cobra.Command{
 }
 
 func init() {
+    backcompatCmd.Flags().StringVar(&groupIDFlagVal, string(publisher.GroupIDFlag.Name), "", publisher.GroupIDFlag.Description)
+    backcompatCmd.Flags().StringVar(&repositoryFlagVal, string(artifactory.PublisherRepositoryFlag.Name), "", artifactory.PublisherRepositoryFlag.Description)
+    backcompatCmd.Flags().StringVar(&urlFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", publisher.ConnectionInfoURLFlag.Description)
+
     rootCmd.AddCommand(backcompatCmd)
 }

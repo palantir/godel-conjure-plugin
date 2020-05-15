@@ -67,8 +67,12 @@ func BackCompat(params ConjureProjectParams, projectDir string, flagVals map[dis
 		//outputDir := currParam.OutputDir
 
 		//outputConf := conjure.OutputConfiguration{OutputDir: path.Join(projectDir, outputDir), GenerateServer: currParam.Server}
-		groupID := flagVals[publisher.GroupIDFlag.Name].(string)
-		if isCompatible, out, err := conjurebackcompatcli.CheckBackcompat(currentIRBytes, groupID, key, projectDir); err != nil {
+		groupID, ok := flagVals[publisher.GroupIDFlag.Name]
+		if !ok {
+			return errors.New(fmt.Sprintf("%s flag is not specified", publisher.GroupIDFlag.Name))
+		}
+
+		if isCompatible, out, err := conjurebackcompatcli.CheckBackcompat(currentIRBytes, groupID.(string), key, projectDir); err != nil {
 			return err
 		} else if !isCompatible {
 			return errors.New(fmt.Sprintf("check backcompat failed\n%s", out))

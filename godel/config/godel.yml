@@ -1,5 +1,6 @@
 plugins:
   resolvers:
+    - "/Users/hsaraogi/.m2/repository/{{GroupPath}}/{{Product}}/{{Version}}/{{Product}}-{{Version}}-{{OS}}-{{Arch}}.tgz"
     - "https://palantir.bintray.com/releases/{{GroupPath}}/{{Product}}/{{Version}}/{{Product}}-{{Version}}-{{OS}}-{{Arch}}.tgz"
   plugins:
     - locator:
@@ -12,6 +13,8 @@ plugins:
         checksums:
           darwin-amd64: 62d08d2baa31d295e12ec04214d0f3a2faa32a12fe8c1a45cb8ce28fa0e71eef
           linux-amd64: 8bb81d7479e4f6985ba8b93e0bf56ae67d87b0d49a92f053b2d477401cb47524
+    - locator:
+        id: com.palantir.godel-conjure-plugin:conjure-plugin:5.0.0-4-g54f857a.dirty
 environment:
   GO111MODULE: "on"
   GOFLAGS: "-mod=vendor"
