@@ -46,9 +46,9 @@ func CheckBackcompatIRs(old []byte, new []byte) (isCompatible bool, rBytes []byt
 		return false, nil, errors.Wrapf(err, "failed to create temporary directory")
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); rErr == nil && err != nil {
-			rErr = errors.Wrapf(err, "failed to remove temporary directory")
-		}
+		//if err := os.RemoveAll(tmpDir); rErr == nil && err != nil {
+		//	rErr = errors.Wrapf(err, "failed to remove temporary directory")
+		//}
 	}()
 	oldIRPath := path.Join(tmpDir, "old-ir.json")
 	if err := ioutil.WriteFile(oldIRPath, old, 0644); err != nil {
