@@ -96,13 +96,13 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		if err := os.MkdirAll(directoryPath, 0755); err != nil {
 			return errors.WithStack(err)
 		}
+		irFilePath := path.Join(directoryPath, irFileName)
 
 		irBytes, err := param.IRProvider.IRBytes()
 		if err != nil {
 			return err
 		}
 
-		irFilePath := path.Join(directoryPath, irFileName)
 		if err := ioutil.WriteFile(irFilePath, irBytes, 0644); err != nil {
 			return errors.WithStack(err)
 		}

@@ -16,11 +16,13 @@ package conjurebackcompatcli
 
 import (
 	"fmt"
+	"github.com/palantir/godel-conjure-plugin/v5/commons"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"runtime"
+	"strings"
 
 	conjurebackcompatcli_internal "github.com/palantir/godel-conjure-plugin/v5/backcompat-cli-bundler/conjurebackcompatcli/internal"
 	"github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli"
@@ -28,6 +30,16 @@ import (
 )
 
 const ConjureBackcompatJarPath = "conjure-backcompat.jar"
+const OldIRPath = "old-ir.json"
+
+
+func CheckBackcompat(current []byte, groupName, repoName, conjureIRDir string) (isCompatible bool, rBytes []byte, rErr error) {
+	old, err := getLastTagIR(groupName, repoName, conjureIRDir)
+	if err != nil {
+		return false, nil, err
+	}
+	return CheckBackcompatYaml(old, current)
+}
 
 func CheckBackcompatYaml(old []byte, new []byte) (isCompatible bool, rBytes []byte, rErr error) {
 	tmpDir, err := ioutil.TempDir("", "")
@@ -81,7 +93,6 @@ func IsCompatible(oldPath, newPath string) (isCompatible bool, rBytes []byte, rE
 	cmd := exec.Command("java",
 		"-jar",
 		cliPath,
-		"--check-equivalent",
 		fmt.Sprintf("--old=%s", oldPath),
 		fmt.Sprintf("--proposed=%s", newPath))
 	output, err := cmd.CombinedOutput()
@@ -92,6 +103,36 @@ func IsCompatible(oldPath, newPath string) (isCompatible bool, rBytes []byte, rE
 	} else {
 		return false, nil, errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(output))
 	}
+}
+
+func getLastTagIR(groupName, repoName, conjureIRDir string) ([]byte, error) {
+	defer func() {
+		_ = os.Remove(OldIRPath)
+	}()
+	version, err := getLastTag(conjureIRDir)
+	if err != nil {
+		return nil, err
+	}
+
+	group := strings.Replace(groupName, ".", "/", -1)
+	artifactPath := strings.Join([]string{group, repoName, version}, "/")
+	artifactName := fmt.Sprintf("%s-%s%s", repoName, version, ".conjure.json")
+	url := fmt.Sprintf("%s/%s", "https://artifactory.palantir.build/artifactory/internal-conjure-release", path.Join(artifactPath, artifactName))
+
+	if err := commons.DownloadFile(OldIRPath, url); err != nil {
+		return nil, errors.Wrapf(err, "failed to download old IR\n url:%s", url)
+	}
+	return ioutil.ReadFile(OldIRPath)
+}
+
+func getLastTag(conjureIRDir string) (string, error) {
+	cmd := exec.Command("git", "describe", "--abbrev=0 --tags")
+	cmd.Dir = conjureIRDir
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to get last tag %v\nOutput:\n%s", cmd.Args, string(output))
+	}
+	return string(output), nil
 }
 
 func cliCmdPath() (string, error) {

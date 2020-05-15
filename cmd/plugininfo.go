@@ -37,8 +37,17 @@ var (
 			pluginapi.TaskInfoCommand("run"),
 			pluginapi.TaskInfoVerifyOptions(
 				// by default, run after "generate" but before next built-in task
-				pluginapi.VerifyOptionsOrdering(intVar(verifyorder.Generate+75)),
+				pluginapi.VerifyOptionsOrdering(intVar(verifyorder.Generate+50)),
 				pluginapi.VerifyOptionsApplyFalseArgs("--"+VerifyFlagName),
+			),
+		),
+		pluginapi.PluginInfoTaskInfo(
+			"conjure-backcompat",
+			"Check conjure backcompat",
+			pluginapi.TaskInfoCommand("checkConjureBackCompat"),
+			pluginapi.TaskInfoVerifyOptions(
+				// by default, run after "generate" and "conjure" but before next built-in task
+				pluginapi.VerifyOptionsOrdering(intVar(verifyorder.Generate+75)),
 			),
 		),
 		pluginapi.PluginInfoTaskInfo(

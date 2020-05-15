@@ -18,9 +18,8 @@ package main
 
 import (
 	"fmt"
-	"io"
+	"github.com/palantir/godel-conjure-plugin/v5/commons"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"regexp"
 
@@ -48,7 +47,7 @@ const Version = "%s"
 		_ = os.Remove(conjureTgzPath)
 	}()
 
-	if err := downloadFile(conjureTgzPath, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/conjure/%s/conjure-%s.tgz", conjureVersion, conjureVersion)); err != nil {
+	if err := commons.DownloadFile(conjureTgzPath, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/conjure/%s/conjure-%s.tgz", conjureVersion, conjureVersion)); err != nil {
 		panic(err)
 	}
 
@@ -71,27 +70,4 @@ const Version = "%s"
 	if err := ioutil.WriteFile(versionFilePath, []byte(newVersionFileContent), 0644); err != nil {
 		panic(err)
 	}
-}
-
-func downloadFile(filepath string, url string) error {
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = out.Close()
-	}()
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	if _, err := io.Copy(out, resp.Body); err != nil {
-		return err
-	}
-	return nil
 }

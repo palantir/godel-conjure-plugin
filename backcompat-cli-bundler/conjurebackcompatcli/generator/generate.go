@@ -18,9 +18,8 @@ package main
 
 import (
 	"fmt"
-	"io"
+	"github.com/palantir/godel-conjure-plugin/v5/commons"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"regexp"
 
@@ -50,7 +49,7 @@ const Version = "%s"
 		_ = os.Remove(ConjureBackcompatJarPath)
 	}()
 
-	if err := downloadFile(ConjureBackcompatJarPath, fmt.Sprintf("https://artifactory.external.palantir.build/artifactory/internal-jar-release/com/palantir/conjure/backcompat/conjure-backcompat-cli/%s/conjure-backcompat-cli-%s.jar", conjureBackcompatVersion, conjureBackcompatVersion)); err != nil {
+	if err := commons.DownloadFile(ConjureBackcompatJarPath, fmt.Sprintf("https://artifactory.external.palantir.build/artifactory/internal-jar-release/com/palantir/conjure/backcompat/conjure-backcompat-cli/%s/conjure-backcompat-cli-%s.jar", conjureBackcompatVersion, conjureBackcompatVersion)); err != nil {
 		panic(err)
 	}
 
@@ -73,27 +72,4 @@ const Version = "%s"
 	if err := ioutil.WriteFile(versionFilePath, []byte(newVersionFileContent), 0644); err != nil {
 		panic(err)
 	}
-}
-
-func downloadFile(filepath string, url string) error {
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = out.Close()
-	}()
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	if _, err := io.Copy(out, resp.Body); err != nil {
-		return err
-	}
-	return nil
 }
