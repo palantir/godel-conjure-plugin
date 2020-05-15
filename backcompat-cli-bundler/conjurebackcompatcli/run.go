@@ -131,7 +131,7 @@ func getLastTag(projectDir string) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to get last tag %v\nOutput:\n%s\nDir:%s", cmd.Args, string(output), projectDir)
 	}
-	return string(output), nil
+	return strings.TrimSpace(string(output)), nil
 }
 
 func cliCmdPath() (string, error) {
