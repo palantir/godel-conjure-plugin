@@ -31,7 +31,7 @@ github.com/nmiyake/pkg/dirs
 github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go/v5 v5.0.1
+# github.com/palantir/conjure-go/v5 v5.0.2
 github.com/palantir/conjure-go/v5/conjure
 github.com/palantir/conjure-go/v5/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v5/conjure/transforms
