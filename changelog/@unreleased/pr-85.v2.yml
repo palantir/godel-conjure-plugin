@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Make cli bundler more robust to unpacking failure
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/85
