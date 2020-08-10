@@ -122,7 +122,6 @@ func ensureCLIExists(cliPath string) error {
 
 	// check that we can now find the cli
 	if _, err := os.Stat(cliPath); err != nil {
-		// destination already exists
 		return errors.Wrap(err, "failed to stat cli file after unpacking; please comment on godel-conjure-plugin#84 and retry")
 	}
 
