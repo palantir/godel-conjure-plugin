@@ -73,6 +73,9 @@ func Run(inPath, outPath string) error {
 	if err != nil {
 		return err
 	}
+	if err := ensureCLIExists(cliPath); err != nil {
+		return err
+	}
 	cmd := exec.Command(cliPath, "compile", inPath, outPath)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(output))
@@ -80,24 +83,32 @@ func Run(inPath, outPath string) error {
 	return nil
 }
 
+func cliUnpackDir() string {
+	return path.Join(os.TempDir(), "_conjureircli")
+}
+
+func cliArchiveDir() string {
+	return path.Join(cliUnpackDir(), fmt.Sprintf("conjure-%v", conjureircli_internal.Version))
+}
+
 func cliCmdPath() (string, error) {
-	cacheDirPath := path.Join(os.TempDir(), "_conjureircli")
-	dstPath := path.Join(cacheDirPath, fmt.Sprintf("conjure-%v", conjureircli_internal.Version))
-	if err := ensureCLIExists(dstPath); err != nil {
-		return "", err
-	}
 	switch runtime.GOOS {
 	case "darwin", "linux":
-		return path.Join(dstPath, "bin", "conjure"), nil
+		return path.Join(cliArchiveDir(), "bin", "conjure"), nil
 	default:
 		return "", errors.Errorf("OS %s not supported", runtime.GOOS)
 	}
 }
 
-func ensureCLIExists(dstPath string) error {
-	if fi, err := os.Stat(dstPath); err == nil && fi.IsDir() {
+func ensureCLIExists(cliPath string) error {
+	if fi, err := os.Stat(cliPath); err == nil && fi.Mode().IsRegular() && fi.Size() > 0 {
 		// destination already exists
 		return nil
+	}
+
+	// destination does not exist or is malformed, remove the dest dir just in case of a previous bad install
+	if err := os.RemoveAll(cliArchiveDir()); err != nil {
+		return errors.Wrap(err, "failed to remove destination dir before unpacking cli archive")
 	}
 
 	// expand asset into destination
@@ -105,5 +116,15 @@ func ensureCLIExists(dstPath string) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	return errors.WithStack(archiver.TarGz.Read(bytes.NewReader(tgzBytes), path.Dir(dstPath)))
+	if err := archiver.TarGz.Read(bytes.NewReader(tgzBytes), cliUnpackDir()); err != nil {
+		return errors.WithStack(err)
+	}
+
+	// check that we can now find the cli
+	if _, err := os.Stat(cliPath); err != nil {
+		// destination already exists
+		return errors.Wrap(err, "failed to stat cli file after unpacking; please comment on godel-conjure-plugin#84 and retry")
+	}
+
+	return nil
 }
