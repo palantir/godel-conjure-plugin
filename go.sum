@@ -146,8 +146,8 @@ github.com/palantir/conjure-go/v4 v4.2.0 h1:VhZ6/2SBZ7pLiXWMmu371+2NtVNmSJfwcFzG
 github.com/palantir/conjure-go/v4 v4.2.0/go.mod h1:VSVefkM94TdXRyP7wvBeURBNOFkYRJEtxPi8BeyKFi8=
 github.com/palantir/conjure-go/v5 v5.0.1 h1:7ljpRaVCeT4vqEV1UxodJ+MgZv1nNce5Gg5FSohAE4Q=
 github.com/palantir/conjure-go/v5 v5.0.1/go.mod h1:qAWik7iYoJtlHwyJ/sG0FuJx1PtzrLVCUglLH1k7NrE=
-github.com/palantir/conjure-go/v5 v5.0.2 h1:pRL/C3kuDR2vD9kCOf2jsw7kTRNR0JNDXg6bthlauoc=
-github.com/palantir/conjure-go/v5 v5.0.2/go.mod h1:F8/DSzMizUEpp+PyIyCoYaH3HqCsZjdWrEEVhy1s/Co=
+github.com/palantir/conjure-go/v5 v5.0.3 h1:y+mH5ERCGqQI7TpOR/Q02etL12IlqD09hwM9FMdv2g8=
+github.com/palantir/conjure-go/v5 v5.0.3/go.mod h1:PaP6asdeUTs9l3T/NXDKTssoD0UsR+Xh7jkYjSIhjaM=
 github.com/palantir/distgo v1.2.0/go.mod h1:jOCcoLD92T/eN4VfRxczaDIWsqyy1f0yQZMFOt3cJCw=
 github.com/palantir/distgo v1.20.0 h1:cIE2mC2ZlFaRQVTq7cN3YeobdA/vI2HTfISLx0dMho0=
 github.com/palantir/distgo v1.20.0/go.mod h1:Jfsd7o7+kzCY8a3xpbPabr5IMjW6zSNOKLTNa8TJH4g=
@@ -173,6 +173,7 @@ github.com/palantir/pkg/bearertoken v1.0.0/go.mod h1:avqDPtNT8TtRgLsOctPfGXwD62A
 github.com/palantir/pkg/bearertoken v1.0.1/go.mod h1:2Cv+3lHNBZLge2i0HehP1K5GCnkhE6YZrJLVXJcskG0=
 github.com/palantir/pkg/binary v1.0.0/go.mod h1:fARS9aw2WQBGHh1I68LnVEi6nnGXe1UwWQTOr2K8Ack=
 github.com/palantir/pkg/binary v1.0.1/go.mod h1:fCwVNRbc0rEuqDcmGSwdgx4cqBq7/5zUD1BS8DsCm64=
+github.com/palantir/pkg/boolean v1.0.0/go.mod h1:uGQK9vNvMHZF4zKXb15tiYokElb1a0z8zCJpQ5R36f0=
 github.com/palantir/pkg/bytesbuffers v1.0.0/go.mod h1:JFWINutL8wfBpXOqastvJtuEXNEQhIVNnBVY0oeJFws=
 github.com/palantir/pkg/cobracli v1.0.0 h1:hhkWxrqRdsXM6mMbXovVnUrZRitmKNu8SgC+XQP9kzI=
 github.com/palantir/pkg/cobracli v1.0.0/go.mod h1:AneQq9QEiEHnx61jDASdobjCwKKSkWLVVsyoMpgmy74=
