@@ -1,3 +1,10 @@
+# github.com/VividCortex/ewma v1.1.1
+github.com/VividCortex/ewma
+# github.com/andybalholm/brotli v0.0.0-20190621154722-5f990b63d2d6
+github.com/andybalholm/brotli
+# github.com/cheggaaa/pb/v3 v3.0.2
+github.com/cheggaaa/pb/v3
+github.com/cheggaaa/pb/v3/termutil
 # github.com/danverbraganza/varcaser v0.0.0-20190207223536-e3fb03ee5b4c
 github.com/danverbraganza/varcaser/varcaser
 # github.com/davecgh/go-spew v1.1.1
@@ -9,20 +16,40 @@ github.com/dsnet/compress/bzip2/internal/sais
 github.com/dsnet/compress/internal
 github.com/dsnet/compress/internal/errors
 github.com/dsnet/compress/internal/prefix
+# github.com/fatih/color v1.7.0
+github.com/fatih/color
 # github.com/go-bindata/go-bindata v3.1.2+incompatible
 github.com/go-bindata/go-bindata
+# github.com/golang/gddo v0.0.0-20190419222130-af0f2af80721
+github.com/golang/gddo/httputil
+github.com/golang/gddo/httputil/header
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
-# github.com/google/go-github v15.0.0+incompatible
-github.com/google/go-github/github
+# github.com/google/go-github/v28 v28.1.1
+github.com/google/go-github/v28/github
 # github.com/google/go-querystring v1.0.0
 github.com/google/go-querystring/query
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
-# github.com/mattn/go-runewidth v0.0.2
+# github.com/klauspost/compress v1.9.2
+github.com/klauspost/compress/flate
+github.com/klauspost/compress/fse
+github.com/klauspost/compress/huff0
+github.com/klauspost/compress/snappy
+github.com/klauspost/compress/zstd
+github.com/klauspost/compress/zstd/internal/xxhash
+# github.com/klauspost/pgzip v1.2.1
+github.com/klauspost/pgzip
+# github.com/mattn/go-colorable v0.1.4
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.8
+github.com/mattn/go-isatty
+# github.com/mattn/go-runewidth v0.0.4
 github.com/mattn/go-runewidth
 # github.com/mholt/archiver v2.1.0+incompatible
 github.com/mholt/archiver
+# github.com/mholt/archiver/v3 v3.3.0
+github.com/mholt/archiver/v3
 # github.com/nmiyake/pkg v0.0.1
 github.com/nmiyake/pkg
 # github.com/nmiyake/pkg/dirs v1.0.1
@@ -38,16 +65,17 @@ github.com/palantir/conjure-go/v5/conjure/transforms
 github.com/palantir/conjure-go/v5/conjure/types
 github.com/palantir/conjure-go/v5/conjure/visitors
 github.com/palantir/conjure-go/v5/conjure/werrorexpressions
-# github.com/palantir/distgo v1.20.0
+# github.com/palantir/distgo v1.21.0
 github.com/palantir/distgo/assetapi
 github.com/palantir/distgo/distgo
-github.com/palantir/distgo/pkg/git
 github.com/palantir/distgo/projectversioner/git
 github.com/palantir/distgo/publisher
 github.com/palantir/distgo/publisher/artifactory
 github.com/palantir/distgo/publisher/artifactory/config
 github.com/palantir/distgo/publisher/artifactory/config/internal/v0
 github.com/palantir/distgo/publisher/maven
+# github.com/palantir/distgo/pkg/git v1.0.0
+github.com/palantir/distgo/pkg/git
 # github.com/palantir/go-ptimports/v2 v2.9.0
 github.com/palantir/go-ptimports/v2/ptimports
 # github.com/palantir/goastwriter v0.0.1
@@ -58,7 +86,7 @@ github.com/palantir/goastwriter/decl
 github.com/palantir/goastwriter/expression
 github.com/palantir/goastwriter/spec
 github.com/palantir/goastwriter/statement
-# github.com/palantir/godel/v2 v2.22.0
+# github.com/palantir/godel/v2 v2.25.0
 github.com/palantir/godel/v2/framework/artifactresolver
 github.com/palantir/godel/v2/framework/builtintasks
 github.com/palantir/godel/v2/framework/builtintasks/checkpath
@@ -89,9 +117,9 @@ github.com/palantir/godel/v2/pkg/versionedconfig
 github.com/palantir/pkg
 # github.com/palantir/pkg/cobracli v1.0.1
 github.com/palantir/pkg/cobracli
-# github.com/palantir/pkg/matcher v1.0.0
+# github.com/palantir/pkg/matcher v1.0.1
 github.com/palantir/pkg/matcher
-# github.com/palantir/pkg/pkgpath v1.0.0
+# github.com/palantir/pkg/pkgpath v1.0.1
 github.com/palantir/pkg/pkgpath
 # github.com/palantir/pkg/safehttp v1.0.1
 github.com/palantir/pkg/safehttp
@@ -99,7 +127,7 @@ github.com/palantir/pkg/safehttp
 github.com/palantir/pkg/safejson
 # github.com/palantir/pkg/safeyaml v1.0.1
 github.com/palantir/pkg/safeyaml
-# github.com/palantir/pkg/specdir v1.0.0
+# github.com/palantir/pkg/specdir v1.0.1
 github.com/palantir/pkg/specdir
 # github.com/palantir/pkg/transform v1.0.0
 github.com/palantir/pkg/transform
@@ -129,6 +157,16 @@ github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
+# github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
+github.com/xi2/xz
+# golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+golang.org/x/crypto/cast5
+golang.org/x/crypto/openpgp
+golang.org/x/crypto/openpgp/armor
+golang.org/x/crypto/openpgp/elgamal
+golang.org/x/crypto/openpgp/errors
+golang.org/x/crypto/openpgp/packet
+golang.org/x/crypto/openpgp/s2k
 # golang.org/x/mod v0.2.0
 golang.org/x/mod/module
 golang.org/x/mod/semver

@@ -28,13 +28,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
-
 	"github.com/palantir/distgo/distgo"
 	"github.com/palantir/distgo/publisher"
 	"github.com/palantir/distgo/publisher/artifactory/config"
 	"github.com/palantir/distgo/publisher/maven"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 const TypeName = "artifactory" // publishes output artifacts to Artifactory
@@ -154,16 +153,14 @@ func (p *artifactoryPublisher) ArtifactoryRunPublish(productTaskOutputInfo distg
 	}
 
 	if !cfg.NoPOM {
-		for _, currDistID := range productTaskOutputInfo.Product.DistOutputInfos.DistIDs {
-			pomName, pomContent, err := maven.POM(groupID, maven.Packaging(currDistID, productTaskOutputInfo), productTaskOutputInfo)
-			if err != nil {
-				return nil, err
-			}
-			artifactNames = append(artifactNames, pomName)
-			// do not include POM in uploadedURLs
-			if _, err := cfg.UploadFile(publisher.NewFileInfoFromBytes([]byte(pomContent)), baseURL, pomName, artifactExists, dryRun, stdout); err != nil {
-				return nil, err
-			}
+		pomName, pomContent, err := maven.POM(groupID, productTaskOutputInfo)
+		if err != nil {
+			return nil, err
+		}
+		artifactNames = append(artifactNames, pomName)
+		// do not include POM in uploadedURLs
+		if _, err := cfg.UploadFile(publisher.NewFileInfoFromBytes([]byte(pomContent)), baseURL, pomName, artifactExists, dryRun, stdout); err != nil {
+			return nil, err
 		}
 	}
 
