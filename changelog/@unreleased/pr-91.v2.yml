@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: |-
+    Update conjure-go dependency to v4.9.0
+
+    Bump several godeps.
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/91
