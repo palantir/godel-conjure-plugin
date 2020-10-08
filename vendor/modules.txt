@@ -58,7 +58,10 @@ github.com/nmiyake/pkg/dirs
 github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go/v5 v5.0.3
+# github.com/palantir/conjure-go-runtime/v2 v2.2.0
+github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
+github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
+# github.com/palantir/conjure-go/v5 v5.1.0
 github.com/palantir/conjure-go/v5/conjure
 github.com/palantir/conjure-go/v5/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v5/conjure/transforms
@@ -78,7 +81,7 @@ github.com/palantir/distgo/publisher/maven
 github.com/palantir/distgo/pkg/git
 # github.com/palantir/go-ptimports/v2 v2.9.0
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/goastwriter v0.0.1
+# github.com/palantir/goastwriter v0.1.0
 github.com/palantir/goastwriter
 github.com/palantir/goastwriter/astgen
 github.com/palantir/goastwriter/comment
@@ -131,6 +134,9 @@ github.com/palantir/pkg/safeyaml
 github.com/palantir/pkg/specdir
 # github.com/palantir/pkg/transform v1.0.0
 github.com/palantir/pkg/transform
+# github.com/palantir/pkg/uuid v1.0.1
+github.com/palantir/pkg/uuid
+github.com/palantir/pkg/uuid/internal/uuid
 # github.com/palantir/witchcraft-go-error v1.3.0
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
