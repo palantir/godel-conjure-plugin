@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Upgrade conjure-go to 5.3.0
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/98
