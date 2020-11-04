@@ -61,7 +61,7 @@ github.com/nwaples/rardecode
 # github.com/palantir/conjure-go-runtime/v2 v2.5.0
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
-# github.com/palantir/conjure-go/v5 v5.3.0
+# github.com/palantir/conjure-go/v5 v5.4.0
 github.com/palantir/conjure-go/v5/conjure
 github.com/palantir/conjure-go/v5/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v5/conjure/transforms
@@ -132,12 +132,12 @@ github.com/palantir/pkg/safejson
 github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/specdir v1.0.1
 github.com/palantir/pkg/specdir
-# github.com/palantir/pkg/transform v1.0.1
+# github.com/palantir/pkg/transform v1.0.0
 github.com/palantir/pkg/transform
 # github.com/palantir/pkg/uuid v1.0.1
 github.com/palantir/pkg/uuid
 github.com/palantir/pkg/uuid/internal/uuid
-# github.com/palantir/witchcraft-go-error v1.4.1
+# github.com/palantir/witchcraft-go-error v1.4.3
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
 # github.com/palantir/witchcraft-go-params v1.1.0
