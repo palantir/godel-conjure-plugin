@@ -1,0 +1,5 @@
+type: break
+break:
+  description: Bump go module to v6
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/101
