@@ -1,0 +1,5 @@
+type: break
+break:
+  description: Bump conjure-go to v6.0.0
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/100
