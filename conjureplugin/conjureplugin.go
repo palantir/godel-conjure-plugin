@@ -20,9 +20,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/palantir/conjure-go/v5/conjure"
-	conjurego "github.com/palantir/conjure-go/v5/conjure"
-	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure"
+	conjurego "github.com/palantir/conjure-go/v6/conjure"
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 )
 
 const indentLen = 2
