@@ -21,8 +21,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/palantir/godel-conjure-plugin/v5/conjureplugin"
-	v1 "github.com/palantir/godel-conjure-plugin/v5/conjureplugin/config/internal/v1"
+	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )

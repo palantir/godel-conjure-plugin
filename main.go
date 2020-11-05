@@ -17,7 +17,7 @@ package main
 import (
 	"os"
 
-	"github.com/palantir/godel-conjure-plugin/v5/cmd"
+	"github.com/palantir/godel-conjure-plugin/v6/cmd"
 	"github.com/palantir/godel/v2/framework/pluginapi/v2/pluginapi"
 )
 

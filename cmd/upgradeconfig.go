@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/palantir/godel-conjure-plugin/v5/conjureplugin/config"
+	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
 	"github.com/palantir/godel/v2/framework/pluginapi"
 )
 

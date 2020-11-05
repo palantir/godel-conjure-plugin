@@ -17,7 +17,7 @@ package conjureircli_test
 import (
 	"testing"
 
-	"github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
