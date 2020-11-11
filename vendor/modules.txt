@@ -59,7 +59,7 @@ github.com/nwaples/rardecode
 # github.com/palantir/conjure-go-runtime/v2 v2.5.0
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
-# github.com/palantir/conjure-go/v6 v6.0.0
+# github.com/palantir/conjure-go/v6 v6.0.1
 github.com/palantir/conjure-go/v6/conjure
 github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v6/conjure/transforms
