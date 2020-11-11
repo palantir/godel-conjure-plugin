@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Upgrade conjure-go to 6.0.1; render servers with WGS v2
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/104
