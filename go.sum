@@ -228,8 +228,8 @@ github.com/palantir/conjure-go/v4 v4.2.0 h1:VhZ6/2SBZ7pLiXWMmu371+2NtVNmSJfwcFzG
 github.com/palantir/conjure-go/v4 v4.2.0/go.mod h1:VSVefkM94TdXRyP7wvBeURBNOFkYRJEtxPi8BeyKFi8=
 github.com/palantir/conjure-go/v5 v5.0.1 h1:7ljpRaVCeT4vqEV1UxodJ+MgZv1nNce5Gg5FSohAE4Q=
 github.com/palantir/conjure-go/v5 v5.0.1/go.mod h1:qAWik7iYoJtlHwyJ/sG0FuJx1PtzrLVCUglLH1k7NrE=
-github.com/palantir/conjure-go/v6 v6.0.1 h1:x4OwWkNoBo5+Q+6H7mX67y+vUbHds6P/61iOO9oFYcI=
-github.com/palantir/conjure-go/v6 v6.0.1/go.mod h1:9CWAhzSbNHmPqBHgtXqgvWKg7opdDlhditBT3ofbeuQ=
+github.com/palantir/conjure-go/v6 v6.0.2 h1:bWv4tk+CxYv/ud1O4HuHn16HmNArjmEu54/aI0/EyNI=
+github.com/palantir/conjure-go/v6 v6.0.2/go.mod h1:9CWAhzSbNHmPqBHgtXqgvWKg7opdDlhditBT3ofbeuQ=
 github.com/palantir/distgo v1.2.0/go.mod h1:jOCcoLD92T/eN4VfRxczaDIWsqyy1f0yQZMFOt3cJCw=
 github.com/palantir/distgo v1.20.0 h1:cIE2mC2ZlFaRQVTq7cN3YeobdA/vI2HTfISLx0dMho0=
 github.com/palantir/distgo v1.20.0/go.mod h1:Jfsd7o7+kzCY8a3xpbPabr5IMjW6zSNOKLTNa8TJH4g=
@@ -318,6 +318,8 @@ github.com/palantir/pkg/tlsconfig v1.0.0/go.mod h1:pyDZXpSYm5J6r/4Fm6mjDV25Oe1aM
 github.com/palantir/pkg/tlsconfig v1.0.1/go.mod h1:GmXODSYyPva3huR2pEaAknSGIcyRPy08Hvr38WP5+W4=
 github.com/palantir/pkg/transform v1.0.0 h1:21MzkUg9fQgIdadTYMM1Z1qrml2MVdpNY5ai27G15LM=
 github.com/palantir/pkg/transform v1.0.0/go.mod h1:YH2PQUzswoDayk4rTvKt6B+NcnUJgZRNr9MEqfAMCo0=
+github.com/palantir/pkg/transform v1.0.1 h1:+b0wtPsC/tcFOSoAzxsurXnbUnZIb4TDj/tfMLIMX3w=
+github.com/palantir/pkg/transform v1.0.1/go.mod h1:Kn0ST9vBxM16s08/1uYPSWgAOussLidNmukkvqcIocE=
 github.com/palantir/pkg/uuid v1.0.0/go.mod h1:yCHOTYHJD/zKB1c8sJ2IhIGvPGnYYcp0FgGTnbr5jiM=
 github.com/palantir/pkg/uuid v1.0.1 h1:wcBLI2wA9IyCgE5o7z8jkfct74BHhC5iD8FNuqp8ZHc=
 github.com/palantir/pkg/uuid v1.0.1/go.mod h1:pvQXYqMYf8GdAHEFiO4ROL9CEuNX7voJ7TjMPcx3NJo=
@@ -553,8 +555,8 @@ golang.org/x/tools v0.0.0-20200507205054-480da3ebd79c h1:TDspWmUQsjdWzrHnd5imfaJ
 golang.org/x/tools v0.0.0-20200507205054-480da3ebd79c/go.mod h1:EkVYQZoAsY45+roYkvgYkIh4xh/qjgUK9TdY2XT94GE=
 golang.org/x/tools v0.0.0-20201022035929-9cf592e881e9 h1:sEvmEcJVKBNUvgCUClbUQeHOAa9U0I2Ce1BooMvVCY4=
 golang.org/x/tools v0.0.0-20201022035929-9cf592e881e9/go.mod h1:emZCQorbCU4vsT4fOWvOPXz4eW1wZW4PmDk9uLelYpA=
-golang.org/x/tools v0.0.0-20201105220310-78b158585360 h1:/9CzsU8hOpnSUCtem1vfWNgsVeCTgkMdx+VE5YIYxnU=
-golang.org/x/tools v0.0.0-20201105220310-78b158585360/go.mod h1:emZCQorbCU4vsT4fOWvOPXz4eW1wZW4PmDk9uLelYpA=
+golang.org/x/tools v0.0.0-20201112185108-eeaa07dd7696 h1:Bfazo+enXJET5SbHeh95NtxabJF6fJ9r/jpfRJgd3j4=
+golang.org/x/tools v0.0.0-20201112185108-eeaa07dd7696/go.mod h1:emZCQorbCU4vsT4fOWvOPXz4eW1wZW4PmDk9uLelYpA=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=

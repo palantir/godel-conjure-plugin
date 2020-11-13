@@ -56,10 +56,7 @@ github.com/nmiyake/pkg/dirs
 github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go-runtime/v2 v2.5.0
-github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
-github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
-# github.com/palantir/conjure-go/v6 v6.0.1
+# github.com/palantir/conjure-go/v6 v6.0.2
 github.com/palantir/conjure-go/v6/conjure
 github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v6/conjure/transforms
@@ -130,11 +127,8 @@ github.com/palantir/pkg/safejson
 github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/specdir v1.0.1
 github.com/palantir/pkg/specdir
-# github.com/palantir/pkg/transform v1.0.0
+# github.com/palantir/pkg/transform v1.0.1
 github.com/palantir/pkg/transform
-# github.com/palantir/pkg/uuid v1.0.1
-github.com/palantir/pkg/uuid
-github.com/palantir/pkg/uuid/internal/uuid
 # github.com/palantir/witchcraft-go-error v1.4.3
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
@@ -177,7 +171,7 @@ golang.org/x/mod/semver
 # golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# golang.org/x/tools v0.0.0-20201105220310-78b158585360
+# golang.org/x/tools v0.0.0-20201112185108-eeaa07dd7696
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/gcimporter
