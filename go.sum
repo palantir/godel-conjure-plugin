@@ -318,8 +318,6 @@ github.com/palantir/pkg/tlsconfig v1.0.0/go.mod h1:pyDZXpSYm5J6r/4Fm6mjDV25Oe1aM
 github.com/palantir/pkg/tlsconfig v1.0.1/go.mod h1:GmXODSYyPva3huR2pEaAknSGIcyRPy08Hvr38WP5+W4=
 github.com/palantir/pkg/transform v1.0.0 h1:21MzkUg9fQgIdadTYMM1Z1qrml2MVdpNY5ai27G15LM=
 github.com/palantir/pkg/transform v1.0.0/go.mod h1:YH2PQUzswoDayk4rTvKt6B+NcnUJgZRNr9MEqfAMCo0=
-github.com/palantir/pkg/transform v1.0.1 h1:+b0wtPsC/tcFOSoAzxsurXnbUnZIb4TDj/tfMLIMX3w=
-github.com/palantir/pkg/transform v1.0.1/go.mod h1:Kn0ST9vBxM16s08/1uYPSWgAOussLidNmukkvqcIocE=
 github.com/palantir/pkg/uuid v1.0.0/go.mod h1:yCHOTYHJD/zKB1c8sJ2IhIGvPGnYYcp0FgGTnbr5jiM=
 github.com/palantir/pkg/uuid v1.0.1 h1:wcBLI2wA9IyCgE5o7z8jkfct74BHhC5iD8FNuqp8ZHc=
 github.com/palantir/pkg/uuid v1.0.1/go.mod h1:pvQXYqMYf8GdAHEFiO4ROL9CEuNX7voJ7TjMPcx3NJo=
