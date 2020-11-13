@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Bump conjure-go to v6.0.2, removing strict enum validation on deserialization.
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/105
