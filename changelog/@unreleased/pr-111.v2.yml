@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Update Conjure IR generator version to 4.14.1 to include new fields like "extensions".
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/111
