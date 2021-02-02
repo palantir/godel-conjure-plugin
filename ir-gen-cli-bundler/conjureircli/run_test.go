@@ -54,7 +54,8 @@ types:
       } ]
     }
   } ],
-  "services" : [ ]
+  "services" : [ ],
+  "extensions" : { }
 }`,
 		},
 	} {
