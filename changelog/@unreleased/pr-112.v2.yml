@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Adds new functions to the `conjureircli` package that adds support for specifying the content of the extensions block for generated IR.
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/112
