@@ -1,0 +1,8 @@
+type: feature
+feature:
+  description: |-
+    Add accept-funcs feature flag to enable lambda based union visitors
+
+    adds an option to generate an "AcceptFuncs" function for union types which accepts lambda functions that can be used as visitors. This allows visitors to be called on union types without having to implement a visitor interface.
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/116
