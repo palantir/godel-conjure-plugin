@@ -53,10 +53,11 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 			publishVal = irProvider.GeneratedFromYAML()
 		}
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:  currConfig.OutputDir,
-			IRProvider: irProvider,
-			Server:     currConfig.Server,
-			Publish:    publishVal,
+			OutputDir:   currConfig.OutputDir,
+			IRProvider:  irProvider,
+			AcceptFuncs: currConfig.AcceptFuncs,
+			Server:      currConfig.Server,
+			Publish:     publishVal,
 		}
 	}
 	return conjureplugin.ConjureProjectParams{

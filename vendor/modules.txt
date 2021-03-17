@@ -56,7 +56,7 @@ github.com/nmiyake/pkg/dirs
 github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go/v6 v6.1.0
+# github.com/palantir/conjure-go/v6 v6.2.0
 github.com/palantir/conjure-go/v6/conjure
 github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v6/conjure/transforms
@@ -132,7 +132,7 @@ github.com/palantir/pkg/transform
 # github.com/palantir/witchcraft-go-error v1.4.3
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.1.0
+# github.com/palantir/witchcraft-go-params v1.2.0
 github.com/palantir/witchcraft-go-params
 # github.com/pierrec/lz4 v2.0.5+incompatible
 github.com/pierrec/lz4
@@ -141,11 +141,11 @@ github.com/pierrec/lz4/internal/xxh32
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/spf13/cobra v1.1.1
+# github.com/spf13/cobra v1.1.3
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/stretchr/testify v1.4.0
+# github.com/stretchr/testify v1.7.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/termie/go-shutil v0.0.0-20140729215957-bcacb06fecae
@@ -193,5 +193,7 @@ golang.org/x/xerrors
 golang.org/x/xerrors/internal
 # gopkg.in/cheggaaa/pb.v1 v1.0.22
 gopkg.in/cheggaaa/pb.v1
-# gopkg.in/yaml.v2 v2.3.0
+# gopkg.in/yaml.v2 v2.4.0
 gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+gopkg.in/yaml.v3

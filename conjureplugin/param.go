@@ -33,6 +33,8 @@ type ConjureProjectParam struct {
 	IROutputPath string
 	// Server will optionally generate server code in addition to client code for services specified in this project.
 	Server bool
+	// AcceptFuncs will optionally generate lambda based visitor code for unions specified in this project.
+	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
 }

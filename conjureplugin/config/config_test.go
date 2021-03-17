@@ -215,6 +215,30 @@ projects:
 				},
 			},
 		},
+		{
+			`
+projects:
+ project:
+   output-dir: outputDir
+   ir-locator:
+     type: remote
+     locator: localhost:8080/ir.json
+   accept-funcs: true
+`,
+			config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeRemote,
+							Locator: "localhost:8080/ir.json",
+						},
+						Server:      false,
+						AcceptFuncs: true,
+					},
+				},
+			},
+		},
 	} {
 		var got config.ConjurePluginConfig
 		err := yaml.Unmarshal([]byte(tc.in), &got)
@@ -274,6 +298,32 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 						OutputDir:  "outputDir",
 						IRProvider: conjureplugin.NewLocalYAMLIRProvider("input.yml"),
 						Publish:    true,
+					},
+				},
+			},
+		},
+		{
+			config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "input.json",
+						},
+						AcceptFuncs: true,
+					},
+				},
+			},
+			conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
+						AcceptFuncs: true,
 					},
 				},
 			},
