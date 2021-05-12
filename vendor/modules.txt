@@ -23,10 +23,6 @@ github.com/golang/gddo/httputil
 github.com/golang/gddo/httputil/header
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
-# github.com/google/go-github/v28 v28.1.1
-github.com/google/go-github/v28/github
-# github.com/google/go-querystring v1.0.0
-github.com/google/go-querystring/query
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
 # github.com/klauspost/compress v1.9.2
@@ -63,7 +59,7 @@ github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
 github.com/palantir/conjure-go/v6/conjure/visitors
 github.com/palantir/conjure-go/v6/conjure/werrorexpressions
-# github.com/palantir/distgo v1.21.0
+# github.com/palantir/distgo v1.29.0
 github.com/palantir/distgo/assetapi
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/projectversioner/git
@@ -84,10 +80,9 @@ github.com/palantir/goastwriter/decl
 github.com/palantir/goastwriter/expression
 github.com/palantir/goastwriter/spec
 github.com/palantir/goastwriter/statement
-# github.com/palantir/godel/v2 v2.25.0
+# github.com/palantir/godel/v2 v2.39.0
 github.com/palantir/godel/v2/framework/artifactresolver
 github.com/palantir/godel/v2/framework/builtintasks
-github.com/palantir/godel/v2/framework/builtintasks/checkpath
 github.com/palantir/godel/v2/framework/builtintasks/githooks
 github.com/palantir/godel/v2/framework/builtintasks/githubwiki
 github.com/palantir/godel/v2/framework/builtintasks/idea
@@ -141,6 +136,11 @@ github.com/pierrec/lz4/internal/xxh32
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/rogpeppe/go-internal v1.7.0
+github.com/rogpeppe/go-internal/internal/syscall/windows
+github.com/rogpeppe/go-internal/internal/syscall/windows/sysdll
+github.com/rogpeppe/go-internal/lockedfile
+github.com/rogpeppe/go-internal/lockedfile/internal/filelock
 # github.com/spf13/cobra v1.1.3
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
@@ -157,14 +157,6 @@ github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 github.com/xi2/xz
-# golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-golang.org/x/crypto/cast5
-golang.org/x/crypto/openpgp
-golang.org/x/crypto/openpgp/armor
-golang.org/x/crypto/openpgp/elgamal
-golang.org/x/crypto/openpgp/errors
-golang.org/x/crypto/openpgp/packet
-golang.org/x/crypto/openpgp/s2k
 # golang.org/x/mod v0.3.0
 golang.org/x/mod/module
 golang.org/x/mod/semver
