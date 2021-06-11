@@ -43,7 +43,11 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return err
 		}
 
-		outputConf := conjure.OutputConfiguration{OutputDir: path.Join(projectDir, outputDir), GenerateServer: currParam.Server}
+		outputConf := conjure.OutputConfiguration{
+			OutputDir: path.Join(projectDir, outputDir),
+			GenerateServer: currParam.Server,
+			GenerateFuncsVisitor: currParam.AcceptFuncs,
+		}
 		if verify {
 			diff, err := diffOnDisk(conjureDef, projectDir, outputConf)
 			if err != nil {
