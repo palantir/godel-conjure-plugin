@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Accept-funcs flag correctly passed through to conjure-go generator
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/132
