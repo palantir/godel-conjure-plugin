@@ -1,5 +1,8 @@
 type: fix
 fix:
-  description: Accept-funcs flag correctly passed through to conjure-go generator
+  description: |
+    Fixes issue where the "accept-func" configuration was not respected.
+
+    Previously, the "accept-funcs" flag was not properly passed through to the conjure-go generator, which made it such that specifying the "accept-funcs" field in configuration had no effect.
   links:
   - https://github.com/palantir/godel-conjure-plugin/pull/132
