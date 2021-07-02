@@ -23,15 +23,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/palantir/goastwriter/astgen"
-	"github.com/palantir/goastwriter/decl"
-	"github.com/pkg/errors"
-	"golang.org/x/tools/go/packages"
-
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/palantir/conjure-go/v6/conjure/visitors"
+	"github.com/palantir/goastwriter/astgen"
+	"github.com/palantir/goastwriter/decl"
+	"github.com/pkg/errors"
+	"golang.org/x/tools/go/packages"
 )
 
 type StringSet map[string]struct{}
@@ -378,7 +377,7 @@ func outputPackageBasePath(outputDirAbsPath string) (string, error) {
 // provided directory is not within a module. Returns an error if any errors are encountered in making this
 // determination.
 func goModulePath(dir string) (modName string, modBaseDir string, rErr error) {
-	cmd := exec.Command("go", "list", "-m", "-json")
+	cmd := exec.Command("go", "list", "-m", "-mod=readonly", "-json")
 	cmd.Dir = dir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
