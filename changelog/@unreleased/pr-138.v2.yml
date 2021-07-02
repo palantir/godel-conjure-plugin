@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Bump conjure-go to v6.4.0
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/138
