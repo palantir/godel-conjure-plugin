@@ -6,7 +6,7 @@ require (
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/mholt/archiver v2.1.0+incompatible
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.4.0
+	github.com/palantir/conjure-go/v6 v6.5.0
 	github.com/palantir/distgo v1.29.0
 	github.com/palantir/go-ptimports/v2 v2.10.0 // indirect
 	github.com/palantir/goastwriter v0.1.1 // indirect
