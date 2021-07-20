@@ -52,10 +52,14 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 		if currConfig.Publish == nil {
 			publishVal = irProvider.GeneratedFromYAML()
 		}
+		acceptFuncsFlag := true
+		if currConfig.AcceptFuncs != nil {
+			acceptFuncsFlag = *currConfig.AcceptFuncs
+		}
 		params[key] = conjureplugin.ConjureProjectParam{
 			OutputDir:   currConfig.OutputDir,
 			IRProvider:  irProvider,
-			AcceptFuncs: currConfig.AcceptFuncs,
+			AcceptFuncs: acceptFuncsFlag,
 			Server:      currConfig.Server,
 			Publish:     publishVal,
 		}

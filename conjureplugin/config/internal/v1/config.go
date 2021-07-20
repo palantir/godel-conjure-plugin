@@ -36,7 +36,7 @@ type SingleConjureConfig struct {
 	Server bool `yaml:"server,omitempty"`
 	// AcceptFuncs indicates if we will generate lambda based visitor code.
 	// Currently this is behind a feature flag and is subject to change.
-	AcceptFuncs bool `yaml:"accept-funcs,omitempty"`
+	AcceptFuncs *bool `yaml:"accept-funcs,omitempty"`
 }
 
 type LocatorType string

@@ -234,7 +234,7 @@ projects:
 							Locator: "localhost:8080/ir.json",
 						},
 						Server:      false,
-						AcceptFuncs: true,
+						AcceptFuncs: boolPtr(true),
 					},
 				},
 			},
@@ -270,9 +270,10 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:  "outputDir",
-						IRProvider: conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:    true,
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
 					},
 				},
 			},
@@ -295,9 +296,10 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:  "outputDir",
-						IRProvider: conjureplugin.NewLocalYAMLIRProvider("input.yml"),
-						Publish:    true,
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input.yml"),
+						Publish:     true,
+						AcceptFuncs: true,
 					},
 				},
 			},
@@ -311,7 +313,7 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 							Type:    v1.LocatorTypeAuto,
 							Locator: "input.json",
 						},
-						AcceptFuncs: true,
+						AcceptFuncs: boolPtr(true),
 					},
 				},
 			},
@@ -346,8 +348,9 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:  "outputDir",
-						IRProvider: conjureplugin.NewLocalFileIRProvider("input.json"),
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
+						AcceptFuncs: true,
 					},
 				},
 			},
