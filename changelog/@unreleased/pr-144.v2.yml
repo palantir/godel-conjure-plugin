@@ -1,0 +1,11 @@
+type: feature
+feature:
+  description: |-
+    Turn on AcceptFuncs lambda visitor generation by default
+
+    This allows passing inline lambdas for each union variant instead of
+    defining a visitor struct and implementing methods for each variant.
+    This helps reduce boilerplate and improves readability for simple code
+    when interacting with unions.
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/144
