@@ -235,6 +235,14 @@ func (u *TestUnion) AcceptFuncs(testCaseFunc func(TestCase) error, unknownFunc f
 	}
 }
 
+func (u *TestUnion) TestCaseNoopSuccess(TestCase) error {
+	return nil
+}
+
+func (u *TestUnion) ErrorOnUnknown(typeName string) error {
+	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 func (u *TestUnion) Accept(v TestUnionVisitor) error {
 	switch u.typ {
 	default:
