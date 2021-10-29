@@ -10,7 +10,7 @@ require (
 	github.com/palantir/distgo v1.29.0
 	github.com/palantir/go-ptimports/v2 v2.10.0 // indirect
 	github.com/palantir/goastwriter v0.1.1 // indirect
-	github.com/palantir/godel/v2 v2.40.0
+	github.com/palantir/godel/v2 v2.41.0
 	github.com/palantir/pkg/cobracli v1.0.1
 	github.com/palantir/pkg/safehttp v1.0.1
 	github.com/palantir/pkg/safejson v1.0.1
