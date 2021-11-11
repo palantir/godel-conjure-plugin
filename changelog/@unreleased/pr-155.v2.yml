@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Update conjure-go to 6.9.0
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/155
