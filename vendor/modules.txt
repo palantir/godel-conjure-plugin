@@ -5,7 +5,7 @@ github.com/andybalholm/brotli
 # github.com/cheggaaa/pb/v3 v3.0.2
 github.com/cheggaaa/pb/v3
 github.com/cheggaaa/pb/v3/termutil
-# github.com/dave/jennifer v1.4.1
+# github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 github.com/dave/jennifer/jen
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
@@ -55,7 +55,7 @@ github.com/nmiyake/pkg/dirs
 github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go/v6 v6.9.0
+# github.com/palantir/conjure-go/v6 v6.10.0
 ## explicit
 github.com/palantir/conjure-go/v6/conjure
 github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
