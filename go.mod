@@ -7,7 +7,7 @@ require (
 	github.com/mholt/archiver v2.1.0+incompatible
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v6 v6.13.0
-	github.com/palantir/distgo v1.29.0
+	github.com/palantir/distgo v1.30.0
 	github.com/palantir/godel/v2 v2.41.0
 	github.com/palantir/pkg/cobracli v1.0.1
 	github.com/palantir/pkg/safehttp v1.0.1
@@ -50,7 +50,7 @@ require (
 	github.com/rogpeppe/go-internal v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/termie/go-shutil v0.0.0-20140729215957-bcacb06fecae // indirect
-	github.com/ulikunitz/xz v0.5.8 // indirect
+	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
