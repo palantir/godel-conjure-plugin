@@ -80,8 +80,8 @@ github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v6/conjure/snip
 github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
-# github.com/palantir/distgo v1.29.0
-## explicit; go 1.13
+# github.com/palantir/distgo v1.30.0
+## explicit; go 1.17
 github.com/palantir/distgo/assetapi
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/projectversioner/git
@@ -179,7 +179,7 @@ github.com/stretchr/testify/require
 # github.com/termie/go-shutil v0.0.0-20140729215957-bcacb06fecae
 ## explicit
 github.com/termie/go-shutil
-# github.com/ulikunitz/xz v0.5.8
+# github.com/ulikunitz/xz v0.5.10
 ## explicit; go 1.12
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
