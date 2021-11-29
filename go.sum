@@ -294,6 +294,7 @@ github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lN
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/nmiyake/pkg v0.0.0-20170627000939-b64318170fde/go.mod h1:1mqQ24p9iRljD6gKVkWOwMJRvbzgbyAtb0zALIt0lis=
+github.com/nmiyake/pkg v0.0.1 h1:LooujgshxOHQsPpluVqzOwBV9dUEZXIxOkotRMXbBGQ=
 github.com/nmiyake/pkg v0.0.1/go.mod h1:078BHtQj5Tk8Im6EpMHR0/Stp79lwL3FIRiGaC9hTDM=
 github.com/nmiyake/pkg v1.0.0 h1:HLaVYtHDMpgvKKudovOE4lFaiudQNL+8Imr89hWrSZg=
 github.com/nmiyake/pkg v1.0.0/go.mod h1:078BHtQj5Tk8Im6EpMHR0/Stp79lwL3FIRiGaC9hTDM=
@@ -346,8 +347,8 @@ github.com/palantir/godel-conjure-plugin/v5 v5.1.0/go.mod h1:zWHH7de5ZBPguLEXgwU
 github.com/palantir/godel/pkg/products/v2 v2.0.0/go.mod h1:SaLUycZLVP5qV6mL9MWG3jkX4dS23lJnzpubTGAV4FU=
 github.com/palantir/godel/v2 v2.22.0/go.mod h1:Da/HS4lwo4j/v/PpmpJxgfamjg4Jwp6qPSnPzAr0Ppk=
 github.com/palantir/godel/v2 v2.39.0/go.mod h1:gtwmZT0EERqvpjo3JhMpD5WtsUc5MPjkJkqhPM6l5vw=
-github.com/palantir/godel/v2 v2.41.0 h1:QPVQ9pNs/ul3adIMHdZSPqwPr9ZypL8TaRkmE/tAYCA=
-github.com/palantir/godel/v2 v2.41.0/go.mod h1:e3VuqRVVz0b2RFNRo6mLGNZChxYgbVeO9pxEmvWd4DI=
+github.com/palantir/godel/v2 v2.42.0 h1:MHagDfR6S9Pd96spNzvoT4YGhHriXNj40Fi8+uhbrhM=
+github.com/palantir/godel/v2 v2.42.0/go.mod h1:JA7C9C3xI58vTY6JhlB08EDiRlkOjATNhWrUx4KeVoA=
 github.com/palantir/pkg v0.0.0-20180424172112-23395ebeee5d/go.mod h1:jLbXCfQ4HRrT5RRj5JuKc1ucQeridBMyRCpmzRtUYMY=
 github.com/palantir/pkg v0.0.0-20181230161202-d12f4064ff8e/go.mod h1:jLbXCfQ4HRrT5RRj5JuKc1ucQeridBMyRCpmzRtUYMY=
 github.com/palantir/pkg v1.0.1 h1:ZbGUcc14N7xcZSY9cehQoiHHTm/BAZO5RJdlsNEtSbk=
