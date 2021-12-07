@@ -6,7 +6,7 @@ require (
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/mholt/archiver v2.1.0+incompatible
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.14.0
+	github.com/palantir/conjure-go/v6 v6.15.0
 	github.com/palantir/distgo v1.31.0
 	github.com/palantir/godel/v2 v2.42.0
 	github.com/palantir/pkg/cobracli v1.0.1
