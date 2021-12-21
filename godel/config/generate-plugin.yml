@@ -1,6 +1,3 @@
 generators:
   conjureircli:
     go-generate-dir: ir-gen-cli-bundler/conjureircli/generator
-    gen-paths:
-      paths:
-        - ir-gen-cli-bundler/conjureircli/internal
