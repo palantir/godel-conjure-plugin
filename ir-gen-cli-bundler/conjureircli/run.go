@@ -15,7 +15,6 @@
 package conjureircli
 
 import (
-	"bytes"
 	"embed"
 	"fmt"
 	"io/ioutil"
@@ -184,11 +183,11 @@ func ensureCLIExists(cliPath string) error {
 	}
 
 	// expand asset into destination
-	tgzBytes, err := conjureCliFS.ReadFile("internal/conjure.tgz")
+	tgzFile, err := conjureCliFS.Open("internal/conjure.tgz")
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if err := archiver.TarGz.Read(bytes.NewReader(tgzBytes), cliUnpackDir); err != nil {
+	if err := archiver.TarGz.Read(tgzFile, cliUnpackDir); err != nil {
 		return errors.WithStack(err)
 	}
 
