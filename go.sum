@@ -408,8 +408,8 @@ github.com/palantir/conjure-go/v6 v6.15.0 h1:ECjzs0m13BkoxJI10paM6sf9EythRDIUBG5
 github.com/palantir/conjure-go/v6 v6.15.0/go.mod h1:rAePFCXmBwV/p6r762CqAczU4x5XbJ3K7s2ahnK2R+Q=
 github.com/palantir/distgo v1.2.0/go.mod h1:jOCcoLD92T/eN4VfRxczaDIWsqyy1f0yQZMFOt3cJCw=
 github.com/palantir/distgo v1.20.0/go.mod h1:Jfsd7o7+kzCY8a3xpbPabr5IMjW6zSNOKLTNa8TJH4g=
-github.com/palantir/distgo v1.31.0 h1:CLKYSCmOH3bIqYfNf3/PUMTTEbEi96K2gf7+IqRfcTU=
-github.com/palantir/distgo v1.31.0/go.mod h1:UZCsr9Ed8aodr09Qb/FhKUAwI0WHfPBru/9w6yt3JGs=
+github.com/palantir/distgo v1.32.0 h1:bMzuH4O6XepcZFSQ9KeV/fwf6iuQyouiiSVR8WXsbLU=
+github.com/palantir/distgo v1.32.0/go.mod h1:UZCsr9Ed8aodr09Qb/FhKUAwI0WHfPBru/9w6yt3JGs=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
 github.com/palantir/distgo/pkg/git v1.0.0/go.mod h1:eXrr3SOmf/sWTYmtiubYVxSaVegTlMGgRgBUFMFFedw=
 github.com/palantir/go-encrypted-config-value v1.1.0/go.mod h1:6c5zDN0XqZLxJiV3yLZmoEkUpaB4W3xJdKY6UPn24qI=
@@ -426,8 +426,8 @@ github.com/palantir/godel-conjure-plugin/v5 v5.1.0/go.mod h1:zWHH7de5ZBPguLEXgwU
 github.com/palantir/godel/pkg/products/v2 v2.0.0/go.mod h1:SaLUycZLVP5qV6mL9MWG3jkX4dS23lJnzpubTGAV4FU=
 github.com/palantir/godel/v2 v2.22.0/go.mod h1:Da/HS4lwo4j/v/PpmpJxgfamjg4Jwp6qPSnPzAr0Ppk=
 github.com/palantir/godel/v2 v2.39.0/go.mod h1:gtwmZT0EERqvpjo3JhMpD5WtsUc5MPjkJkqhPM6l5vw=
-github.com/palantir/godel/v2 v2.43.0 h1:JQKiC+k/7KmRBJhzGKRBO6kcf0/TlIBsAucgRerRGQI=
-github.com/palantir/godel/v2 v2.43.0/go.mod h1:smmCKpSWBQwaPv+iWyDy47x8y69M7+AvFHoe9JfK1vg=
+github.com/palantir/godel/v2 v2.45.0 h1:tJ+6TbOnxpYPP2Msv7JrBkYESfqWeSlJdgKyRoAIM6U=
+github.com/palantir/godel/v2 v2.45.0/go.mod h1:smmCKpSWBQwaPv+iWyDy47x8y69M7+AvFHoe9JfK1vg=
 github.com/palantir/pkg v0.0.0-20180424172112-23395ebeee5d/go.mod h1:jLbXCfQ4HRrT5RRj5JuKc1ucQeridBMyRCpmzRtUYMY=
 github.com/palantir/pkg v0.0.0-20181230161202-d12f4064ff8e/go.mod h1:jLbXCfQ4HRrT5RRj5JuKc1ucQeridBMyRCpmzRtUYMY=
 github.com/palantir/pkg v1.0.1 h1:ZbGUcc14N7xcZSY9cehQoiHHTm/BAZO5RJdlsNEtSbk=
