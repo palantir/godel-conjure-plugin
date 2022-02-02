@@ -9,6 +9,10 @@ products:
         arch: amd64
       - os: linux
         arch: amd64
+      - os: darwin
+        arch: arm64
+      - os: linux
+        arch: arm64
       version-var: github.com/palantir/godel-conjure-plugin/cmd.Version
     dist:
       disters:
@@ -19,6 +23,10 @@ products:
               arch: amd64
             - os: linux
               arch: amd64
+            - os: darwin
+              arch: arm64
+            - os: linux
+              arch: arm64
     publish: {}
 product-defaults:
   publish:
