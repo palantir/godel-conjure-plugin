@@ -1,8 +1,5 @@
 type: improvement
 improvement:
-  description: |-
-    Add arm64 builds
-
-    Support m1 macs and Linux arm as well, just because.
+  description: Add arm64 builds.
   links:
   - https://github.com/palantir/godel-conjure-plugin/pull/182
