@@ -368,8 +368,9 @@ github.com/palantir/pkg/boolean v1.0.0/go.mod h1:uGQK9vNvMHZF4zKXb15tiYokElb1a0z
 github.com/palantir/pkg/bytesbuffers v1.0.0/go.mod h1:JFWINutL8wfBpXOqastvJtuEXNEQhIVNnBVY0oeJFws=
 github.com/palantir/pkg/bytesbuffers v1.0.1/go.mod h1:tmmrI9egWT9g6oBhcO3bsd+R5HOxNiNMkTelr2+W2vg=
 github.com/palantir/pkg/cobracli v1.0.0/go.mod h1:AneQq9QEiEHnx61jDASdobjCwKKSkWLVVsyoMpgmy74=
-github.com/palantir/pkg/cobracli v1.0.1 h1:RLAL+bWRcFVqX1XHDQZp6V2vZYN483U0HE9dhp2W+WQ=
 github.com/palantir/pkg/cobracli v1.0.1/go.mod h1:UfYLriXzhyx7a3r+3UTD+kbX+xASjr9kSK05fC85NyI=
+github.com/palantir/pkg/cobracli v1.1.0 h1:dfBDc+FSrBnkNv96Ew9ROeks5JI4NxwD//Raas+zd6Y=
+github.com/palantir/pkg/cobracli v1.1.0/go.mod h1:eaiBi7zgXa8AXlxH+hV4TNQlXbYY36xSFE9DdArG1MM=
 github.com/palantir/pkg/datetime v1.0.0/go.mod h1:s01MDVkY8pZEP+sbAIbXxiAsS+mPLHla3cFnQ2pk//g=
 github.com/palantir/pkg/datetime v1.0.1/go.mod h1:Xx0XxVNJKPZRPw4xkNJ2qLNTLqGFu5QW6rAWeuoATBs=
 github.com/palantir/pkg/gittest v1.0.0/go.mod h1:M49S4TsX5sh7lYJmOF+pFzcB4fJNOylzN8tOdpSq958=
@@ -512,8 +513,9 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
+github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/termie/go-shutil v0.0.0-20140729215957-bcacb06fecae h1:vgGSvdW5Lqg+I1aZOlG32uyE6xHpLdKhZzcTEktz5wM=
 github.com/termie/go-shutil v0.0.0-20140729215957-bcacb06fecae/go.mod h1:quDq6Se6jlGwiIKia/itDZxqC5rj6/8OdFyMMAwTxCs=

@@ -9,12 +9,12 @@ require (
 	github.com/palantir/conjure-go/v6 v6.15.0
 	github.com/palantir/distgo v1.36.0
 	github.com/palantir/godel/v2 v2.42.0
-	github.com/palantir/pkg/cobracli v1.0.1
+	github.com/palantir/pkg/cobracli v1.1.0
 	github.com/palantir/pkg/safehttp v1.0.1
 	github.com/palantir/pkg/safejson v1.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.4.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
