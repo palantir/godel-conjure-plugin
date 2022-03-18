@@ -80,8 +80,8 @@ github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v6/conjure/snip
 github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
-# github.com/palantir/distgo v1.36.0
-## explicit; go 1.17
+# github.com/palantir/distgo v1.37.0
+## explicit; go 1.18
 github.com/palantir/distgo/assetapi
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/projectversioner/git
