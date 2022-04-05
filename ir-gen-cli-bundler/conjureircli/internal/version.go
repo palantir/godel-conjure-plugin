@@ -1,5 +1,6 @@
-// This is a generated file: do not edit by hand.
-// To update this file, run the generator in conjureircli/generator.
-package conjureircli_internal
+package internal
 
-const Version = "4.14.1"
+const (
+	Version = "4.25.0"
+	SHA256  = "e0b712e3ec12cc2fc8c9f5ec07cd1c57a011bab3cfa0701499e7ea0dc0d5fdc4"
+)

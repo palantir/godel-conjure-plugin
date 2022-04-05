@@ -25,9 +25,6 @@ github.com/dsnet/compress/internal/prefix
 # github.com/fatih/color v1.13.0
 ## explicit; go 1.13
 github.com/fatih/color
-# github.com/go-bindata/go-bindata v3.1.2+incompatible
-## explicit
-github.com/go-bindata/go-bindata
 # github.com/golang/gddo v0.0.0-20190419222130-af0f2af80721
 ## explicit
 github.com/golang/gddo/httputil

@@ -15,7 +15,7 @@
 package conjureircli
 
 import (
-	"bytes"
+	"embed"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -24,9 +24,14 @@ import (
 	"runtime"
 
 	"github.com/mholt/archiver"
-	conjureircli_internal "github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
 	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
+)
+
+var (
+	//go:embed internal/conjure.tgz
+	conjureCliFS embed.FS
 )
 
 func YAMLtoIR(in []byte) (rBytes []byte, rErr error) {
@@ -153,7 +158,7 @@ func RunWithParams(inPath, outPath string, params ...Param) error {
 var cliUnpackDir = path.Join(os.TempDir(), "_conjureircli")
 
 // cliArchiveDir is the top-level directory of the unpacked archive
-var cliArchiveDir = path.Join(cliUnpackDir, fmt.Sprintf("conjure-%v", conjureircli_internal.Version))
+var cliArchiveDir = path.Join(cliUnpackDir, fmt.Sprintf("conjure-%v", internal.Version))
 
 // cliCmdPath is the path to the conjure compiler executable
 func cliCmdPath() (string, error) {
@@ -178,11 +183,11 @@ func ensureCLIExists(cliPath string) error {
 	}
 
 	// expand asset into destination
-	tgzBytes, err := conjureircli_internal.Asset("conjure.tgz")
+	tgzFile, err := conjureCliFS.Open("internal/conjure.tgz")
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if err := archiver.TarGz.Read(bytes.NewReader(tgzBytes), cliUnpackDir); err != nil {
+	if err := archiver.TarGz.Read(tgzFile, cliUnpackDir); err != nil {
 		return errors.WithStack(err)
 	}
 

@@ -17,63 +17,42 @@
 package main
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"regexp"
 
-	"github.com/go-bindata/go-bindata"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
 )
 
-const conjureVersion = "4.14.1"
+const conjureTgzPath = "../internal/conjure.tgz"
+
+var conjureURL = fmt.Sprintf(
+	"https://search.maven.org/remotecontent?filepath=com/palantir/conjure/conjure/%s/conjure-%s.tgz",
+	internal.Version, internal.Version)
 
 func main() {
-	versionFilePath := "../internal/version.go"
-	newVersionFileContent := fmt.Sprintf(`// This is a generated file: do not edit by hand.
-// To update this file, run the generator in conjureircli/generator.
-package conjureircli_internal
-
-const Version = "%s"
-`, conjureVersion)
-
-	// version file exists and is in desired state: assume that all generated content is in desired state
-	if currVersionFileContent, err := ioutil.ReadFile(versionFilePath); err == nil && string(currVersionFileContent) == newVersionFileContent {
-		return
-	}
-
-	conjureTgzPath := "conjure.tgz"
-	defer func() {
-		_ = os.Remove(conjureTgzPath)
-	}()
-
-	if err := downloadFile(conjureTgzPath, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/conjure/%s/conjure-%s.tgz", conjureVersion, conjureVersion)); err != nil {
-		panic(err)
-	}
-
-	if err := bindata.Translate(&bindata.Config{
-		Input: []bindata.InputConfig{
-			{
-				Path: ".",
-			},
-		},
-		Ignore: []*regexp.Regexp{
-			regexp.MustCompile(`.*\.go`),
-		},
-		NoCompress: true,
-		Output:     "../internal/bindata.go",
-		Package:    "conjureircli_internal",
-	}); err != nil {
-		panic(err)
-	}
-
-	if err := ioutil.WriteFile(versionFilePath, []byte(newVersionFileContent), 0644); err != nil {
+	if err := downloadFile(conjureTgzPath, conjureURL); err != nil {
 		panic(err)
 	}
 }
 
 func downloadFile(filepath string, url string) error {
+	if _, err := os.Stat(filepath); err == nil {
+		hash := sha256.New()
+		existing, err := os.OpenFile(filepath, os.O_RDONLY, 0)
+		if err != nil {
+			return err
+		}
+		if _, err := io.Copy(hash, existing); err != nil {
+			return err
+		}
+		if sha := fmt.Sprintf("%x", hash.Sum(nil)); sha == internal.SHA256 {
+			// existing file up to date
+			return nil
+		}
+	}
 	out, err := os.Create(filepath)
 	if err != nil {
 		return err
@@ -90,8 +69,14 @@ func downloadFile(filepath string, url string) error {
 		_ = resp.Body.Close()
 	}()
 
-	if _, err := io.Copy(out, resp.Body); err != nil {
+	hash := sha256.New()
+	reader := io.TeeReader(resp.Body, hash)
+	if _, err := io.Copy(out, reader); err != nil {
 		return err
+	}
+
+	if sha := fmt.Sprintf("%x", hash.Sum(nil)); sha != internal.SHA256 {
+		return fmt.Errorf("unexpected download sha256 %s", sha)
 	}
 	return nil
 }
