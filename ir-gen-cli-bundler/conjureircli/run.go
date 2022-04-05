@@ -16,7 +16,7 @@ package conjureircli
 
 import (
 	"bytes"
-	_ "embed"
+	_ "embed" // required for go:embed directive
 	"fmt"
 	"io/ioutil"
 	"os"
