@@ -35,6 +35,8 @@ github.com/golang/gddo/httputil/header
 # github.com/golang/snappy v0.0.3
 ## explicit
 github.com/golang/snappy
+# github.com/google/go-cmp v0.5.1
+## explicit; go 1.8
 # github.com/inconshreveable/mousetrap v1.0.0
 ## explicit
 github.com/inconshreveable/mousetrap

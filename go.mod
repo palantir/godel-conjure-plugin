@@ -28,6 +28,7 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/gddo v0.0.0-20190419222130-af0f2af80721 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
+	github.com/google/go-cmp v0.5.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/klauspost/compress v1.9.2 // indirect
 	github.com/klauspost/pgzip v1.2.1 // indirect
