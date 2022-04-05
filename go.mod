@@ -6,7 +6,7 @@ require (
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/mholt/archiver v2.1.0+incompatible
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.15.0
+	github.com/palantir/conjure-go/v6 v6.17.0
 	github.com/palantir/distgo v1.37.0
 	github.com/palantir/godel/v2 v2.53.0
 	github.com/palantir/pkg/cobracli v1.1.0
@@ -54,7 +54,7 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/mod v0.5.0 // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
-	golang.org/x/tools v0.1.5 // indirect
+	golang.org/x/tools v0.1.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.22 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
