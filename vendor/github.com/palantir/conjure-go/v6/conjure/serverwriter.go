@@ -32,9 +32,10 @@ const (
 	handlerName = "handler"
 
 	// Router
-	routerVarName     = "router"
-	resourceName      = "resource"
-	pathParamsVarName = "pathParams"
+	routerVarName       = "router"
+	resourceName        = "resource"
+	pathParamsVarName   = "pathParams"
+	routerParamsVarName = "routerParams"
 
 	// Handler
 	handlerStructNameSuffix = "Handler"
@@ -63,7 +64,7 @@ func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement
 		Comment("impl provides an implementation of each endpoint, which can assume the request parameters have been parsed").Line().
 		Comment("in accordance with the Conjure specification.").Line().
 		Func().Id(funcName).
-		Params(jen.Id(routerVarName).Add(snip.WrouterRouter()), jen.Id(implName).Id(ifaceType)).
+		Params(jen.Id(routerVarName).Add(snip.WrouterRouter()), jen.Id(implName).Id(ifaceType), jen.Id(routerParamsVarName).Op("...").Add(snip.WrouterRouteParam())).
 		Params(jen.Error()).
 		BlockFunc(func(methodBody *jen.Group) {
 			// Create the handler struct
@@ -98,26 +99,37 @@ func astForWrouterRegisterArgsFunc(args *jen.Group, endpointDef *types.EndpointD
 		snip.CGRHTTPServerStatusCodeMapper(),
 		snip.CGRHTTPServerErrHandler(),
 	)
+	var routerParams []*jen.Statement
 	for _, argDef := range endpointDef.PathParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafePathParams()).Call(jen.Lit(argDef.ParamID))
+				routerParams = append(routerParams, snip.WrouterSafePathParams().Call(jen.Lit(argDef.ParamID)))
 			}
 		}
 	}
 	for _, argDef := range endpointDef.HeaderParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafeHeaderParams()).Call(jen.Lit(argDef.ParamID))
+				routerParams = append(routerParams, snip.WrouterSafeHeaderParams().Call(jen.Lit(argDef.ParamID)))
 			}
 		}
 	}
 	for _, argDef := range endpointDef.QueryParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafeQueryParams()).Call(jen.Lit(argDef.ParamID))
+				routerParams = append(routerParams, snip.WrouterSafeQueryParams().Call(jen.Lit(argDef.ParamID)))
 			}
 		}
+	}
+	if len(routerParams) == 0 {
+		args.Add(jen.Id(routerParamsVarName).Op("..."))
+	} else {
+		args.Add(jen.AppendFunc(func(params *jen.Group) {
+			params.Add(jen.Id(routerParamsVarName))
+			for _, p := range routerParams {
+				params.Add(p)
+			}
+		}).Op("..."))
 	}
 }
 
@@ -190,10 +202,10 @@ func astForHandlerMethodPathParams(methodBody *jen.Group, pathParams []*types.En
 }
 
 func astForHandlerMethodPathParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
-	strVar := transforms.SafeName(argDef.ParamID) + "Str"
+	strVar := transforms.ArgName(argDef.ParamID) + "Str"
 	switch argDef.Type.(type) {
 	case types.Any, types.String:
-		strVar = transforms.SafeName(argDef.ParamID)
+		strVar = transforms.ArgName(argDef.ParamID)
 	}
 	// For each path param, pull out the value and check if it is present in the map
 	// argNameStr, ok := pathParams["argName"]; if !ok { werror... }
@@ -208,7 +220,7 @@ func astForHandlerMethodPathParam(methodBody *jen.Group, argDef *types.EndpointA
 	switch argDef.Type.(type) {
 	case types.Any, types.String:
 	default:
-		astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), jen.Id(strVar))
+		astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), jen.Id(strVar))
 	}
 }
 
@@ -220,13 +232,12 @@ func astForHandlerMethodHeaderParams(methodBody *jen.Group, headerParams []*type
 
 func astForHandlerMethodHeaderParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	var queryVar jen.Code
-	switch argDef.Type.(type) {
-	case *types.List:
+	if argDef.Type.IsCollection() {
 		queryVar = jen.Id(reqName).Dot("Header").Dot("Values").Call(jen.Lit(argDef.ParamID))
-	default:
+	} else {
 		queryVar = jen.Id(reqName).Dot("Header").Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
-	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), queryVar)
 }
 
 func astForHandlerMethodQueryParams(methodBody *jen.Group, queryParams []*types.EndpointArgumentDefinition) {
@@ -237,13 +248,12 @@ func astForHandlerMethodQueryParams(methodBody *jen.Group, queryParams []*types.
 
 func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	var queryVar jen.Code
-	switch argDef.Type.(type) {
-	case *types.List:
+	if argDef.Type.IsCollection() {
 		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Index(jen.Lit(argDef.ParamID))
-	default:
+	} else {
 		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
-	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), queryVar)
 }
 
 func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
@@ -251,7 +261,7 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 		return
 	}
 
-	varName := transforms.SafeName(argDef.Name)
+	varName := transforms.ArgName(argDef.Name)
 
 	emptyBodyCondition := jen.Id(reqName).Dot("Body").Op("!=").Nil().Op("&&").
 		Id(reqName).Dot("Body").Op("!=").Add(snip.HTTPNoBody())
@@ -354,21 +364,28 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 				g.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
 			})
 		}
+	case *types.Set:
+		if _, isString := typVal.Item.(types.String); isString {
+			expr = inStrExpr
+		} else {
+			methodBody.Var().Id(outVarName).Add(typVal.Code())
+			methodBody.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Add(inStrExpr)).BlockFunc(func(g *jen.Group) {
+				astForDecodeHTTPParamInternal(g, argName, typVal.Item, "convertedVal", jen.Id("v"), depth+1)
+				g.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
+			})
+		}
 	case *types.AliasType:
-		methodBody.Var().Id(outVarName).Add(typVal.Code())
-		methodBody.If(
-			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(
-				jen.Id("[]byte").Call(snip.StrconvQuote().Call(inStrExpr)),
-				jen.Op("&").Id(outVarName),
-			),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(snip.WerrorWrapContext().Call(
-				jen.Id(reqName).Dot("Context").Call(),
-				snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
-				jen.Lit(fmt.Sprintf("failed to unmarshal %q param", argName)),
-			)),
-		)
+		if typVal.IsOptional() {
+			valVar := varNameDepth(outVarName+"Value", depth)
+			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, inStrExpr, depth+1)
+			expr = typVal.Code().Values(jen.Id("Value").Op(":").Id(valVar))
+		} else if typVal.IsString() {
+			expr = typVal.Code().Call(inStrExpr)
+		} else {
+			valVar := varNameDepth(outVarName+"Value", depth)
+			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, inStrExpr, depth+1)
+			expr = typVal.Code().Call(jen.Id(valVar))
+		}
 	case *types.EnumType:
 		methodBody.Var().Id(outVarName).Add(typVal.Code())
 		methodBody.If(
@@ -414,7 +431,7 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 			g.Id(cookieTokenVar)
 		}
 		for _, paramDef := range endpointDef.Params {
-			g.Id(transforms.SafeName(paramDef.Name))
+			g.Id(transforms.ArgName(paramDef.Name))
 		}
 	})
 
