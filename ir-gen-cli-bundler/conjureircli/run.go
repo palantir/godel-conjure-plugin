@@ -15,7 +15,8 @@
 package conjureircli
 
 import (
-	"embed"
+	"bytes"
+	_ "embed"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -31,7 +32,7 @@ import (
 
 var (
 	//go:embed internal/conjure.tgz
-	conjureCliFS embed.FS
+	conjureCliTGZ []byte
 )
 
 func YAMLtoIR(in []byte) (rBytes []byte, rErr error) {
@@ -183,11 +184,7 @@ func ensureCLIExists(cliPath string) error {
 	}
 
 	// expand asset into destination
-	tgzFile, err := conjureCliFS.Open("internal/conjure.tgz")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if err := archiver.TarGz.Read(tgzFile, cliUnpackDir); err != nil {
+	if err := archiver.TarGz.Read(bytes.NewReader(conjureCliTGZ), cliUnpackDir); err != nil {
 		return errors.WithStack(err)
 	}
 
