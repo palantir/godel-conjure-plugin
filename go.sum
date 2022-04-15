@@ -260,8 +260,8 @@ github.com/palantir/conjure-go/v6 v6.17.0 h1:DqM3/LOdfByLfX/4OcIxa6yLQiGq2NpTw4Y
 github.com/palantir/conjure-go/v6 v6.17.0/go.mod h1:m6yfZXAwvCX+Gtpl7YAf78cEgvDvZO7zZHAfFJZCLx0=
 github.com/palantir/distgo v1.2.0/go.mod h1:jOCcoLD92T/eN4VfRxczaDIWsqyy1f0yQZMFOt3cJCw=
 github.com/palantir/distgo v1.20.0/go.mod h1:Jfsd7o7+kzCY8a3xpbPabr5IMjW6zSNOKLTNa8TJH4g=
-github.com/palantir/distgo v1.37.0 h1:jZGxPY+sawj6T5SVU09lNvoM9t4vQxb27/RZYY+TiKc=
-github.com/palantir/distgo v1.37.0/go.mod h1:rw2KGddN5Z/jbKeIdl86bo3WREdeHb3B/ZlSBHx5soI=
+github.com/palantir/distgo v1.38.0 h1:KoxuzrWPUSF1P0eDzMzI80sJXC4BJiMC2zXgGXwm4do=
+github.com/palantir/distgo v1.38.0/go.mod h1:rw2KGddN5Z/jbKeIdl86bo3WREdeHb3B/ZlSBHx5soI=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
 github.com/palantir/distgo/pkg/git v1.0.0/go.mod h1:eXrr3SOmf/sWTYmtiubYVxSaVegTlMGgRgBUFMFFedw=
 github.com/palantir/go-encrypted-config-value v1.1.0/go.mod h1:6c5zDN0XqZLxJiV3yLZmoEkUpaB4W3xJdKY6UPn24qI=
@@ -276,8 +276,8 @@ github.com/palantir/godel-conjure-plugin/v4 v4.4.0/go.mod h1:ffjwJ5TDgxbw1WXyiK3
 github.com/palantir/godel-conjure-plugin/v5 v5.1.0/go.mod h1:zWHH7de5ZBPguLEXgwUxe7Z20UsRUWrZm6wMKnT5iaE=
 github.com/palantir/godel/pkg/products/v2 v2.0.0/go.mod h1:SaLUycZLVP5qV6mL9MWG3jkX4dS23lJnzpubTGAV4FU=
 github.com/palantir/godel/v2 v2.22.0/go.mod h1:Da/HS4lwo4j/v/PpmpJxgfamjg4Jwp6qPSnPzAr0Ppk=
-github.com/palantir/godel/v2 v2.53.0 h1:rRn8qGdz7yxZkhI+iik8p1isEqa8kRxLqDNkg4qP+B0=
-github.com/palantir/godel/v2 v2.53.0/go.mod h1:fh4zvXdGGq20Vru5HmXbtOLoXnaLRw1v+JOOGEa0ygE=
+github.com/palantir/godel/v2 v2.54.0 h1:I544PM9hUqEpnNFgJIaMF9dWUdU7isYi9YktIRMc8xE=
+github.com/palantir/godel/v2 v2.54.0/go.mod h1:fh4zvXdGGq20Vru5HmXbtOLoXnaLRw1v+JOOGEa0ygE=
 github.com/palantir/pkg v0.0.0-20180424172112-23395ebeee5d/go.mod h1:jLbXCfQ4HRrT5RRj5JuKc1ucQeridBMyRCpmzRtUYMY=
 github.com/palantir/pkg v0.0.0-20181230161202-d12f4064ff8e/go.mod h1:jLbXCfQ4HRrT5RRj5JuKc1ucQeridBMyRCpmzRtUYMY=
 github.com/palantir/pkg v1.0.1 h1:ZbGUcc14N7xcZSY9cehQoiHHTm/BAZO5RJdlsNEtSbk=
