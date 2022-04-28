@@ -201,6 +201,7 @@ projects:
      type: remote
      locator: localhost:8080/ir.json
    server: true
+   cli: true
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -211,6 +212,7 @@ projects:
 							Locator: "localhost:8080/ir.json",
 						},
 						Server: true,
+						CLI:    true,
 					},
 				},
 			},

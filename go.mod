@@ -59,3 +59,5 @@ require (
 	gopkg.in/cheggaaa/pb.v1 v1.0.22 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
+
+replace github.com/palantir/conjure-go/v6 => github.com/asanderson15/conjure-go/v6 v6.0.0-20220428185138-94f027b2e170

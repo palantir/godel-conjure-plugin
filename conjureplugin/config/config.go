@@ -61,6 +61,7 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 			IRProvider:  irProvider,
 			AcceptFuncs: acceptFuncsFlag,
 			Server:      currConfig.Server,
+			CLI:         currConfig.CLI,
 			Publish:     publishVal,
 		}
 	}

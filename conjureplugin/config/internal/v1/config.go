@@ -34,6 +34,8 @@ type SingleConjureConfig struct {
 	Publish *bool `yaml:"publish"`
 	// Server indicates if we will generate server code. Currently this is behind a feature flag and is subject to change.
 	Server bool `yaml:"server,omitempty"`
+	// CLI indicates if we will generate cobra CLI bindings. Currently this is behind a feature flag and is subject to change.
+	CLI bool `yaml:"cli,omitempty"`
 	// AcceptFuncs indicates if we will generate lambda based visitor code.
 	// Currently this is behind a feature flag and is subject to change.
 	AcceptFuncs *bool `yaml:"accept-funcs,omitempty"`
