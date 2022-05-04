@@ -7,7 +7,7 @@ require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v6 v6.17.0
 	github.com/palantir/distgo v1.38.0
-	github.com/palantir/godel/v2 v2.54.0
+	github.com/palantir/godel/v2 v2.55.0
 	github.com/palantir/pkg/cobracli v1.1.0
 	github.com/palantir/pkg/safehttp v1.0.1
 	github.com/palantir/pkg/safejson v1.0.1
