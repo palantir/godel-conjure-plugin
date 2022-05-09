@@ -32,6 +32,7 @@ const (
 
 	bearerTokenFlagName = "bearer_token"
 	confFlagName        = "conf"
+	verboseFlagName     = "verbose"
 )
 
 var (
@@ -40,6 +41,7 @@ var (
 	cliReservedArgNames = []string{
 		confFlagName,
 		bearerTokenFlagName,
+		verboseFlagName,
 	}
 )
 
@@ -91,7 +93,7 @@ func astForLoadCLIConfigBody(file *jen.Group) {
 
 	// Read config bytes from disk
 	file.List(jen.Id("confBytes"), jen.Err()).Op(":=").
-		Add(snip.IOUtilReadFile()).Call(jen.Id(configPathVar))
+		Add(snip.OSReadFile()).Call(jen.Id(configPathVar))
 	file.Add(returnErrBlock())
 
 	// Unmarshal client config and return
@@ -104,7 +106,7 @@ func astForLoadCLIConfigBody(file *jen.Group) {
 // astForGetCLIContext implements getCLIContext, which returns a context with initialized loggers
 func astForGetCLIContext(file *jen.Group) {
 	file.Add(jen.Func().Id(getCLIContextFuncName).
-		Params().
+		Params(jen.Id("flags").Op("*").Add(snip.PflagsFlagset())).
 		Params(snip.Context()).
 		BlockFunc(func(g *jen.Group) {
 			astForGetCLIContextBody(g)
@@ -113,16 +115,22 @@ func astForGetCLIContext(file *jen.Group) {
 
 // astForGetCLIContextBody implements the getCLIContext function
 func astForGetCLIContextBody(file *jen.Group) {
-	stdout := jen.Qual("os", "Stdout").Clone
 	file.Id("ctx").Op(":=").Add(snip.ContextBackground()).Call()
-	file.Add(snip.WGLLogSetDefaultLoggerProvider()).Call(snip.WGLWlogZapLoggerProvider().Call())
+	file.Id("logProvider").Op(":=").Add(snip.WGLLogNoopLoggerProvider()).Call()
+	file.Id("logWriter").Op(":=").Add(snip.IODiscard())
+	file.List(jen.Id("verbose"), jen.Err()).Op(":=").Id("flags").Dot("GetBool").Call(jen.Lit(verboseFlagName))
+	file.If(jen.Id("verbose").Op("&&").Err().Op("==").Nil()).BlockFunc(func(g *jen.Group) {
+		g.Id("logProvider").Op("=").Add(snip.WGLWlogZapLoggerProvider().Call())
+		g.Id("logWriter").Op("=").Add(snip.OSStdout())
+	})
+	file.Add(snip.WGLLogSetDefaultLoggerProvider()).Call(jen.Id("logProvider"))
 	file.Id("ctx").Op("=").Add(snip.WGLSvc1logWithLogger()).Call(
-		jen.Id("ctx"), snip.WGLSvc1logNew().Call(stdout(), snip.WGLLogDebugLevel()))
-	file.Id("traceLogger").Op(":=").Add(snip.WGLTrc1logDefaultLogger()).Call()
+		jen.Id("ctx"), snip.WGLSvc1logNew().Call(jen.Id("logWriter"), snip.WGLLogDebugLevel()))
+	file.Id("traceLogger").Op(":=").Add(snip.WGLTrc1logNewLogger()).Call(jen.Id("logWriter"))
 	file.Id("ctx").Op("=").Add(snip.WGLTrc1logWithLogger()).Call(
 		jen.Id("ctx"), jen.Id("traceLogger"))
 	file.Id("ctx").Op("=").Add(snip.WGLEvt2logWithLogger()).Call(
-		jen.Id("ctx"), snip.WGLEvt2logNew().Call(stdout()))
+		jen.Id("ctx"), snip.WGLEvt2logNew().Call(jen.Id("logWriter")))
 	file.List(jen.Id("tracer"), jen.Id("err")).Op(":=").Add(snip.WGTZipkinNewTracer()).Call(jen.Id("traceLogger"))
 	file.If(jen.Id("err").Op("!=").Nil()).Block(
 		jen.Return(jen.Id("ctx")))
@@ -201,11 +209,10 @@ func astForRootServiceCommand(file *jen.Group, service *types.ServiceDefinition)
 
 	// Define root service command type
 	file.Type().Id(getRootServiceCommandName(serviceName)).Struct(
-		jen.Id("clientProvider").Id(getCLIServiceClientProviderName(serviceName)),
-		jen.Id("rootCmd").Op("*").Add(snip.CobraCommand())).Line()
+		jen.Id("clientProvider").Id(getCLIServiceClientProviderName(serviceName))).Line()
 
 	// Generate default constructor
-	file.Func().Id(getNewRootServiceCommandName(serviceName)).Params().Params(jen.Id(getRootServiceCommandName(serviceName))).
+	file.Func().Id(getNewRootServiceCommandName(serviceName)).Params().Params(jen.Op("*").Add(snip.CobraCommand())).
 		Block(
 			jen.Return(
 				jen.Id(getNewRootServiceCommandWithClientProviderName(serviceName)).
@@ -214,26 +221,16 @@ func astForRootServiceCommand(file *jen.Group, service *types.ServiceDefinition)
 	// Generate constructor that accepts a client provider argument, enabling injection of a client for testing
 	file.Func().Id(getNewRootServiceCommandWithClientProviderName(serviceName)).
 		Params(jen.Id("clientProvider").Id(getCLIServiceClientProviderName(serviceName))).
-		Params(jen.Id(getRootServiceCommandName(serviceName))).
+		Params(jen.Op("*").Add(snip.CobraCommand())).
 		BlockFunc(func(f *jen.Group) {
 			astForRootServiceCommandConstructorBody(f, service)
-		}).Line()
-
-	// Generate register commands method on service command
-	file.Func().
-		Params(jen.Id("c").Id(getRootServiceCommandName(serviceName))).
-		Id("Command").
-		Params().
-		Params(jen.Op("*").Add(snip.CobraCommand())).
-		BlockFunc(func(g *jen.Group) {
-			g.Return(jen.Id("c").Dot("rootCmd"))
 		}).Line()
 }
 
 func astForRootServiceCommandConstructorBody(file *jen.Group, service *types.ServiceDefinition) {
 	serviceName := service.Name
 
-	// Initialize root cobra command for service, as well as persistent conf flag
+	// Initialize root cobra command for service, as well as persistent flags
 	file.Id("rootCmd").Op(":=").Op("&").Add(snip.CobraCommand()).Values(jen.Dict{
 		jen.Id("Use"):   jen.Lit(transforms.Private(serviceName)),
 		jen.Id("Short"): jen.Lit(fmt.Sprintf("Runs commands on the %s", serviceName)),
@@ -241,12 +238,15 @@ func astForRootServiceCommandConstructorBody(file *jen.Group, service *types.Ser
 	file.Id("rootCmd").
 		Dot("PersistentFlags").Call().
 		Dot("String").Call(
-		jen.Lit(confFlagName), jen.Lit(defaultConfigFilePath), jen.Lit("The configuration file is optional. The default path is ./var/conf/configuration.yml.")).Line()
+		jen.Lit(confFlagName), jen.Lit(defaultConfigFilePath), jen.Lit("The configuration file is optional. The default path is ./var/conf/configuration.yml."))
+	file.Id("rootCmd").
+		Dot("PersistentFlags").Call().
+		Dot("BoolP").Call(
+		jen.Lit(verboseFlagName), jen.Lit("v"), jen.False(), jen.Lit("Enables verbose mode for debugging client connections.")).Line()
 
 	// Initialize service command
 	file.Id("cliCommand").Op(":=").Id(getRootServiceCommandName(serviceName)).Values(jen.Dict{
 		jen.Id("clientProvider"): jen.Id("clientProvider"),
-		jen.Id("rootCmd"):        jen.Id("rootCmd"),
 	}).Line()
 
 	// Initialize and configure endpoint commands
@@ -258,7 +258,7 @@ func astForRootServiceCommandConstructorBody(file *jen.Group, service *types.Ser
 		astForEndpointFlags(file, service, endpoint)
 	}
 
-	file.Return(jen.Id("cliCommand"))
+	file.Return(jen.Id("rootCmd"))
 }
 
 // astForEndpointFlags registers each endpoint subcommand and associated flags
@@ -266,11 +266,15 @@ func astForEndpointFlags(file *jen.Group, service *types.ServiceDefinition, endp
 	// Initialize endpoint command
 	endpointCmd := getEndpointCommandName(service.Name, endpoint.EndpointName)
 	endpointCmdRun := jen.Id("cliCommand").Dot(getEndpointCommandRunName(service.Name, endpoint.EndpointName))
+	endpointDocs := fmt.Sprintf("Calls the %s endpoint.", endpoint.EndpointName)
+	if len(endpoint.Docs) > 0 {
+		endpointDocs = string(endpoint.Docs)
+	}
 	file.Id(endpointCmd).
 		Op(":=").
 		Op("&").Add(snip.CobraCommand()).Values(jen.Dict{
 		jen.Id("Use"):   jen.Lit(transforms.Private(endpoint.EndpointName)),
-		jen.Id("Short"): jen.Lit(fmt.Sprintf("Calls the %s endpoint", endpoint.EndpointName)),
+		jen.Id("Short"): jen.Lit(endpointDocs),
 		jen.Id("RunE"):  endpointCmdRun,
 	})
 
@@ -281,19 +285,19 @@ func astForEndpointFlags(file *jen.Group, service *types.ServiceDefinition, endp
 
 	// Register a flag for each endpoint param
 	for _, param := range endpoint.Params {
-		optionality := "a required param"
+		optionality := "Required"
 		if param.Type.IsOptional() {
-			optionality = "an optional param"
+			optionality = "Optional"
 		}
 		argDocs := ""
 		if len(param.Docs) > 0 {
-			argDocs = fmt.Sprintf(" Argument docs: %s", param.Docs)
+			argDocs = string(param.Docs)
 		}
 		file.Id(endpointCmd).Dot("Flags").Call().
 			Dot("String").Call(
 			jen.Lit(getFlagName(param.Name)),
 			jen.Lit(""),
-			jen.Lit(fmt.Sprintf("%s is %s.%s", param.Name, optionality, argDocs)))
+			jen.Lit(fmt.Sprintf("%s. %s", optionality, argDocs)))
 	}
 
 	// Register an additional bearer token flag if auth is enabled for the endpoint
@@ -325,11 +329,11 @@ func astForEndpointCommand(file *jen.Group, service *types.ServiceDefinition, en
 // astForEndpointCommandBody generates the command function, which initializes a client before calling the internal
 // command function
 func astForEndpointCommandBody(file *jen.Group, service *types.ServiceDefinition, endpoint *types.EndpointDefinition) {
-	// Get CLI with logging
-	file.Id("ctx").Op(":=").Id(getCLIContextFuncName).Call()
-
 	// Get flags from command
 	file.Id("flags").Op(":=").Id("cmd").Dot("Flags").Call()
+
+	// Get CLI with logging
+	file.Id("ctx").Op(":=").Id(getCLIContextFuncName).Call(jen.Id("flags"))
 
 	// Get client for service
 	file.List(jen.Id("client"), jen.Err()).
@@ -382,13 +386,6 @@ func astForEndpointCommandBody(file *jen.Group, service *types.ServiceDefinition
 // astForEndpointParam handles getting a param value from a flag and parsing it into the type expected by the client
 func astForEndpointParam(file *jen.Group, flagName string, param *types.EndpointArgumentDefinition) {
 	argName := getArgName(param)
-
-	// TODO: Add support for reading file from path as binary input.
-	// Note that this code path should not be hit because we skip generating code for endpoints with binary params
-	if param.Type.IsBinary() {
-		file.Id("panic").Call(jen.Lit("Commands with binary arguments are not yet supported."))
-		return
-	}
 
 	// Get the param value from the flag
 	flagVarNameRaw := flagName + "Raw"
@@ -444,7 +441,7 @@ func astForEndpointCollectionParamDecode(file *jen.Group, argName string, flagVa
 	file.Id(argBytesName).Op(":=").Index().Byte().Parens(flagVar)
 	file.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
-			jen.Add(snip.ByteReader).Call(jen.Id(argBytesName)),
+			snip.ByteReader().Call(jen.Id(argBytesName)),
 			jen.Op("&").Id(argName),
 		),
 		jen.Err().Op("!=").Nil(),
@@ -465,7 +462,7 @@ func astForPrintResult(file *jen.Group, endpoint *types.EndpointDefinition) {
 			file.Id("resultDeref").Op(":=").Op("*").Id("result")
 			resultVar = jen.Id("resultDeref").Clone
 		}
-		file.List(jen.Id("_"), jen.Err()).Op("=").Add(snip.IOCopy).Call(jen.Id("cmd").Dot("OutOrStdout").Call(), resultVar())
+		file.List(jen.Id("_"), jen.Err()).Op("=").Add(snip.IOCopy()).Call(jen.Id("cmd").Dot("OutOrStdout").Call(), resultVar())
 		file.If(jen.Err().Op("!=").Nil().Block(
 			jen.Return(jen.Add(snip.WerrorWrapContext().Call(jen.Id("ctx"), jen.Err(), jen.Lit("failed to write result bytes to stdout"))))),
 		)

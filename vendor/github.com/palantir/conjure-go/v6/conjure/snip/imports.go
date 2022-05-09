@@ -59,7 +59,7 @@ var DefaultImportsToPackageNames = map[string]string{
 // Each entry is a func() *jen.Statement, typically the Clone method.
 // This ensures there are no side effects caused by mutating the global variables.
 var (
-	ByteReader          = jen.Qual("bytes", "NewReader")
+	ByteReader          = jen.Qual("bytes", "NewReader").Clone
 	Context             = jen.Qual("context", "Context").Clone
 	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextBackground   = jen.Qual("context", "Background").Clone
@@ -73,9 +73,8 @@ var (
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
-	IOCopy              = jen.Qual("io", "Copy").Clone()
-	IOUtilReadAll       = jen.Qual("io/ioutil", "ReadAll").Clone
-	IOUtilReadFile      = jen.Qual("io/ioutil", "ReadFile").Clone
+	IOCopy              = jen.Qual("io", "Copy").Clone
+	IODiscard           = jen.Qual("io", "Discard").Clone
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
 	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
@@ -89,6 +88,7 @@ var (
 	URLPathEscape       = jen.Qual("net/url", "PathEscape").Clone
 	URLValues           = jen.Qual("net/url", "Values").Clone
 	OSStdout            = jen.Qual("os", "Stdout").Clone
+	OSReadFile          = jen.Qual("os", "ReadFile").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
 	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone
@@ -179,12 +179,13 @@ var (
 	WerrorWrapContext     = jen.Qual(pal+"witchcraft-go-error", "WrapWithContextParams").Clone
 
 	WGLLogSetDefaultLoggerProvider = jen.Qual(wgl+"wlog", "SetDefaultLoggerProvider").Clone
+	WGLLogNoopLoggerProvider       = jen.Qual(wgl+"wlog", "NewNoopLoggerProvider").Clone
 	WGLLogDebugLevel               = jen.Qual(wgl+"wlog", "DebugLevel").Clone
 	WGLWlogZapLoggerProvider       = jen.Qual(wgl+"wlog-zap", "LoggerProvider").Clone
 	WGLSvc1logWithLogger           = jen.Qual(wgl+"wlog/svclog/svc1log", "WithLogger").Clone
 	WGLSvc1logNew                  = jen.Qual(wgl+"wlog/svclog/svc1log", "New").Clone
 	WGLTrc1logWithLogger           = jen.Qual(wgl+"wlog/trclog/trc1log", "WithLogger").Clone
-	WGLTrc1logDefaultLogger        = jen.Qual(wgl+"wlog/trclog/trc1log", "DefaultLogger").Clone
+	WGLTrc1logNewLogger            = jen.Qual(wgl+"wlog/trclog/trc1log", "New").Clone
 	WGLEvt2logWithLogger           = jen.Qual(wgl+"wlog/evtlog/evt2log", "WithLogger").Clone
 	WGLEvt2logNew                  = jen.Qual(wgl+"wlog/evtlog/evt2log", "New").Clone
 	WGTContextWithTracer           = jen.Qual(pal+"witchcraft-go-tracing/wtracing", "ContextWithTracer").Clone
@@ -210,6 +211,7 @@ var (
 	GJSONValid      = jen.Qual("github.com/tidwall/gjson", "Valid").Clone
 	GJSONValidBytes = jen.Qual("github.com/tidwall/gjson", "ValidBytes").Clone
 
+	TAny          = jen.Op("[").Id("T").Id("any").Op("]").Clone
 	YamlUnmarshal = jen.Qual("gopkg.in/yaml.v3", "Unmarshal").Clone
 
 	CobraCommand = jen.Qual("github.com/spf13/cobra", "Command").Clone

@@ -24,8 +24,6 @@ github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hC
 github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6/go.mod h1:grANhF5doyWs3UAsr3K4I6qtAmlQcZDesFNEHPZAzj8=
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
-github.com/asanderson15/conjure-go/v6 v6.0.0-20220428185138-94f027b2e170 h1:7b4AKBXgk6vRtbeYT4RJCYbKFbc2FtH4dcEYM9HFygE=
-github.com/asanderson15/conjure-go/v6 v6.0.0-20220428185138-94f027b2e170/go.mod h1:6U/Kkxk5QV3qf5nF7dGUdWKRM/HcuOBBT3NyCenfqhQ=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
@@ -182,6 +180,8 @@ github.com/nmiyake/pkg/gofiles v1.2.0 h1:L0LWMfnHyMxiLP2Cuqno163/4zK73FscEsNd7sH
 github.com/nwaples/rardecode v1.0.0 h1:r7vGuS5akxOnR4JQSkko62RJ1ReCMXxQRPtxsiFMBOs=
 github.com/nwaples/rardecode v1.0.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
+github.com/palantir/conjure-go/v6 v6.19.0 h1:IMlBvrXSAE7Azd8+L2RhzaxQlbJDBowL2M9sbmjV4/c=
+github.com/palantir/conjure-go/v6 v6.19.0/go.mod h1:1uioHwsbNOf/L8zMdAo/XE3tPub7aafqcAOVwXZeRCw=
 github.com/palantir/distgo v1.38.0 h1:KoxuzrWPUSF1P0eDzMzI80sJXC4BJiMC2zXgGXwm4do=
 github.com/palantir/distgo v1.38.0/go.mod h1:rw2KGddN5Z/jbKeIdl86bo3WREdeHb3B/ZlSBHx5soI=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
