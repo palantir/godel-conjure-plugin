@@ -46,6 +46,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		outputConf := conjure.OutputConfiguration{
 			OutputDir:            path.Join(projectDir, outputDir),
 			GenerateServer:       currParam.Server,
+			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
 		}
 		if verify {
