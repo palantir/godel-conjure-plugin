@@ -7,7 +7,7 @@ require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v6 v6.22.0
 	github.com/palantir/distgo v1.39.0
-	github.com/palantir/godel/v2 v2.57.0
+	github.com/palantir/godel/v2 v2.58.0
 	github.com/palantir/pkg/cobracli v1.1.0
 	github.com/palantir/pkg/safehttp v1.0.1
 	github.com/palantir/pkg/safejson v1.0.1
@@ -57,5 +57,5 @@ require (
 	golang.org/x/tools v0.1.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.22 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
