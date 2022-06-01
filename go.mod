@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/mholt/archiver v2.1.0+incompatible
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.22.0
+	github.com/palantir/conjure-go/v6 v6.23.0
 	github.com/palantir/distgo v1.39.0
 	github.com/palantir/godel/v2 v2.58.0
 	github.com/palantir/pkg/cobracli v1.1.0
