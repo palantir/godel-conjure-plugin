@@ -182,14 +182,14 @@ github.com/nwaples/rardecode v1.0.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWk
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/palantir/conjure-go/v6 v6.28.0 h1:3Fh/Lv3h3ddsKJfiKTBOGrJo5Sk9ZKLtKLVsuZ9CtwY=
 github.com/palantir/conjure-go/v6 v6.28.0/go.mod h1:AXnxTAHB9d/9U/XwWILEYFaBR4PcD/U1KbK6jMQM5yc=
-github.com/palantir/distgo v1.42.0 h1:XVCLoamme5pgWnqBlgBWOv2n6XN7yIkbOvDdgHlc5Ho=
-github.com/palantir/distgo v1.42.0/go.mod h1:rw2KGddN5Z/jbKeIdl86bo3WREdeHb3B/ZlSBHx5soI=
+github.com/palantir/distgo v1.44.0 h1:/209Y20c0/jL2TTaXoLK+dZO7txA/KpJXAAiO5ifUXc=
+github.com/palantir/distgo v1.44.0/go.mod h1:2/oWsgHMrLCh8ZZLuLjA4ipzRCTrSBtHbbyXLI9Q+lU=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
 github.com/palantir/distgo/pkg/git v1.0.0/go.mod h1:eXrr3SOmf/sWTYmtiubYVxSaVegTlMGgRgBUFMFFedw=
 github.com/palantir/go-ptimports/v2 v2.10.0 h1:foAjyLulrcRc89Vto7EwniJJDiQT8oiG8CsLAH9h8HE=
 github.com/palantir/go-ptimports/v2 v2.10.0/go.mod h1:BhZDs/eL/RvgShGCPEG+vKxZJug+geeGEppwLjedxNI=
-github.com/palantir/godel/v2 v2.62.0 h1:dO8tpNxro/d/GA7tqGXamw9qMjAJXYPzXZkog3RFkjQ=
-github.com/palantir/godel/v2 v2.62.0/go.mod h1:8DQdP275z1qgrJL8rO3G25Ph/NIkPgyHWprcbneQ8PQ=
+github.com/palantir/godel/v2 v2.65.0 h1:0zjS+VtBZeafsEVDykJaQgVncnVjH1zmXd2xym10qtQ=
+github.com/palantir/godel/v2 v2.65.0/go.mod h1:8DQdP275z1qgrJL8rO3G25Ph/NIkPgyHWprcbneQ8PQ=
 github.com/palantir/pkg v1.0.1 h1:ZbGUcc14N7xcZSY9cehQoiHHTm/BAZO5RJdlsNEtSbk=
 github.com/palantir/pkg v1.0.1/go.mod h1:Eo6Jl0UXfT+65sLXJOcU9duu0WPvKsWFXCb0dE5VWZs=
 github.com/palantir/pkg/cobracli v1.0.1/go.mod h1:UfYLriXzhyx7a3r+3UTD+kbX+xASjr9kSK05fC85NyI=
@@ -276,6 +276,8 @@ github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljT
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/ulikunitz/xz v0.5.10 h1:t92gobL9l3HE202wg3rlk19F6X+JOxl9BBrCCMYEYd8=
 github.com/ulikunitz/xz v0.5.10/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
+github.com/whilp/git-urls v1.0.0 h1:95f6UMWN5FKW71ECsXRUd3FVYiXdrE7aX4NZKcPmIjU=
+github.com/whilp/git-urls v1.0.0/go.mod h1:J16SAmobsqc3Qcy98brfl5f5+e0clUvg1krgwk/qCfE=
 github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 h1:nIPpBwaJSVYIxUFsDv3M8ofmx9yWTog9BfvIu0q41lo=
 github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8/go.mod h1:HUYIGzjTL3rfEspMxjDjgmT5uz5wzYJKVo23qUhYTos=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
