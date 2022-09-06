@@ -210,8 +210,9 @@ github.com/palantir/pkg/safeyaml v1.0.1 h1:4cSUj9Ttnwydq4vxB8NSxe+qhquBYYtMuJbw6
 github.com/palantir/pkg/safeyaml v1.0.1/go.mod h1:rwADKpvXsYupKvXJg4pOuPrwK8F4Ki95VIq6lHjUqyA=
 github.com/palantir/pkg/specdir v1.0.1 h1:h3FxhAYZHUAuvZXF5O40pyhjKjm4JlcHYRogIVNw3Ew=
 github.com/palantir/pkg/specdir v1.0.1/go.mod h1:RJN42E0F1s4wHrNuXoT0cG4erUigMs0pjpBpmpijb0c=
-github.com/palantir/pkg/transform v1.0.0 h1:21MzkUg9fQgIdadTYMM1Z1qrml2MVdpNY5ai27G15LM=
 github.com/palantir/pkg/transform v1.0.0/go.mod h1:YH2PQUzswoDayk4rTvKt6B+NcnUJgZRNr9MEqfAMCo0=
+github.com/palantir/pkg/transform v1.0.1 h1:+b0wtPsC/tcFOSoAzxsurXnbUnZIb4TDj/tfMLIMX3w=
+github.com/palantir/pkg/transform v1.0.1/go.mod h1:Kn0ST9vBxM16s08/1uYPSWgAOussLidNmukkvqcIocE=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pierrec/lz4 v2.0.5+incompatible h1:2xWsjqPFWcplujydGg4WmhC/6fZqK42wMM8aXeqhl0I=
