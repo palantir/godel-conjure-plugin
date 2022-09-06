@@ -146,7 +146,7 @@ github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/specdir v1.0.1
 ## explicit; go 1.13
 github.com/palantir/pkg/specdir
-# github.com/palantir/pkg/transform v1.0.0
+# github.com/palantir/pkg/transform v1.0.1
 ## explicit; go 1.13
 github.com/palantir/pkg/transform
 # github.com/pierrec/lz4 v2.0.5+incompatible
