@@ -8,9 +8,9 @@ require (
 	github.com/palantir/conjure-go/v6 v6.30.0
 	github.com/palantir/distgo v1.45.0
 	github.com/palantir/godel/v2 v2.67.0
-	github.com/palantir/pkg/cobracli v1.1.0
-	github.com/palantir/pkg/safehttp v1.0.1
-	github.com/palantir/pkg/safejson v1.0.1
+	github.com/palantir/pkg/cobracli v1.2.0
+	github.com/palantir/pkg/safehttp v1.1.0
+	github.com/palantir/pkg/safejson v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0
@@ -39,12 +39,12 @@ require (
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/palantir/distgo/pkg/git v1.0.0 // indirect
 	github.com/palantir/go-ptimports/v2 v2.10.0 // indirect
-	github.com/palantir/pkg v1.0.1 // indirect
-	github.com/palantir/pkg/matcher v1.1.0 // indirect
-	github.com/palantir/pkg/pkgpath v1.1.0 // indirect
-	github.com/palantir/pkg/safeyaml v1.0.1 // indirect
-	github.com/palantir/pkg/specdir v1.1.0 // indirect
-	github.com/palantir/pkg/transform v1.0.1 // indirect
+	github.com/palantir/pkg v1.1.0 // indirect
+	github.com/palantir/pkg/matcher v1.2.0 // indirect
+	github.com/palantir/pkg/pkgpath v1.2.0 // indirect
+	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
+	github.com/palantir/pkg/specdir v1.2.0 // indirect
+	github.com/palantir/pkg/transform v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.7.0 // indirect
