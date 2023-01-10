@@ -1,6 +1,6 @@
 package internal
 
 const (
-	Version = "4.25.0"
-	SHA256  = "e0b712e3ec12cc2fc8c9f5ec07cd1c57a011bab3cfa0701499e7ea0dc0d5fdc4"
+	Version = "4.35.0"
+	SHA256  = "5087877495d936504fccdb7f8746c51f5394b2667b3839d98c5fbd59c7add93f"
 )
