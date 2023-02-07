@@ -1,6 +1,6 @@
 module github.com/palantir/godel-conjure-plugin/v6
 
-go 1.19
+go 1.20
 
 require (
 	github.com/mholt/archiver v2.1.0+incompatible
