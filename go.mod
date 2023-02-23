@@ -6,8 +6,8 @@ require (
 	github.com/mholt/archiver v2.1.0+incompatible
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v6 v6.40.0
-	github.com/palantir/distgo v1.49.0
-	github.com/palantir/godel/v2 v2.77.0
+	github.com/palantir/distgo v1.50.0
+	github.com/palantir/godel/v2 v2.78.0
 	github.com/palantir/pkg/cobracli v1.2.0
 	github.com/palantir/pkg/safehttp v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
@@ -27,9 +27,9 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/gddo v0.0.0-20190419222130-af0f2af80721 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
-	github.com/klauspost/compress v1.9.2 // indirect
+	github.com/klauspost/compress v1.15.11 // indirect
 	github.com/klauspost/pgzip v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -56,6 +56,7 @@ require (
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.22 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
