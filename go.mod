@@ -12,7 +12,7 @@ require (
 	github.com/palantir/pkg/safehttp v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.2
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -28,7 +28,7 @@ require (
 	github.com/golang/gddo v0.0.0-20190419222130-af0f2af80721 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.15.11 // indirect
 	github.com/klauspost/pgzip v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
