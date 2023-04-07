@@ -183,8 +183,8 @@ github.com/nwaples/rardecode v1.0.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWk
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/palantir/conjure-go/v6 v6.42.0 h1:jJdL4pqjAM/mbMPsLJPjzDoEGDuCfRsjU3YE7AXmLpQ=
 github.com/palantir/conjure-go/v6 v6.42.0/go.mod h1:dJ5MoaB5xYZ4cNh0caa6M9EgpIqCulJ9e6ZQcsvXxts=
-github.com/palantir/distgo v1.55.0 h1:l+pD1Ds7ZeHrlKGLpUF3Ixli6rs/jfnHIBPFyH4mPBo=
-github.com/palantir/distgo v1.55.0/go.mod h1:tqZdzcMSYDC/FyazWr/6arjIylDoYWJAnUVonC66G/s=
+github.com/palantir/distgo v1.56.0 h1:rpD0DZ1a94NpaW5FWhKL+fwVwoAhlMUXqNwgd5q3TM0=
+github.com/palantir/distgo v1.56.0/go.mod h1:jPeZH79A5spEQXuAEoaZ15zFbs1VBf4g8UPVtYoECZM=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
 github.com/palantir/distgo/pkg/git v1.0.0/go.mod h1:eXrr3SOmf/sWTYmtiubYVxSaVegTlMGgRgBUFMFFedw=
 github.com/palantir/go-ptimports/v2 v2.10.0 h1:foAjyLulrcRc89Vto7EwniJJDiQT8oiG8CsLAH9h8HE=
@@ -371,8 +371,8 @@ golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20210119212857-b64e53b001e4/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
-golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.7.0 h1:3jlCCIQZPdOYu1h8BkNvLz8Kgwtae2cagcG/VamtZRU=
+golang.org/x/sys v0.7.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
