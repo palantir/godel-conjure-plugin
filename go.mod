@@ -6,8 +6,8 @@ require (
 	github.com/mholt/archiver v2.1.0+incompatible
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v6 v6.44.0
-	github.com/palantir/distgo v1.58.0
-	github.com/palantir/godel/v2 v2.86.0
+	github.com/palantir/distgo v1.59.0
+	github.com/palantir/godel/v2 v2.87.0
 	github.com/palantir/pkg/cobracli v1.2.0
 	github.com/palantir/pkg/safehttp v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
@@ -45,7 +45,7 @@ require (
 	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
 	github.com/palantir/pkg/specdir v1.2.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
-	github.com/palantir/witchcraft-go-error v1.25.0 // indirect
+	github.com/palantir/witchcraft-go-error v1.26.0 // indirect
 	github.com/palantir/witchcraft-go-params v1.24.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
