@@ -5,9 +5,9 @@ go 1.20
 require (
 	github.com/mholt/archiver v2.1.0+incompatible
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.46.0
-	github.com/palantir/distgo v1.59.0
-	github.com/palantir/godel/v2 v2.88.0
+	github.com/palantir/conjure-go/v6 v6.47.0
+	github.com/palantir/distgo v1.60.0
+	github.com/palantir/godel/v2 v2.89.0
 	github.com/palantir/pkg/cobracli v1.2.0
 	github.com/palantir/pkg/safehttp v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
@@ -45,8 +45,8 @@ require (
 	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
 	github.com/palantir/pkg/specdir v1.2.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
-	github.com/palantir/witchcraft-go-error v1.26.0 // indirect
-	github.com/palantir/witchcraft-go-params v1.24.0 // indirect
+	github.com/palantir/witchcraft-go-error v1.27.0 // indirect
+	github.com/palantir/witchcraft-go-params v1.25.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.7.0 // indirect
@@ -57,7 +57,7 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/tools v0.11.0 // indirect
+	golang.org/x/tools v0.11.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.22 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
