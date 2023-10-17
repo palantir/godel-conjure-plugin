@@ -181,8 +181,11 @@ func (u *testUnionDeserializer) toStruct() TestUnion {
 func (u *TestUnion) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "testCase":
+		if u.testCase == nil {
+			return nil, fmt.Errorf("field \"testCase\" is required")
+		}
 		return struct {
 			Type     string   ` + "`" + `json:"type"` + "`" + `
 			TestCase TestCase ` + "`" + `json:"testCase"` + "`" + `
@@ -204,6 +207,12 @@ func (u *TestUnion) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	case "testCase":
+		if u.testCase == nil {
+			return fmt.Errorf("field \"testCase\" is required")
+		}
+	}
 	return nil
 }
 
@@ -231,6 +240,9 @@ func (u *TestUnion) AcceptFuncs(testCaseFunc func(TestCase) error, unknownFunc f
 		}
 		return unknownFunc(u.typ)
 	case "testCase":
+		if u.testCase == nil {
+			return fmt.Errorf("field \"testCase\" is required")
+		}
 		return testCaseFunc(*u.testCase)
 	}
 }
@@ -251,6 +263,9 @@ func (u *TestUnion) Accept(v TestUnionVisitor) error {
 		}
 		return v.VisitUnknown(u.typ)
 	case "testCase":
+		if u.testCase == nil {
+			return fmt.Errorf("field \"testCase\" is required")
+		}
 		return v.VisitTestCase(*u.testCase)
 	}
 }
@@ -268,6 +283,9 @@ func (u *TestUnion) AcceptWithContext(ctx context.Context, v TestUnionVisitorWit
 		}
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "testCase":
+		if u.testCase == nil {
+			return fmt.Errorf("field \"testCase\" is required")
+		}
 		return v.VisitTestCaseWithContext(ctx, *u.testCase)
 	}
 }
