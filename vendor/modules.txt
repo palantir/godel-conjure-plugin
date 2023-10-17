@@ -32,8 +32,6 @@ github.com/golang/gddo/httputil/header
 # github.com/golang/snappy v0.0.4
 ## explicit
 github.com/golang/snappy
-# github.com/google/go-cmp v0.5.9
-## explicit; go 1.13
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
@@ -50,11 +48,11 @@ github.com/klauspost/compress/zstd/internal/xxhash
 # github.com/klauspost/pgzip v1.2.1
 ## explicit
 github.com/klauspost/pgzip
-# github.com/mattn/go-colorable v0.1.12
-## explicit; go 1.13
+# github.com/mattn/go-colorable v0.1.13
+## explicit; go 1.15
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.14
-## explicit; go 1.12
+# github.com/mattn/go-isatty v0.0.19
+## explicit; go 1.15
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.4
 ## explicit
@@ -74,16 +72,16 @@ github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 ## explicit
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go/v6 v6.47.0
-## explicit; go 1.20
+# github.com/palantir/conjure-go/v6 v6.49.0
+## explicit; go 1.21
 github.com/palantir/conjure-go/v6/conjure
 github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v6/conjure/cycles
 github.com/palantir/conjure-go/v6/conjure/snip
 github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
-# github.com/palantir/distgo v1.60.0
-## explicit; go 1.20
+# github.com/palantir/distgo v1.62.0
+## explicit; go 1.21
 github.com/palantir/distgo/assetapi
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/projectversioner/git
@@ -98,8 +96,8 @@ github.com/palantir/distgo/pkg/git
 # github.com/palantir/go-ptimports/v2 v2.10.0
 ## explicit; go 1.16
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel/v2 v2.89.0
-## explicit; go 1.20
+# github.com/palantir/godel/v2 v2.93.0
+## explicit; go 1.21
 github.com/palantir/godel/v2/framework/artifactresolver
 github.com/palantir/godel/v2/framework/builtintasks
 github.com/palantir/godel/v2/framework/builtintasks/githooks
@@ -152,12 +150,12 @@ github.com/palantir/pkg/specdir
 # github.com/palantir/pkg/transform v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.27.0
-## explicit; go 1.20
+# github.com/palantir/witchcraft-go-error v1.29.0
+## explicit; go 1.21
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.25.0
-## explicit; go 1.20
+# github.com/palantir/witchcraft-go-params v1.27.0
+## explicit; go 1.21
 github.com/palantir/witchcraft-go-params
 # github.com/pierrec/lz4 v2.0.5+incompatible
 ## explicit
@@ -200,16 +198,16 @@ github.com/whilp/git-urls
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 ## explicit
 github.com/xi2/xz
-# golang.org/x/mod v0.12.0
-## explicit; go 1.17
+# golang.org/x/mod v0.13.0
+## explicit; go 1.18
 golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/sys v0.11.0
+# golang.org/x/sys v0.13.0
 ## explicit; go 1.17
 golang.org/x/sys/execabs
 golang.org/x/sys/unix
-# golang.org/x/tools v0.12.0
+# golang.org/x/tools v0.14.0
 ## explicit; go 1.18
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
