@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Updating the readme to direct people to use https://github.com/palantir/godel-mod-plugin
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/384
