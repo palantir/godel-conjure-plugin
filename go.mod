@@ -44,8 +44,8 @@ require (
 	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
 	github.com/palantir/pkg/specdir v1.2.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
-	github.com/palantir/witchcraft-go-error v1.30.0 // indirect
-	github.com/palantir/witchcraft-go-params v1.28.0 // indirect
+	github.com/palantir/witchcraft-go-error v1.31.0 // indirect
+	github.com/palantir/witchcraft-go-params v1.29.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.7.0 // indirect

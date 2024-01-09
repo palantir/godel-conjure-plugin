@@ -150,11 +150,11 @@ github.com/palantir/pkg/specdir
 # github.com/palantir/pkg/transform v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.30.0
+# github.com/palantir/witchcraft-go-error v1.31.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.28.0
+# github.com/palantir/witchcraft-go-params v1.29.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-params
 # github.com/pierrec/lz4 v2.0.5+incompatible
