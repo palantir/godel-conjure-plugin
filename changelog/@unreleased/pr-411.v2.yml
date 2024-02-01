@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Allow specifying extensions in the conjure IR
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/411
