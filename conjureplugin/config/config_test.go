@@ -15,6 +15,7 @@
 package config_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -52,10 +53,10 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator: local/yaml-dir
-   publish: false
+  project:
+    output-dir: outputDir
+    ir-locator: local/yaml-dir
+    publish: false
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -73,11 +74,11 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator:
-     type: yaml
-     locator: explicit/yaml-dir
+  project:
+    output-dir: outputDir
+    ir-locator:
+      type: yaml
+      locator: explicit/yaml-dir
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -94,9 +95,9 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator: http://foo.com/ir.json
+  project:
+    output-dir: outputDir
+    ir-locator: http://foo.com/ir.json
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -113,10 +114,10 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator: http://foo.com/ir.json
-   publish: true
+  project:
+    output-dir: outputDir
+    ir-locator: http://foo.com/ir.json
+    publish: true
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -134,11 +135,11 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator:
-     type: remote
-     locator: localhost:8080/ir.json
+  project:
+    output-dir: outputDir
+    ir-locator:
+      type: remote
+      locator: localhost:8080/ir.json
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -155,9 +156,9 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator: local/nonexistent-ir-file.json
+  project:
+    output-dir: outputDir
+    ir-locator: local/nonexistent-ir-file.json
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -174,11 +175,11 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator:
-     type: ir-file
-     locator: local/nonexistent-ir-file.json
+  project:
+    output-dir: outputDir
+    ir-locator:
+      type: ir-file
+      locator: local/nonexistent-ir-file.json
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -195,13 +196,13 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator:
-     type: remote
-     locator: localhost:8080/ir.json
-   server: true
-   cli: true
+  project:
+    output-dir: outputDir
+    ir-locator:
+      type: remote
+      locator: localhost:8080/ir.json
+    server: true
+    cli: true
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -220,12 +221,12 @@ projects:
 		{
 			`
 projects:
- project:
-   output-dir: outputDir
-   ir-locator:
-     type: remote
-     locator: localhost:8080/ir.json
-   accept-funcs: true
+  project:
+    output-dir: outputDir
+    ir-locator:
+      type: remote
+      locator: localhost:8080/ir.json
+    accept-funcs: true
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
@@ -241,11 +242,48 @@ projects:
 				},
 			},
 		},
+		{
+			`
+projects:
+  project:
+    output-dir: outputDir
+    ir-locator:
+      type: yaml
+      locator: explicit/yaml-dir
+    extensions:
+      recommended-product-dependencies:
+        maximum-version: "2.x.x"
+        minimum-version: "2.78.0"
+        product-group: "com.palantir.assetserver"
+        product-name: "asset-server"
+`,
+			config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeYAML,
+							Locator: "explicit/yaml-dir",
+						},
+						Extensions: map[string]interface{}{
+							"recommended-product-dependencies": map[interface{}]interface{}{
+								"maximum-version": "2.x.x",
+								"minimum-version": "2.78.0",
+								"product-group":   "com.palantir.assetserver",
+								"product-name":    "asset-server",
+							},
+						},
+					},
+				},
+			},
+		},
 	} {
-		var got config.ConjurePluginConfig
-		err := yaml.Unmarshal([]byte(tc.in), &got)
-		require.NoError(t, err)
-		assert.Equal(t, tc.want, got, "Case %d", i)
+		t.Run(fmt.Sprintf("Case %d", i), func(t *testing.T) {
+			var got config.ConjurePluginConfig
+			err := yaml.Unmarshal([]byte(tc.in), &got)
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, got)
+		})
 	}
 }
 
