@@ -15,6 +15,7 @@
 package distgo
 
 import (
+	"encoding/json"
 	"sort"
 )
 
@@ -22,6 +23,13 @@ type ProductParam struct {
 	// ID is the unique identifier for this product. Its value comes from the key for the product in the Products map in
 	// the configuration.
 	ID ProductID
+
+	// Name is the name of this product. If it is not specified in configuration, defaults to the
+	// same value as ID. The Name field should be used for operations that require the product's
+	// name for configuration or rendering. The field is intended to be used in cases when the
+	// product name used for these purposes cannot be the ID -- for example, if there are different
+	// products that want to render output with the same logical name.
+	Name string
 
 	// Build specifies the build configuration for the product.
 	Build *BuildParam
@@ -68,16 +76,30 @@ func (p *ProductParam) AllDependenciesSortedIDs() []ProductID {
 
 type ProductOutputInfo struct {
 	ID                ProductID          `json:"productId"`
+	Name              string             `json:"productName"`
 	BuildOutputInfo   *BuildOutputInfo   `json:"buildOutputInfo"`
 	DistOutputInfos   *DistOutputInfos   `json:"distOutputInfos"`
 	PublishOutputInfo *PublishOutputInfo `json:"publishOutputInfo"`
 	DockerOutputInfos *DockerOutputInfos `json:"dockerOutputInfos"`
 }
 
+func (p *ProductOutputInfo) UnmarshalJSON(bytes []byte) error {
+	type productOutputInfoAlias ProductOutputInfo
+	var productOutputInfo productOutputInfoAlias
+	if err := json.Unmarshal(bytes, &productOutputInfo); err != nil {
+		return err
+	}
+	if productOutputInfo.Name == "" {
+		productOutputInfo.Name = string(productOutputInfo.ID)
+	}
+	*p = ProductOutputInfo(productOutputInfo)
+	return nil
+}
+
 func (p *ProductParam) ToProductOutputInfo(version string) (ProductOutputInfo, error) {
 	var buildOutputInfo *BuildOutputInfo
 	if p.Build != nil {
-		buildOutputInfoVar, err := p.Build.ToBuildOutputInfo(p.ID, version)
+		buildOutputInfoVar, err := p.Build.ToBuildOutputInfo(p.Name, version)
 		if err != nil {
 			return ProductOutputInfo{}, err
 		}
@@ -85,7 +107,7 @@ func (p *ProductParam) ToProductOutputInfo(version string) (ProductOutputInfo, e
 	}
 	var distOutputInfos *DistOutputInfos
 	if p.Dist != nil {
-		distOutputInfosVar, err := p.Dist.ToDistOutputInfos(p.ID, version)
+		distOutputInfosVar, err := p.Dist.ToDistOutputInfos(p.Name, version)
 		if err != nil {
 			return ProductOutputInfo{}, err
 		}
@@ -98,7 +120,7 @@ func (p *ProductParam) ToProductOutputInfo(version string) (ProductOutputInfo, e
 	}
 	var dockerOutputInfos *DockerOutputInfos
 	if p.Docker != nil {
-		dockerOutputInfosVar, err := p.Docker.ToDockerOutputInfos(p.ID, version)
+		dockerOutputInfosVar, err := p.Docker.ToDockerOutputInfos(p.Name, version)
 		if err != nil {
 			return ProductOutputInfo{}, err
 		}
@@ -106,6 +128,7 @@ func (p *ProductParam) ToProductOutputInfo(version string) (ProductOutputInfo, e
 	}
 	return ProductOutputInfo{
 		ID:                p.ID,
+		Name:              p.Name,
 		BuildOutputInfo:   buildOutputInfo,
 		DistOutputInfos:   distOutputInfos,
 		PublishOutputInfo: publishOutputInfo,
