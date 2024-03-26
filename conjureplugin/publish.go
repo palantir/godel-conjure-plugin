@@ -17,7 +17,6 @@ package conjureplugin
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -51,7 +50,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 	}
 
 	publisher := artifactory.NewArtifactoryPublisher()
-	tmpDir, err := ioutil.TempDir("", "")
+	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -72,7 +71,8 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			Version:    version,
 		}
 		productOutputInfo := distgo.ProductOutputInfo{
-			ID: distgo.ProductID(key),
+			ID:   distgo.ProductID(key),
+			Name: key,
 			DistOutputInfos: &distgo.DistOutputInfos{
 				DistIDs: []distgo.DistID{keyAsDistID},
 				DistInfos: map[distgo.DistID]distgo.DistOutputInfo{
@@ -103,7 +103,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		}
 
 		irFilePath := path.Join(directoryPath, irFileName)
-		if err := ioutil.WriteFile(irFilePath, irBytes, 0644); err != nil {
+		if err := os.WriteFile(irFilePath, irBytes, 0644); err != nil {
 			return errors.WithStack(err)
 		}
 
