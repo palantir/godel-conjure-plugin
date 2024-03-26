@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Set Name field in distgo.ProductOutputInfo
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/427
