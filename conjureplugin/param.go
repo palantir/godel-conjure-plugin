@@ -39,4 +39,7 @@ type ConjureProjectParam struct {
 	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
+	// Extensions are a map of key-value pairs that will be injected to the IR's extensions field.
+	// This is only available when the IR is generated from a YAML file.
+	Extensions map[string]interface{}
 }
