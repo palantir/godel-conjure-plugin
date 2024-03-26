@@ -83,3 +83,9 @@ Here is an example invocation to publish a Conjure definition:
 ```
 
 The `--dry-run` flag can be added to print the operation that would be performed (including the upload URL).
+
+Additional Useful Plugins When Using Godel
+-------------------------
+
+If you are using Godel, adding in the [`godel-mod-plugin`](https://github.com/palantir/godel-mod-plugin) can help eliminate undefined dependency errors when running `./godelw verify`. 
+
