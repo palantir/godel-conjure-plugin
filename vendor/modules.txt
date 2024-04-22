@@ -72,7 +72,7 @@ github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 ## explicit
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go/v6 v6.56.0
+# github.com/palantir/conjure-go/v6 v6.57.0
 ## explicit; go 1.21
 github.com/palantir/conjure-go/v6/conjure
 github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
@@ -150,7 +150,7 @@ github.com/palantir/pkg/specdir
 # github.com/palantir/pkg/transform v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.35.0
+# github.com/palantir/witchcraft-go-error v1.36.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
