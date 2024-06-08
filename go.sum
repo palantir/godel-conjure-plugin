@@ -186,8 +186,8 @@ github.com/nwaples/rardecode v1.0.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWk
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/palantir/conjure-go/v6 v6.58.0 h1:R2xAxoBCtMU98VnPbNI0FKAe6AYoRKBzrJZccsbmLkQ=
 github.com/palantir/conjure-go/v6 v6.58.0/go.mod h1:0vJWu0sU7ooJMj+lH90hqEfF+ioqEuNbrg0GiCjLYVs=
-github.com/palantir/distgo v1.70.0 h1:bO1qETKah6DYVps5hS5DFQMtyf/fX0RUnG8upgTA9vY=
-github.com/palantir/distgo v1.70.0/go.mod h1:cJo+aJRUNE1sLdxnFEyI6oG8k1D2ZK2hNs/AHieLk7g=
+github.com/palantir/distgo v1.71.0 h1:qm1ocikVC5VIt8Imbwb/qr8+Jf9nU9RUIx9uzfG2BZo=
+github.com/palantir/distgo v1.71.0/go.mod h1:7siJNjkaULT8sI1G2+oyDXhZVjZBaKqN9R8soES8OAU=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
 github.com/palantir/distgo/pkg/git v1.0.0/go.mod h1:eXrr3SOmf/sWTYmtiubYVxSaVegTlMGgRgBUFMFFedw=
 github.com/palantir/go-ptimports/v2 v2.10.0 h1:foAjyLulrcRc89Vto7EwniJJDiQT8oiG8CsLAH9h8HE=
@@ -217,8 +217,8 @@ github.com/palantir/pkg/specdir v1.2.0 h1:O8ukQIYBUrYfOB+LDj88Ih7308KW9THuNy0/Lc
 github.com/palantir/pkg/specdir v1.2.0/go.mod h1:uXmFsbADJKbsDmaTSSODThNJxzSTEaUuBLSdZ/7fGcg=
 github.com/palantir/pkg/transform v1.1.0 h1:43tnYETShELXCRro6+uc0GlgB4GZvsQ/YNH5301IxW8=
 github.com/palantir/pkg/transform v1.1.0/go.mod h1:SHqpFkx1vKQ8Bb81VsmySYTsSHSBtgj06cZm9HihuGk=
-github.com/palantir/witchcraft-go-error v1.36.0 h1:DnctTRqILbY2FnjM9s+9Zzf2pCrkv7BHNaJJvy6beJc=
-github.com/palantir/witchcraft-go-error v1.36.0/go.mod h1:xlr850w77YM824nEmXdi1gO8d5IKckDALHD+JR76v30=
+github.com/palantir/witchcraft-go-error v1.37.0 h1:ck7+qS/OCfG5xXxBbvH9jTt2SUHq7BwxzsaZA//ywr8=
+github.com/palantir/witchcraft-go-error v1.37.0/go.mod h1:8ToRbp1Ev7N5HnzUYNqMJWSwEorJ25WCFCBL8uF4USc=
 github.com/palantir/witchcraft-go-params v1.34.0 h1:llvcinZASaTJ+/uNhcgsprRbSZiZ8/8IWnr1chGGtFY=
 github.com/palantir/witchcraft-go-params v1.34.0/go.mod h1:R+/PmtwK5BfCIrA6JFlUGhJfhTQOHGjQaLAaUvqfPLo=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
