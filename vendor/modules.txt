@@ -80,7 +80,7 @@ github.com/palantir/conjure-go/v6/conjure/snip
 github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
 github.com/palantir/conjure-go/v6/cycles
-# github.com/palantir/distgo v1.70.0
+# github.com/palantir/distgo v1.71.0
 ## explicit; go 1.21
 github.com/palantir/distgo/assetapi
 github.com/palantir/distgo/distgo
@@ -150,7 +150,7 @@ github.com/palantir/pkg/specdir
 # github.com/palantir/pkg/transform v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.36.0
+# github.com/palantir/witchcraft-go-error v1.37.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
