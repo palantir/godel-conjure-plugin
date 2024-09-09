@@ -3,11 +3,11 @@ module github.com/palantir/godel-conjure-plugin/v6
 go 1.22
 
 require (
-	github.com/mholt/archiver v2.1.0+incompatible
+	github.com/mholt/archiver/v3 v3.5.1
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v6 v6.60.0
 	github.com/palantir/distgo v1.75.0
-	github.com/palantir/godel/v2 v2.114.0
+	github.com/palantir/godel/v2 v2.118.0
 	github.com/palantir/pkg/cobracli v1.2.0
 	github.com/palantir/pkg/safehttp v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
@@ -19,34 +19,32 @@ require (
 
 require (
 	github.com/VividCortex/ewma v1.1.1 // indirect
-	github.com/andybalholm/brotli v0.0.0-20190621154722-5f990b63d2d6 // indirect
+	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.2 // indirect
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/golang/gddo v0.0.0-20190419222130-af0f2af80721 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
-	github.com/klauspost/pgzip v1.2.1 // indirect
+	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
-	github.com/mholt/archiver/v3 v3.3.0 // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
-	github.com/nwaples/rardecode v1.0.0 // indirect
+	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/palantir/distgo/pkg/git v1.0.0 // indirect
 	github.com/palantir/go-ptimports/v2 v2.10.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/matcher v1.2.0 // indirect
-	github.com/palantir/pkg/pkgpath v1.2.0 // indirect
+	github.com/palantir/pkg/pkgpath v1.3.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
 	github.com/palantir/pkg/specdir v1.2.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
 	github.com/palantir/witchcraft-go-error v1.39.0 // indirect
 	github.com/palantir/witchcraft-go-params v1.36.0 // indirect
-	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
+	github.com/pierrec/lz4/v4 v4.1.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
