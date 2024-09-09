@@ -193,7 +193,9 @@ func ensureCLIExists(cliPath string) error {
 		return errors.Wrap(err, "failed to write Conjure CLI TGZ")
 	}
 
-	if err := archiver.DefaultTarGz.Unarchive(tmpTGZPath, cliUnpackDir); err != nil {
+	tarGZ := archiver.NewTarGz()
+	tarGZ.OverwriteExisting = true
+	if err := tarGZ.Unarchive(tmpTGZPath, cliUnpackDir); err != nil {
 		return errors.WithStack(err)
 	}
 
