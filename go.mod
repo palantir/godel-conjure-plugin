@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.63.0
+	github.com/palantir/conjure-go/v6 v6.64.0
 	github.com/palantir/distgo v1.79.0
 	github.com/palantir/godel/v2 v2.122.0
 	github.com/palantir/pkg/cobracli v1.2.0
