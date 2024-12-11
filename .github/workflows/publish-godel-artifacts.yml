@@ -37,7 +37,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: |
-            $GOPATH/go/pkg/mod
+            ${{ env.GOPATH }}/pkg/mod
             ~/.cache/go-build
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - uses: actions/cache@v4
