@@ -12,7 +12,9 @@ jobs:
       # START Go dist setup
       #####################
       - id: set-gopath
-        run: echo "GOPATH=$(go env GOPATH)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> "$GITHUB_OUTPUT"
+          echo "Set GOPATH=$(go env GOPATH) in GITHUB_OUTPUT at $GITHUB_OUTPUT"
       - id: go-dist-info
         uses: palantir/godel/go-dist-info@nmiyake/test-github-actions
         with:
