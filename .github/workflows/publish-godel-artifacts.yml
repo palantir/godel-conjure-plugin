@@ -45,6 +45,5 @@ jobs:
           path: |
             ~/.godel
           key: ${{ runner.os }}-godel-${{ hashFiles('godelw', 'godel/config/godel.yml') }}
+      - run: ./godelw mod
       - run: ./godelw dist
-        env:
-          GOPATH: "/home/runner/go"
