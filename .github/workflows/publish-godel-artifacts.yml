@@ -7,22 +7,22 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       #####################
       # START Go dist setup
       #####################
       - id: set-gopath
-        run: echo "::set-output name=GOPATH::$(go env GOPATH)"
+        run: echo "GOPATH=$(go env GOPATH)" >> "$GITHUB_OUTPUT"
       - id: go-dist-info
         uses: palantir/godel/go-dist-info@nmiyake/test-github-actions
         with:
-          gopath: ${{ steps.set-gopath.outputs.gopath }}
+          gopath: ${{ steps.set-gopath.outputs.GOPATH }}
       - id: restore-go-dist-from-cache
         if: steps.go-dist-info.outputs.go-dist-exists != 'true'
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
-            ${{ steps.set-gopath.outputs.gopath }}/go-dists/${{ steps.go-dist-info.outputs.go-dist-version }}
+            ${{ steps.set-gopath.outputs.GOPATH }}/go-dists/${{ steps.go-dist-info.outputs.go-dist-version }}
           key: ${{ runner.os }}-${{ steps.go-dist-info.outputs.go-dist-version }}
       - id: go-dist-setup
         uses: palantir/godel/go-dist-setup@nmiyake/test-github-actions
@@ -32,13 +32,13 @@ jobs:
       #####################
       # END Go dist setup
       #####################
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.godel
