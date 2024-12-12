@@ -18,7 +18,7 @@ jobs:
           echo "GOPATH=$(go env GOPATH)" >> "$GITHUB_ENV"
           echo "Set GOPATH=$(go env GOPATH) in GITHUB_ENV at $GITHUB_ENV"
       - id: go-dist-info
-        uses: palantir/godel/go-dist-info@0.1.0
+        uses: palantir/github-actions/go-dist-info@0.1.0
         with:
           gopath: ${{ steps.set-gopath.outputs.GOPATH }}
           go-version: go1.23.3
@@ -30,7 +30,7 @@ jobs:
             ${{ steps.set-gopath.outputs.GOPATH }}/go-dists/${{ steps.go-dist-info.outputs.go-dist-version }}
           key: ${{ runner.os }}-${{ steps.go-dist-info.outputs.go-dist-version }}
       - id: go-dist-setup
-        uses: palantir/godel/go-dist-setup@0.1.0
+        uses: palantir/github-actions/go-dist-setup@0.1.0
         with:
           gopath: ${{ steps.set-gopath.outputs.gopath }}
           go-version: ${{ steps.go-dist-info.outputs.go-dist-version }}
