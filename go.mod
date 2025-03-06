@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.64.0
+	github.com/palantir/conjure-go/v6 v6.65.0
 	github.com/palantir/distgo v1.82.0
 	github.com/palantir/godel/v2 v2.127.0
 	github.com/palantir/pkg/cobracli v1.2.0
@@ -42,8 +42,8 @@ require (
 	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
 	github.com/palantir/pkg/specdir v1.2.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
-	github.com/palantir/witchcraft-go-error v1.40.0 // indirect
-	github.com/palantir/witchcraft-go-params v1.37.0 // indirect
+	github.com/palantir/witchcraft-go-error v1.41.0 // indirect
+	github.com/palantir/witchcraft-go-params v1.38.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.7.0 // indirect
