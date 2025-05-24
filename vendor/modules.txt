@@ -29,11 +29,13 @@ github.com/fatih/color
 # github.com/golang/snappy v0.0.4
 ## explicit
 github.com/golang/snappy
+# github.com/google/go-cmp v0.7.0
+## explicit; go 1.21
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/klauspost/compress v1.17.11
-## explicit; go 1.21
+# github.com/klauspost/compress v1.18.0
+## explicit; go 1.22
 github.com/klauspost/compress
 github.com/klauspost/compress/flate
 github.com/klauspost/compress/fse
@@ -41,6 +43,7 @@ github.com/klauspost/compress/gzip
 github.com/klauspost/compress/huff0
 github.com/klauspost/compress/internal/cpuinfo
 github.com/klauspost/compress/internal/godebug
+github.com/klauspost/compress/internal/le
 github.com/klauspost/compress/internal/snapref
 github.com/klauspost/compress/zip
 github.com/klauspost/compress/zstd
@@ -77,7 +80,7 @@ github.com/palantir/conjure-go/v6/conjure/snip
 github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
 github.com/palantir/conjure-go/v6/cycles
-# github.com/palantir/distgo v1.82.0
+# github.com/palantir/distgo v1.83.0
 ## explicit; go 1.24.0
 github.com/palantir/distgo/assetapi
 github.com/palantir/distgo/distgo
