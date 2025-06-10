@@ -6,8 +6,8 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v6 v6.67.0
-	github.com/palantir/distgo v1.83.0
-	github.com/palantir/godel/v2 v2.132.0
+	github.com/palantir/distgo v1.84.0
+	github.com/palantir/godel/v2 v2.133.0
 	github.com/palantir/pkg/cobracli v1.2.0
 	github.com/palantir/pkg/safehttp v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
