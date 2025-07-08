@@ -18,22 +18,13 @@ import (
 	"os"
 
 	"github.com/palantir/distgo/distgo"
-	"github.com/palantir/distgo/publisher"
-	"github.com/palantir/distgo/publisher/artifactory"
-	"github.com/palantir/distgo/publisher/maven"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 var (
-	groupIDFlagVal    string
-	urlFlagVal        string
-	usernameFlagVal   string
-	passwordFlagVal   string
-	repositoryFlagVal string
-	mavenNoPOMFlagVal bool
-	dryRunFlagVal     bool
+	dryRunFlagVal bool
 )
 
 var publishCmd = &cobra.Command{
@@ -72,11 +63,5 @@ var publishCmd = &cobra.Command{
 func init() {
 	publishCmd.Flags().BoolVar(&dryRunFlagVal, "dry-run", false, "print the operations that would be performed")
 
-	publishCmd.Flags().StringVar(&groupIDFlagVal, string(publisher.GroupIDFlag.Name), "", publisher.GroupIDFlag.Description)
-	publishCmd.Flags().StringVar(&repositoryFlagVal, string(artifactory.PublisherRepositoryFlag.Name), "", artifactory.PublisherRepositoryFlag.Description)
-	publishCmd.Flags().StringVar(&urlFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", publisher.ConnectionInfoURLFlag.Description)
-	publishCmd.Flags().StringVar(&usernameFlagVal, string(publisher.ConnectionInfoUsernameFlag.Name), "", publisher.ConnectionInfoUsernameFlag.Description)
-	publishCmd.Flags().StringVar(&passwordFlagVal, string(publisher.ConnectionInfoPasswordFlag.Name), "", publisher.ConnectionInfoPasswordFlag.Description)
-	publishCmd.Flags().BoolVar(&mavenNoPOMFlagVal, string(maven.NoPOMFlag.Name), false, maven.NoPOMFlag.Description)
 	rootCmd.AddCommand(publishCmd)
 }
