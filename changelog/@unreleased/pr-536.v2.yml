@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Upgrade conjure compiler to 4.51.0
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/536
