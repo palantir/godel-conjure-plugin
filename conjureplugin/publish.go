@@ -23,6 +23,7 @@ import (
 	"github.com/palantir/distgo/distgo"
 	gitversioner "github.com/palantir/distgo/projectversioner/git"
 	"github.com/palantir/distgo/publisher/artifactory"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
 	"github.com/pkg/errors"
 )
 
@@ -97,7 +98,19 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		irBytes, err := param.IRProvider.IRBytes()
+		serviceDependencies := []conjureircli.ServiceDependency{}
+		for i, dep := range param.ServiceDependencies {
+			fmt.Printf("i: %v\n", i)	
+			serviceDependencies = append(serviceDependencies, conjureircli.ServiceDependency{
+				MaximumVersion: dep.MaximumVersion,
+				MinimumVersion: version,
+				ProductGroup:   dep.ProductGroup,
+				ProductName:    dep.ProductName,
+			})
+		}
+
+		irBytes, err := param.IRProvider.IRBytes(serviceDependencies...)
+		fmt.Println(string(irBytes))
 		if err != nil {
 			return err
 		}

@@ -38,5 +38,12 @@ type ConjureProjectParam struct {
 	// AcceptFuncs will optionally generate lambda based visitor code for unions specified in this project.
 	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
-	Publish bool
+	Publish             bool
+	ServiceDependencies []ServiceDependency
+}
+
+type ServiceDependency struct {
+	ProductGroup   string `yaml:"product-group"`
+	ProductName    string `yaml:"product-name"`
+	MaximumVersion string `yaml:"maximum-version"`
 }

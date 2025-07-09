@@ -24,7 +24,7 @@ import (
 )
 
 type IRProvider interface {
-	IRBytes() ([]byte, error)
+	IRBytes(recDeps ...conjureircli.ServiceDependency) ([]byte, error)
 	// Generated returns true if the IR provided by this provider is generated from YAML, false otherwise.
 	GeneratedFromYAML() bool
 }
@@ -45,8 +45,8 @@ func NewLocalYAMLIRProvider(path string, params ...conjureircli.Param) IRProvide
 	}
 }
 
-func (p *localYAMLIRProvider) IRBytes() ([]byte, error) {
-	return conjureircli.InputPathToIRWithParams(p.path, p.params...)
+func (p *localYAMLIRProvider) IRBytes(recDeps ...conjureircli.ServiceDependency) ([]byte, error) {
+	return conjureircli.InputPathToIRWithParams(p.path, recDeps, p.params...)
 }
 
 func (p *localYAMLIRProvider) GeneratedFromYAML() bool {
@@ -66,7 +66,7 @@ func NewHTTPIRProvider(irURL string) IRProvider {
 	}
 }
 
-func (p *urlIRProvider) IRBytes() ([]byte, error) {
+func (p *urlIRProvider) IRBytes(_ ...conjureircli.ServiceDependency) ([]byte, error) {
 	resp, cleanup, err := safehttp.Get(http.DefaultClient, p.irURL)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -95,7 +95,7 @@ func NewLocalFileIRProvider(path string) IRProvider {
 	}
 }
 
-func (p *localFileIRProvider) IRBytes() ([]byte, error) {
+func (p *localFileIRProvider) IRBytes(_ ...conjureircli.ServiceDependency) ([]byte, error) {
 	return ioutil.ReadFile(p.path)
 }
 

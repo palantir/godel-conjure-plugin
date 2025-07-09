@@ -16,6 +16,7 @@ package conjureircli
 
 import (
 	_ "embed" // required for go:embed directive
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -54,14 +55,14 @@ func YAMLtoIRWithParams(in []byte, params ...Param) (rBytes []byte, rErr error) 
 	if err := ioutil.WriteFile(inPath, in, 0644); err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return InputPathToIRWithParams(inPath, params...)
+	return InputPathToIRWithParams(inPath, []ServiceDependency{}, params...)
 }
 
 func InputPathToIR(inPath string) (rBytes []byte, rErr error) {
-	return InputPathToIRWithParams(inPath)
+	return InputPathToIRWithParams(inPath, []ServiceDependency{})
 }
 
-func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rErr error) {
+func InputPathToIRWithParams(inPath string, recDeps []ServiceDependency, params ...Param) (rBytes []byte, rErr error) {
 	tmpDir, err := ioutil.TempDir("", "")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create temporary directory")
@@ -73,7 +74,7 @@ func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rEr
 	}()
 
 	outPath := path.Join(tmpDir, "out.json")
-	if err := RunWithParams(inPath, outPath, params...); err != nil {
+	if err := RunWithParams(inPath, outPath, recDeps, params...); err != nil {
 		return nil, err
 	}
 	irBytes, err := ioutil.ReadFile(outPath)
@@ -85,7 +86,7 @@ func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rEr
 
 // Run invokes the "compile" operation on the Conjure CLI with the provided inPath and outPath as arguments.
 func Run(inPath, outPath string) error {
-	return RunWithParams(inPath, outPath)
+	return RunWithParams(inPath, outPath, []ServiceDependency{})
 }
 
 type runArgs struct {
@@ -119,7 +120,7 @@ func ExtensionsParam(extensionsContent map[string]interface{}) (Param, error) {
 
 // RunWithParams invokes the "compile" operation on the Conjure CLI with the provided inPath and outPath as arguments.
 // Any arguments or configuration supplied by the provided params are also applied.
-func RunWithParams(inPath, outPath string, params ...Param) error {
+func RunWithParams(inPath, outPath string, recDeps []ServiceDependency, params ...Param) error {
 	cliPath, err := cliCmdPath()
 	if err != nil {
 		return err
@@ -143,10 +144,24 @@ func RunWithParams(inPath, outPath string, params ...Param) error {
 	// if extensionsContent is non-empty, add as flag
 	if len(runArgCollector.extensionsContent) > 0 {
 		args = append(args, "--extensions", string(runArgCollector.extensionsContent))
+		panic("this is not supposed to be reachable")
 	}
 
 	// set the inPath and outPath as final arguments
 	args = append(args, inPath, outPath)
+
+	var blob struct {
+		RecommendProductDependencies []ServiceDependency `json:"recommended-product-dependencies"`
+	}
+
+	blob.RecommendProductDependencies = recDeps
+
+	bytes, err := json.Marshal(blob)
+	if err != nil {
+		panic(err)
+	}
+
+	args = append(args, "--extensions", string(bytes))
 
 	cmd := exec.Command(cliPath, args...)
 	if output, err := cmd.CombinedOutput(); err != nil {
@@ -219,4 +234,11 @@ func checkCliExists(cliPath string) error {
 		return fmt.Errorf("file mode %s was unexpected", fi.Mode().String())
 	}
 	return nil
+}
+
+type ServiceDependency struct {
+	ProductGroup   string `json:"product-group"`
+	ProductName    string `json:"product-name"`
+	MaximumVersion string `json:"maximum-version"`
+	MinimumVersion string `json:"minimum-version"`
 }
