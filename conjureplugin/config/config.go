@@ -59,8 +59,7 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 		}
 
 		serviceDependencies := []conjureplugin.ServiceDependency{}
-		for other, serviceDependency := range currConfig.ServiceDependencies {
-			
+		for _, serviceDependency := range currConfig.ServiceDependencies {
 			serviceDependencies = append(serviceDependencies, conjureplugin.ServiceDependency(serviceDependency))
 		}
 
