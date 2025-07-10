@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Publish recommended product dependencies in Conjure IR
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/537

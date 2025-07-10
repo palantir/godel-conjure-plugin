@@ -56,13 +56,20 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+
+		var serviceDependencies []conjureplugin.ServiceDependency
+		for _, serviceDependency := range currConfig.ServiceDependencies {
+			serviceDependencies = append(serviceDependencies, conjureplugin.ServiceDependency(serviceDependency))
+		}
+
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:   currConfig.OutputDir,
-			IRProvider:  irProvider,
-			AcceptFuncs: acceptFuncsFlag,
-			Server:      currConfig.Server,
-			CLI:         currConfig.CLI,
-			Publish:     publishVal,
+			OutputDir:           currConfig.OutputDir,
+			IRProvider:          irProvider,
+			AcceptFuncs:         acceptFuncsFlag,
+			Server:              currConfig.Server,
+			CLI:                 currConfig.CLI,
+			Publish:             publishVal,
+			ServiceDependencies: serviceDependencies,
 		}
 	}
 	return conjureplugin.ConjureProjectParams{
