@@ -16,6 +16,7 @@ package conjureircli
 
 import (
 	_ "embed" // required for go:embed directive
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -33,7 +34,7 @@ var (
 	conjureCliTGZ []byte
 )
 
-func YAMLtoIR(in []byte) (rBytes []byte, rErr error) {
+func YAMLtoIR(in []byte, e *Extensions) (rBytes []byte, rErr error) {
 	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create temporary directory")
@@ -48,10 +49,22 @@ func YAMLtoIR(in []byte) (rBytes []byte, rErr error) {
 	if err := os.WriteFile(inPath, in, 0644); err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return InputPathToIR(inPath)
+	return InputPathToIR(inPath, nil)
 }
 
-func InputPathToIR(inPath string) (rBytes []byte, rErr error) {
+type Extensions struct {
+	RecommendedProductDependencies []RecommendedProductDependency `yaml:"recommended-product-depenencies"`
+}
+
+type RecommendedProductDependency struct {
+		ProductGroup   string `json:"product-group"`
+		ProductName    string `json:"product-name"`
+		MaximumVersion string `json:"maximum-version"`
+		MinimumVersion string `json:"minimum-version"`
+		Optional       bool   `json:"optional"`
+	}
+
+func InputPathToIR(inPath string, e *Extensions) (rBytes []byte, rErr error) {
 	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create temporary directory")
@@ -63,7 +76,7 @@ func InputPathToIR(inPath string) (rBytes []byte, rErr error) {
 	}()
 
 	outPath := path.Join(tmpDir, "out.json")
-	if err := Run(inPath, outPath); err != nil {
+	if err := Run(inPath, outPath, e); err != nil {
 		return nil, err
 	}
 	irBytes, err := os.ReadFile(outPath)
@@ -74,7 +87,7 @@ func InputPathToIR(inPath string) (rBytes []byte, rErr error) {
 }
 
 // Run invokes the "compile" operation on the Conjure CLI with the provided inPath and outPath as arguments.
-func Run(inPath, outPath string) error {
+func Run(inPath, outPath string, e *Extensions) error {
 	cliPath, err := cliCmdPath()
 	if err != nil {
 		return err
@@ -88,6 +101,19 @@ func Run(inPath, outPath string) error {
 
 	// set the inPath and outPath as final arguments
 	args = append(args, inPath, outPath)
+
+	if e != nil {
+		extensionBlob := struct {
+			Extensions Extensions `json:"extensions"`
+		}{
+			Extensions: *e,
+		}
+		if bytes, err := json.Marshal(extensionBlob); err != nil {
+			args = append(args, string(bytes))
+		} else {
+			return err
+		}
+	}
 
 	cmd := exec.Command(cliPath, args...)
 	if output, err := cmd.CombinedOutput(); err != nil {

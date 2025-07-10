@@ -25,21 +25,9 @@ import (
 )
 
 type IRProvider interface {
-	IRBytes(*Extensions) ([]byte, error)
+	IRBytes(*conjureircli.Extensions) ([]byte, error)
 	// Generated returns true if the IR provided by this provider is generated from YAML, false otherwise.
 	GeneratedFromYAML() bool
-}
-
-type Extensions struct {
-	Extensions struct {
-		RecommendedProductDependencies []struct {
-			ProductGroup   string `yaml:"product-group"`
-			ProductName    string `yaml:"product-name"`
-			MaximumVersion string `yaml:"maximum-version"`
-			MinimumVersion string `yaml:"minimum-version"`
-			Optional       bool   `yaml:"optional"`
-		}
-	} `yaml:"extensions"`
 }
 
 var _ IRProvider = &localYAMLIRProvider{}
@@ -56,7 +44,7 @@ func NewLocalYAMLIRProvider(path string) IRProvider {
 	}
 }
 
-func (p *localYAMLIRProvider) IRBytes(e *Extensions) ([]byte, error) {
+func (p *localYAMLIRProvider) IRBytes(e *conjureircli.Extensions) ([]byte, error) {
 	return conjureircli.InputPathToIR(p.path, e)
 }
 
@@ -77,7 +65,7 @@ func NewHTTPIRProvider(irURL string) IRProvider {
 	}
 }
 
-func (p *urlIRProvider) IRBytes(_ *Extensions) ([]byte, error) {
+func (p *urlIRProvider) IRBytes(_ *conjureircli.Extensions) ([]byte, error) {
 	resp, cleanup, err := safehttp.Get(http.DefaultClient, p.irURL)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -106,7 +94,7 @@ func NewLocalFileIRProvider(path string) IRProvider {
 	}
 }
 
-func (p *localFileIRProvider) IRBytes(_ *Extensions) ([]byte, error) {
+func (p *localFileIRProvider) IRBytes(_ *conjureircli.Extensions) ([]byte, error) {
 	return os.ReadFile(p.path)
 }
 

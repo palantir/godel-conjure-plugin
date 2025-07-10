@@ -79,7 +79,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 }
 
 func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefinition, error) {
-	bytes, err := param.IRProvider.IRBytes()
+	bytes, err := param.IRProvider.IRBytes(nil)
 	if err != nil {
 		return spec.ConjureDefinition{}, err
 	}

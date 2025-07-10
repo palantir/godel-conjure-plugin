@@ -24,8 +24,8 @@ import (
 
 func TestYAMLtoIR(t *testing.T) {
 	for i, tc := range []struct {
-		in     string
-		want   string
+		in   string
+		want string
 	}{
 		{
 			in: `
@@ -59,7 +59,7 @@ types:
 }`,
 		},
 	} {
-		got, err := conjureircli.YAMLtoIR([]byte(tc.in))
+		got, err := conjureircli.YAMLtoIR([]byte(tc.in), nil)
 		require.NoError(t, err, "Case %d", i)
 		assert.Equal(t, tc.want, string(got), "Case %d\nGot:\n%s", i, got)
 	}

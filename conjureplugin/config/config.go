@@ -56,13 +56,28 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+
+		serviceDependencies := []conjureplugin.ServiceDependency{}
+		for _, serviceDependency := range currConfig.ServiceDependencies {
+			if serviceDependency.ProductGroup == nil || serviceDependency.ProductName == nil || serviceDependency.MaximumVersion == nil {
+				return conjureplugin.ConjureProjectParams{}, errors.Errorf(`"product-group", "product-name", and "maximum-version" must be present`)
+			}
+
+			serviceDependencies = append(serviceDependencies, conjureplugin.ServiceDependency{
+				ProductGroup:   *serviceDependency.ProductGroup,
+				ProductName:    *serviceDependency.ProductName,
+				MaximumVersion: *serviceDependency.MaximumVersion,
+			})
+		}
+
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:   currConfig.OutputDir,
-			IRProvider:  irProvider,
-			AcceptFuncs: acceptFuncsFlag,
-			Server:      currConfig.Server,
-			CLI:         currConfig.CLI,
-			Publish:     publishVal,
+			OutputDir:           currConfig.OutputDir,
+			IRProvider:          irProvider,
+			AcceptFuncs:         acceptFuncsFlag,
+			Server:              currConfig.Server,
+			CLI:                 currConfig.CLI,
+			Publish:             publishVal,
+			ServiceDependencies: serviceDependencies,
 		}
 	}
 	return conjureplugin.ConjureProjectParams{
