@@ -25,7 +25,6 @@ import (
 func TestYAMLtoIR(t *testing.T) {
 	for i, tc := range []struct {
 		in     string
-		params []conjureircli.Param
 		want   string
 	}{
 		{
@@ -59,67 +58,9 @@ types:
   "extensions" : { }
 }`,
 		},
-		{
-			in: `
-types:
-  definitions:
-    default-package: com.palantir.conjure
-    objects:
-      BooleanExample: { fields: { value: boolean } }
-`,
-			params: []conjureircli.Param{
-				mustExtensionsParam(map[string]interface{}{
-					"recommended-product-dependencies": []map[string]interface{}{
-						{
-							"product-group":   "com.palantir.assetserver",
-							"product-name":    "asset-server",
-							"minimum-version": "2.78.0",
-							"maximum-version": "2.x.x",
-						},
-					},
-				}),
-			},
-			want: `{
-  "version" : 1,
-  "errors" : [ ],
-  "types" : [ {
-    "type" : "object",
-    "object" : {
-      "typeName" : {
-        "name" : "BooleanExample",
-        "package" : "com.palantir.conjure"
-      },
-      "fields" : [ {
-        "fieldName" : "value",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "BOOLEAN"
-        }
-      } ]
-    }
-  } ],
-  "services" : [ ],
-  "extensions" : {
-    "recommended-product-dependencies" : [ {
-      "maximum-version" : "2.x.x",
-      "minimum-version" : "2.78.0",
-      "product-group" : "com.palantir.assetserver",
-      "product-name" : "asset-server"
-    } ]
-  }
-}`,
-		},
 	} {
-		got, err := conjureircli.YAMLtoIRWithParams([]byte(tc.in), tc.params...)
+		got, err := conjureircli.YAMLtoIR([]byte(tc.in))
 		require.NoError(t, err, "Case %d", i)
 		assert.Equal(t, tc.want, string(got), "Case %d\nGot:\n%s", i, got)
 	}
-}
-
-func mustExtensionsParam(in map[string]interface{}) conjureircli.Param {
-	param, err := conjureircli.ExtensionsParam(in)
-	if err != nil {
-		panic(err)
-	}
-	return param
 }
