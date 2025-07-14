@@ -27,13 +27,15 @@ import (
 )
 
 var (
+	dryRunFlagVal     bool
+	extensionsFlagVal string
+
 	groupIDFlagVal    string
-	urlFlagVal        string
-	usernameFlagVal   string
 	passwordFlagVal   string
 	repositoryFlagVal string
+	urlFlagVal        string
+	usernameFlagVal   string
 	mavenNoPOMFlagVal bool
-	dryRunFlagVal     bool
 )
 
 var publishCmd = &cobra.Command{
@@ -65,18 +67,20 @@ var publishCmd = &cobra.Command{
 			}
 			flagVals[currFlag.Name] = val
 		}
-		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout())
+
+		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, extensionsFlagVal, cmd.OutOrStdout())
 	},
 }
 
 func init() {
 	publishCmd.Flags().BoolVar(&dryRunFlagVal, "dry-run", false, "print the operations that would be performed")
+	publishCmd.Flags().StringVar(&extensionsFlagVal, "extensions", "", "extensions to add to the IRs extensions field, if empty no extensions will be sent to the internal Conjure IR generator")
 
 	publishCmd.Flags().StringVar(&groupIDFlagVal, string(publisher.GroupIDFlag.Name), "", publisher.GroupIDFlag.Description)
+	publishCmd.Flags().StringVar(&passwordFlagVal, string(publisher.ConnectionInfoPasswordFlag.Name), "", publisher.ConnectionInfoPasswordFlag.Description)
 	publishCmd.Flags().StringVar(&repositoryFlagVal, string(artifactory.PublisherRepositoryFlag.Name), "", artifactory.PublisherRepositoryFlag.Description)
 	publishCmd.Flags().StringVar(&urlFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", publisher.ConnectionInfoURLFlag.Description)
 	publishCmd.Flags().StringVar(&usernameFlagVal, string(publisher.ConnectionInfoUsernameFlag.Name), "", publisher.ConnectionInfoUsernameFlag.Description)
-	publishCmd.Flags().StringVar(&passwordFlagVal, string(publisher.ConnectionInfoPasswordFlag.Name), "", publisher.ConnectionInfoPasswordFlag.Description)
 	publishCmd.Flags().BoolVar(&mavenNoPOMFlagVal, string(maven.NoPOMFlag.Name), false, maven.NoPOMFlag.Description)
 	rootCmd.AddCommand(publishCmd)
 }

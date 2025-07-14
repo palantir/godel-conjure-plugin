@@ -15,6 +15,8 @@
 package conjureircli_test
 
 import (
+	"os"
+	"path"
 	"testing"
 
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
@@ -22,11 +24,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var extension = `{
+	"recommended-product-dependencies" : [
+		{
+			"maximum-version" : "2.x.x",
+			"minimum-version" : "2.78.0",
+			"product-group" : "com.palantir.assetserver",
+			"product-name" : "asset-server"
+		}
+	]
+}`
+
 func TestYAMLtoIR(t *testing.T) {
 	for i, tc := range []struct {
-		in     string
-		params []conjureircli.Param
-		want   string
+		in         string
+		extensions string
+		want       string
 	}{
 		{
 			in: `
@@ -67,18 +80,7 @@ types:
     objects:
       BooleanExample: { fields: { value: boolean } }
 `,
-			params: []conjureircli.Param{
-				mustExtensionsParam(map[string]interface{}{
-					"recommended-product-dependencies": []map[string]interface{}{
-						{
-							"product-group":   "com.palantir.assetserver",
-							"product-name":    "asset-server",
-							"minimum-version": "2.78.0",
-							"maximum-version": "2.x.x",
-						},
-					},
-				}),
-			},
+			extensions: extension,
 			want: `{
   "version" : 1,
   "errors" : [ ],
@@ -110,16 +112,26 @@ types:
 }`,
 		},
 	} {
-		got, err := conjureircli.YAMLtoIRWithParams([]byte(tc.in), tc.params...)
+		got, err := yamlToIRWithExtensions([]byte(tc.in), tc.extensions)
 		require.NoError(t, err, "Case %d", i)
 		assert.Equal(t, tc.want, string(got), "Case %d\nGot:\n%s", i, got)
 	}
 }
 
-func mustExtensionsParam(in map[string]interface{}) conjureircli.Param {
-	param, err := conjureircli.ExtensionsParam(in)
+func yamlToIRWithExtensions(in []byte, extensions string) (rBytes []byte, rErr error) {
+	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		panic(err)
 	}
-	return param
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			panic(err)
+		}
+	}()
+
+	inPath := path.Join(tmpDir, "in.yml")
+	if err := os.WriteFile(inPath, in, 0644); err != nil {
+		panic(err)
+	}
+	return conjureircli.InputPathToIR(inPath, extensions)
 }

@@ -15,8 +15,9 @@
 package conjureplugin
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
 	"github.com/palantir/pkg/safehttp"
@@ -24,7 +25,7 @@ import (
 )
 
 type IRProvider interface {
-	IRBytes() ([]byte, error)
+	IRBytes(extensions string) ([]byte, error)
 	// Generated returns true if the IR provided by this provider is generated from YAML, false otherwise.
 	GeneratedFromYAML() bool
 }
@@ -32,21 +33,19 @@ type IRProvider interface {
 var _ IRProvider = &localYAMLIRProvider{}
 
 type localYAMLIRProvider struct {
-	path   string
-	params []conjureircli.Param
+	path string
 }
 
 // NewLocalYAMLIRProvider returns an IRProvider that provides IR generated from local YAML. The provided path must be a
 // path to a Conjure YAML file or a directory that contains Conjure YAML files.
-func NewLocalYAMLIRProvider(path string, params ...conjureircli.Param) IRProvider {
+func NewLocalYAMLIRProvider(path string) IRProvider {
 	return &localYAMLIRProvider{
-		path:   path,
-		params: params,
+		path: path,
 	}
 }
 
-func (p *localYAMLIRProvider) IRBytes() ([]byte, error) {
-	return conjureircli.InputPathToIRWithParams(p.path, p.params...)
+func (p *localYAMLIRProvider) IRBytes(extensions string) ([]byte, error) {
+	return conjureircli.InputPathToIR(p.path, extensions)
 }
 
 func (p *localYAMLIRProvider) GeneratedFromYAML() bool {
@@ -66,7 +65,7 @@ func NewHTTPIRProvider(irURL string) IRProvider {
 	}
 }
 
-func (p *urlIRProvider) IRBytes() ([]byte, error) {
+func (p *urlIRProvider) IRBytes(_ string) ([]byte, error) {
 	resp, cleanup, err := safehttp.Get(http.DefaultClient, p.irURL)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -75,7 +74,7 @@ func (p *urlIRProvider) IRBytes() ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.Errorf("expected response status 200 when fetching IR from remote source %s, but got %d", p.irURL, resp.StatusCode)
 	}
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }
 
 func (p *urlIRProvider) GeneratedFromYAML() bool {
@@ -95,8 +94,8 @@ func NewLocalFileIRProvider(path string) IRProvider {
 	}
 }
 
-func (p *localFileIRProvider) IRBytes() ([]byte, error) {
-	return ioutil.ReadFile(p.path)
+func (p *localFileIRProvider) IRBytes(_ string) ([]byte, error) {
+	return os.ReadFile(p.path)
 }
 
 func (p *localFileIRProvider) GeneratedFromYAML() bool {

@@ -26,7 +26,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, dryRun bool, stdout io.Writer) error {
+func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, dryRun bool, extensions string, stdout io.Writer) error {
 	var paramsToPublishKeys []string
 	var paramsToPublish []ConjureProjectParam
 	for i, param := range params.OrderedParams() {
@@ -97,7 +97,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		irBytes, err := param.IRProvider.IRBytes()
+		irBytes, err := param.IRProvider.IRBytes(extensions)
 		if err != nil {
 			return err
 		}
