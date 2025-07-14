@@ -17,7 +17,6 @@ package conjureircli
 import (
 	_ "embed" // required for go:embed directive
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -26,7 +25,6 @@ import (
 
 	"github.com/mholt/archiver/v3"
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
-	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 )
 
@@ -35,34 +33,8 @@ var (
 	conjureCliTGZ []byte
 )
 
-func YAMLtoIR(in []byte) (rBytes []byte, rErr error) {
-	return YAMLtoIRWithParams(in)
-}
-
-func YAMLtoIRWithParams(in []byte, params ...Param) (rBytes []byte, rErr error) {
-	tmpDir, err := ioutil.TempDir("", "")
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create temporary directory")
-	}
-	defer func() {
-		if err := os.RemoveAll(tmpDir); rErr == nil && err != nil {
-			rErr = errors.Wrapf(err, "failed to remove temporary directory")
-		}
-	}()
-
-	inPath := path.Join(tmpDir, "in.yml")
-	if err := ioutil.WriteFile(inPath, in, 0644); err != nil {
-		return nil, errors.WithStack(err)
-	}
-	return InputPathToIRWithParams(inPath, params...)
-}
-
 func InputPathToIR(inPath string) (rBytes []byte, rErr error) {
-	return InputPathToIRWithParams(inPath)
-}
-
-func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rErr error) {
-	tmpDir, err := ioutil.TempDir("", "")
+	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create temporary directory")
 	}
@@ -73,10 +45,10 @@ func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rEr
 	}()
 
 	outPath := path.Join(tmpDir, "out.json")
-	if err := RunWithParams(inPath, outPath, params...); err != nil {
+	if err := Run(inPath, outPath); err != nil {
 		return nil, err
 	}
-	irBytes, err := ioutil.ReadFile(outPath)
+	irBytes, err := os.ReadFile(outPath)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -85,41 +57,6 @@ func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rEr
 
 // Run invokes the "compile" operation on the Conjure CLI with the provided inPath and outPath as arguments.
 func Run(inPath, outPath string) error {
-	return RunWithParams(inPath, outPath)
-}
-
-type runArgs struct {
-	extensionsContent []byte
-}
-
-type Param interface {
-	apply(*runArgs)
-}
-
-type paramFn func(*runArgs)
-
-func (fn paramFn) apply(r *runArgs) {
-	fn(r)
-}
-
-// ExtensionsParam returns a parameter that sets the extensions of the generated Conjure IR to be the JSON-marshalled
-// content of the provided map if it is non-empty. Returns a no-op parameter if the provided map is nil or empty.
-func ExtensionsParam(extensionsContent map[string]interface{}) (Param, error) {
-	if len(extensionsContent) == 0 {
-		return nil, nil
-	}
-	extensionBytes, err := safejson.Marshal(extensionsContent)
-	if err != nil {
-		return nil, err
-	}
-	return paramFn(func(r *runArgs) {
-		r.extensionsContent = extensionBytes
-	}), nil
-}
-
-// RunWithParams invokes the "compile" operation on the Conjure CLI with the provided inPath and outPath as arguments.
-// Any arguments or configuration supplied by the provided params are also applied.
-func RunWithParams(inPath, outPath string, params ...Param) error {
 	cliPath, err := cliCmdPath()
 	if err != nil {
 		return err
@@ -128,22 +65,8 @@ func RunWithParams(inPath, outPath string, params ...Param) error {
 		return err
 	}
 
-	// apply provided params
-	var runArgCollector runArgs
-	for _, param := range params {
-		if param == nil {
-			continue
-		}
-		param.apply(&runArgCollector)
-	}
-
 	// invoke the "compile" command
 	args := []string{"compile"}
-
-	// if extensionsContent is non-empty, add as flag
-	if len(runArgCollector.extensionsContent) > 0 {
-		args = append(args, "--extensions", string(runArgCollector.extensionsContent))
-	}
 
 	// set the inPath and outPath as final arguments
 	args = append(args, inPath, outPath)
