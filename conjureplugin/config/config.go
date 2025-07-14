@@ -15,7 +15,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"net/url"
 	"os"
 	"sort"
@@ -23,6 +22,7 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -33,7 +33,7 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v1.ConjurePluginConfig {
 	return (*v1.ConjurePluginConfig)(in)
 }
 
-func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, error) {
+func (c *ConjurePluginConfig) ToParams(projectsParams ...map[string][]conjureircli.Param) (conjureplugin.ConjureProjectParams, error) {
 	var keys []string
 	for k := range c.ProjectConfigs {
 		keys = append(keys, k)
@@ -42,7 +42,12 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	for key, currConfig := range c.ProjectConfigs {
-		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
+		var cliParams []conjureircli.Param
+		for _, projectParams := range projectsParams {
+			cliParams = append(cliParams, projectParams[key]...)
+		}
+
+		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider(cliParams...)
 		if err != nil {
 			return conjureplugin.ConjureProjectParams{}, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
 		}
@@ -85,7 +90,7 @@ func ToIRLocatorConfig(in *IRLocatorConfig) *v1.IRLocatorConfig {
 	return (*v1.IRLocatorConfig)(in)
 }
 
-func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
+func (cfg *IRLocatorConfig) ToIRProvider(params ...conjureircli.Param) (conjureplugin.IRProvider, error) {
 	if cfg.Locator == "" {
 		return nil, errors.Errorf("locator cannot be empty")
 	}
@@ -118,7 +123,7 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 	case v1.LocatorTypeRemote:
 		return conjureplugin.NewHTTPIRProvider(cfg.Locator), nil
 	case v1.LocatorTypeYAML:
-		return conjureplugin.NewLocalYAMLIRProvider(cfg.Locator), nil
+		return conjureplugin.NewLocalYAMLIRProvider(cfg.Locator, params...), nil
 	case v1.LocatorTypeIRFile:
 		return conjureplugin.NewLocalFileIRProvider(cfg.Locator), nil
 	default:
@@ -127,7 +132,7 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 }
 
 func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
-	bytes, err := ioutil.ReadFile(f)
+	bytes, err := os.ReadFile(f)
 	if err != nil {
 		return ConjurePluginConfig{}, errors.WithStack(err)
 	}

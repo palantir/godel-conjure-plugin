@@ -22,25 +22,46 @@ import (
 	"github.com/palantir/distgo/publisher/artifactory"
 	"github.com/palantir/distgo/publisher/maven"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
+	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 var (
+	dryRunFlagVal     bool
+	extensionsFlagVal string
+
 	groupIDFlagVal    string
-	urlFlagVal        string
-	usernameFlagVal   string
 	passwordFlagVal   string
 	repositoryFlagVal string
+	urlFlagVal        string
+	usernameFlagVal   string
 	mavenNoPOMFlagVal bool
-	dryRunFlagVal     bool
 )
 
 var publishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publish Conjure IR",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		projectParams, err := toProjectParams(configFileFlag)
+		var extensions map[string]map[string]any
+		if extensionsFlagVal != "" {
+			if err := safejson.Unmarshal([]byte(extensionsFlagVal), &extensions); err != nil {
+				return err
+			}
+		}
+
+		projectExtensions := make(map[string][]conjureircli.Param)
+
+		for k, v := range extensions {
+			param, err := conjureircli.ExtensionsParam(v)
+			if err != nil {
+				return err
+			}
+			projectExtensions[k] = []conjureircli.Param{param}
+		}
+
+		projectParams, err := toProjectParams(configFileFlag, projectExtensions)
 		if err != nil {
 			return err
 		}
@@ -71,12 +92,13 @@ var publishCmd = &cobra.Command{
 
 func init() {
 	publishCmd.Flags().BoolVar(&dryRunFlagVal, "dry-run", false, "print the operations that would be performed")
+	publishCmd.Flags().StringVar(&extensionsFlagVal, "extensions", "", "extensions to be add to the Conjure IR")
 
 	publishCmd.Flags().StringVar(&groupIDFlagVal, string(publisher.GroupIDFlag.Name), "", publisher.GroupIDFlag.Description)
+	publishCmd.Flags().StringVar(&passwordFlagVal, string(publisher.ConnectionInfoPasswordFlag.Name), "", publisher.ConnectionInfoPasswordFlag.Description)
 	publishCmd.Flags().StringVar(&repositoryFlagVal, string(artifactory.PublisherRepositoryFlag.Name), "", artifactory.PublisherRepositoryFlag.Description)
 	publishCmd.Flags().StringVar(&urlFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", publisher.ConnectionInfoURLFlag.Description)
 	publishCmd.Flags().StringVar(&usernameFlagVal, string(publisher.ConnectionInfoUsernameFlag.Name), "", publisher.ConnectionInfoUsernameFlag.Description)
-	publishCmd.Flags().StringVar(&passwordFlagVal, string(publisher.ConnectionInfoPasswordFlag.Name), "", publisher.ConnectionInfoPasswordFlag.Description)
 	publishCmd.Flags().BoolVar(&mavenNoPOMFlagVal, string(maven.NoPOMFlag.Name), false, maven.NoPOMFlag.Description)
 	rootCmd.AddCommand(publishCmd)
 }

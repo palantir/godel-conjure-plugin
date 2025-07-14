@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: 'feature: Add `--extensions` flag to `conjure-publish` command'
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/539

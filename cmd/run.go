@@ -19,6 +19,7 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +32,7 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run conjure-go based on project configuration",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		parsedConfigSet, err := toProjectParams(configFileFlag)
+		parsedConfigSet, err := toProjectParams(configFileFlag, nil)
 		if err != nil {
 			return err
 		}
@@ -47,10 +48,10 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 }
 
-func toProjectParams(cfgFile string) (conjureplugin.ConjureProjectParams, error) {
+func toProjectParams(cfgFile string, params map[string][]conjureircli.Param) (conjureplugin.ConjureProjectParams, error) {
 	config, err := config.ReadConfigFromFile(cfgFile)
 	if err != nil {
 		return conjureplugin.ConjureProjectParams{}, err
 	}
-	return config.ToParams()
+	return config.ToParams(params)
 }
