@@ -68,11 +68,12 @@ func Run(inPath, outPath string, extensions string) error {
 	// invoke the "compile" command
 	args := []string{"compile"}
 
-	args = append(args, inPath, outPath)
-
 	if extensions != "" {
 		args = append(args, "--extensions", extensions)
 	}
+
+	// set the inPath and outPath as final arguments
+	args = append(args, inPath, outPath)
 
 	cmd := exec.Command(cliPath, args...)
 	if output, err := cmd.CombinedOutput(); err != nil {
