@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: 'improvement: remove redundant `TempDir` creation'
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/541
