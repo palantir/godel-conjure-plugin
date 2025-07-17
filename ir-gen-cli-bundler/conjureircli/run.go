@@ -62,21 +62,21 @@ func InputPathToIR(inPath string) (rBytes []byte, rErr error) {
 }
 
 func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rErr error) {
-	tmpDir, err := ioutil.TempDir("", "")
+	file, err := os.CreateTemp("", "")
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create temporary directory")
+		return nil, errors.Wrapf(err, "failed to create temporary file")
 	}
+	outPath := file.Name()
 	defer func() {
-		if err := os.RemoveAll(tmpDir); rErr == nil && err != nil {
+		if err := os.Remove(outPath); rErr == nil && err != nil {
 			rErr = errors.Wrapf(err, "failed to remove temporary directory")
 		}
 	}()
 
-	outPath := path.Join(tmpDir, "out.json")
 	if err := RunWithParams(inPath, outPath, params...); err != nil {
 		return nil, err
 	}
-	irBytes, err := ioutil.ReadFile(outPath)
+	irBytes, err := os.ReadFile(outPath)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
