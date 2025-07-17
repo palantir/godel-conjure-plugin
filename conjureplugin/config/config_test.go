@@ -267,9 +267,6 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 			},
 			conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
 						OutputDir:   "outputDir",
@@ -293,9 +290,6 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 			},
 			conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
 						OutputDir:   "outputDir",
@@ -320,9 +314,6 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 			},
 			conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
 						OutputDir:   "outputDir",
@@ -345,9 +336,6 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 			},
 			conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
 						OutputDir:   "outputDir",

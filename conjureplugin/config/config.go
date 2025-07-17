@@ -15,10 +15,8 @@
 package config
 
 import (
-	"io/ioutil"
 	"net/url"
 	"os"
-	"sort"
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -34,12 +32,6 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v1.ConjurePluginConfig {
 }
 
 func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, error) {
-	var keys []string
-	for k := range c.ProjectConfigs {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	for key, currConfig := range c.ProjectConfigs {
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
@@ -66,8 +58,7 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 		}
 	}
 	return conjureplugin.ConjureProjectParams{
-		SortedKeys: keys,
-		Params:     params,
+		Params: params,
 	}, nil
 }
 
@@ -127,7 +118,7 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 }
 
 func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
-	bytes, err := ioutil.ReadFile(f)
+	bytes, err := os.ReadFile(f)
 	if err != nil {
 		return ConjurePluginConfig{}, errors.WithStack(err)
 	}

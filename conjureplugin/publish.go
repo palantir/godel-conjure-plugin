@@ -27,17 +27,15 @@ import (
 )
 
 func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, dryRun bool, stdout io.Writer) error {
-	var paramsToPublishKeys []string
-	var paramsToPublish []ConjureProjectParam
-	for i, param := range params.OrderedParams() {
-		if !param.Publish {
+	var filteredParams []Param
+	for _, param := range params.OrderedParams() {
+		if !param.Param.Publish {
 			continue
 		}
-		paramsToPublishKeys = append(paramsToPublishKeys, params.SortedKeys[i])
-		paramsToPublish = append(paramsToPublish, param)
+		filteredParams = append(filteredParams, param)
 	}
 	// nothing to publish
-	if len(paramsToPublish) == 0 {
+	if len(filteredParams) == 0 {
 		return nil
 	}
 
@@ -58,8 +56,8 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		_ = os.RemoveAll(tmpDir)
 	}()
 
-	for i, param := range paramsToPublish {
-		key := paramsToPublishKeys[i]
+	for _, param := range filteredParams {
+		key := param.Key
 		currDir := path.Join(tmpDir, fmt.Sprintf("conjure-%s", key))
 		irFileName := fmt.Sprintf("%s-%s.conjure.json", key, version)
 		keyAsDistID := distgo.DistID(key)
@@ -97,7 +95,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		irBytes, err := param.IRProvider.IRBytes()
+		irBytes, err := param.Param.IRProvider.IRBytes()
 		if err != nil {
 			return err
 		}

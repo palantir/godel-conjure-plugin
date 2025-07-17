@@ -37,17 +37,17 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 
 	k := 0
 	for _, currParam := range params.OrderedParams() {
-		outputDir := currParam.OutputDir
-		conjureDef, err := conjureDefinitionFromParam(currParam)
+		outputDir := currParam.Param.OutputDir
+		conjureDef, err := conjureDefinitionFromParam(currParam.Param)
 		if err != nil {
 			return err
 		}
 
 		outputConf := conjure.OutputConfiguration{
 			OutputDir:            path.Join(projectDir, outputDir),
-			GenerateServer:       currParam.Server,
-			GenerateCLI:          currParam.CLI,
-			GenerateFuncsVisitor: currParam.AcceptFuncs,
+			GenerateServer:       currParam.Param.Server,
+			GenerateCLI:          currParam.Param.CLI,
+			GenerateFuncsVisitor: currParam.Param.AcceptFuncs,
 		}
 		if verify {
 			diff, err := diffOnDisk(conjureDef, projectDir, outputConf)

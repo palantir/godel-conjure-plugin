@@ -14,15 +14,32 @@
 
 package conjureplugin
 
+import (
+	"sort"
+)
+
 type ConjureProjectParams struct {
-	SortedKeys []string
-	Params     map[string]ConjureProjectParam
+	Params map[string]ConjureProjectParam
 }
 
-func (p *ConjureProjectParams) OrderedParams() []ConjureProjectParam {
-	var out []ConjureProjectParam
-	for _, k := range p.SortedKeys {
-		out = append(out, p.Params[k])
+type Param struct {
+	Param ConjureProjectParam
+	Key   string
+}
+
+func (p *ConjureProjectParams) OrderedParams() []Param {
+	var keys []string
+	for key := range p.Params {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	var out []Param
+	for _, k := range keys {
+		out = append(out, Param{
+			Param: p.Params[k],
+			Key:   k,
+		})
 	}
 	return out
 }
