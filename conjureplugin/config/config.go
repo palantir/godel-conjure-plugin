@@ -23,6 +23,7 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -42,9 +43,19 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	for key, currConfig := range c.ProjectConfigs {
-		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
+		var conjureCLIParams []conjureircli.Param
+		if param, err := conjureircli.ExtensionsParam(currConfig.Extensions); err != nil {
+			return conjureplugin.ConjureProjectParams{}, errors.Wrapf(err, "failed to parse extensions")
+		} else if param != nil {
+			conjureCLIParams = append(conjureCLIParams, param)
+		}
+
+		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider(conjureCLIParams...)
 		if err != nil {
 			return conjureplugin.ConjureProjectParams{}, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
+		}
+		if currConfig.Extensions != nil && !irProvider.GeneratedFromYAML() {
+			return conjureplugin.ConjureProjectParams{}, errors.Errorf("cannot use IR extensions on conjure definitions not defined locally")
 		}
 
 		publishVal := false
@@ -63,6 +74,7 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 			Server:      currConfig.Server,
 			CLI:         currConfig.CLI,
 			Publish:     publishVal,
+			Extensions:  currConfig.Extensions,
 		}
 	}
 	return conjureplugin.ConjureProjectParams{
@@ -85,7 +97,7 @@ func ToIRLocatorConfig(in *IRLocatorConfig) *v1.IRLocatorConfig {
 	return (*v1.IRLocatorConfig)(in)
 }
 
-func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
+func (cfg *IRLocatorConfig) ToIRProvider(params ...conjureircli.Param) (conjureplugin.IRProvider, error) {
 	if cfg.Locator == "" {
 		return nil, errors.Errorf("locator cannot be empty")
 	}
@@ -118,7 +130,7 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 	case v1.LocatorTypeRemote:
 		return conjureplugin.NewHTTPIRProvider(cfg.Locator), nil
 	case v1.LocatorTypeYAML:
-		return conjureplugin.NewLocalYAMLIRProvider(cfg.Locator), nil
+		return conjureplugin.NewLocalYAMLIRProvider(cfg.Locator, params...), nil
 	case v1.LocatorTypeIRFile:
 		return conjureplugin.NewLocalFileIRProvider(cfg.Locator), nil
 	default:
