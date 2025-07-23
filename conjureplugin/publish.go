@@ -123,13 +123,13 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 
 		maps.Copy(conjureCliExtensions, providedExtensions)
 
-		irBytesWithExtensions, err := safejson.Marshal(conjureCliIr)
+		irBytes, err = safejson.Marshal(conjureCliIr)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 
 		irFilePath := path.Join(directoryPath, irFileName)
-		if err := os.WriteFile(irFilePath, irBytesWithExtensions, 0644); err != nil {
+		if err := os.WriteFile(irFilePath, irBytes, 0644); err != nil {
 			return errors.WithStack(err)
 		}
 
