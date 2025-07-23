@@ -29,7 +29,7 @@ func WriteBytesToTempFile(bytes []byte) (_ string, rErr error) {
 	}()
 
 	if _, err = file.Write(bytes); err != nil {
-		defer func() { rErr = errors.Join(rErr, os.Remove(file.Name()) }()
+		defer func() { rErr = errors.Join(rErr, os.Remove(file.Name())) }()
 		return "", err
 	}
 
