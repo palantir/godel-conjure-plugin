@@ -1,3 +1,17 @@
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package extensionsprovider
 
 import (
@@ -11,7 +25,7 @@ import (
 
 type ExtensionsProvider func(conjureProject string, irBytesWithoutExtensions []byte, version string) (map[string]any, error)
 
-func NewExtensionsProvider(url string, groupId string, assets []string) ExtensionsProvider {
+func NewExtensionsProvider(url string, groupID string, assets []string) ExtensionsProvider {
 	// url + "/artifactory/" + groupId + "/" + key is what is needed for resolvinng the older conjure IRs
 	return func(conjureProject string, irBytesWithoutExtensions []byte, version string) (_ map[string]any, rErr error) {
 		irFilePathWithoutExtensions, err := writeBytesToFile(irBytesWithoutExtensions)
@@ -38,8 +52,8 @@ func NewExtensionsProvider(url string, groupId string, assets []string) Extensio
 			arg, err := safejson.Marshal(extensionsAssetArgs{
 				Proposed: irFilePathWithoutExtensions,
 				Version:  version,
-				Url:      url,
-				GroupId:  groupId,
+				URL:      url,
+				GroupID:  groupID,
 				Project:  conjureProject,
 			})
 			if err != nil {
@@ -82,8 +96,8 @@ func writeBytesToFile(bytes []byte) (_ string, rErr error) {
 type extensionsAssetArgs struct {
 	Proposed string `json:"proposed,omitempty"` // proposed IR (copying naming from conjure backcompat)
 	Version  string `json:"version,omitempty"`  // take this version if you incompatible
-	Url      string `json:"url,omitempty"`
-	GroupId  string `json:"group-id,omitempty"`
+	URL      string `json:"url,omitempty"`
+	GroupID  string `json:"group-id,omitempty"`
 	Project  string `json:"project,omitempty"`
 }
 

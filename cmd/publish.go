@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/palantir/distgo/distgo"
@@ -68,8 +69,14 @@ var publishCmd = &cobra.Command{
 			}
 			flagVals[currFlag.Name] = val
 		}
+
+		assets := strings.Split(assetsFlagVal, ",")
+		if slices.Equal(assets, []string{""}) {
+			assets = nil
+		}
+
 		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.NewExtensionsProvider(urlFlagVal, groupIDFlagVal, strings.Split(assetsFlagVal, ",")),
+			extensionsprovider.NewExtensionsProvider(urlFlagVal, groupIDFlagVal, assets),
 		)
 	},
 }
