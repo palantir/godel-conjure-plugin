@@ -76,7 +76,7 @@ var publishCmd = &cobra.Command{
 		}
 
 		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.NewExtensionsProvider(assets, configFileFlag, urlFlagVal, groupIDFlagVal),
+			extensionsprovider.NewExtensionsProvider(configFileFlag, assets, urlFlagVal, groupIDFlagVal),
 		)
 	},
 }

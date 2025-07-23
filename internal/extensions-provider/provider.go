@@ -24,7 +24,7 @@ import (
 
 type ExtensionsProvider func(irBytesWithoutExtensions []byte, conjureProject string, version string) (map[string]any, error)
 
-func NewExtensionsProvider(assets []string, config, url, groupID string) ExtensionsProvider {
+func NewExtensionsProvider(config string, assets []string, url, groupID string) ExtensionsProvider {
 	return func(irBytes []byte, conjureProject string, version string) (_ map[string]any, rErr error) {
 		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
