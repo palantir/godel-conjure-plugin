@@ -33,9 +33,6 @@ func NewExtensionsProvider(config string, assets []string, url, groupID string) 
 
 		allExtensions := make(map[string]any)
 		for _, asset := range assets {
-			if asset == "" {
-				continue
-			}
 			bytes, err := exec.Command(asset, "_assetInfo").Output()
 			if err != nil {
 				return nil, err
