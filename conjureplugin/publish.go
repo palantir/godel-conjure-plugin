@@ -110,6 +110,10 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		if err != nil {
 			return errors.WithStack(err)
 		}
+		_, err = os.Stderr.Write(irBytes)
+		if err != nil {
+			panic(err)
+		}
 
 		irFilePath := path.Join(directoryPath, irFileName)
 		if err := os.WriteFile(irFilePath, irBytes, 0644); err != nil {

@@ -85,7 +85,7 @@ func writeBytesToFile(bytes []byte) (_ string, rErr error) {
 		rErr = errors.Join(rErr, file.Close())
 	}()
 
-	if _, rErr = file.Write(bytes); err != nil {
+	if _, rErr = file.Write(bytes); rErr != nil {
 		return
 	}
 
