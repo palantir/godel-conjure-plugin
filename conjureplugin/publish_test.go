@@ -77,7 +77,7 @@ projects:
 		publisher.ConnectionInfoURLFlag.Name:     "http://artifactory.domain.com",
 		publisher.GroupIDFlag.Name:               "com.palantir.foo",
 		artifactory.PublisherRepositoryFlag.Name: "repo",
-	}, true, outputBuf, func(conjureProject string, irBytesWithoutExtensions []byte, version string) (map[string]any, error) {
+	}, true, outputBuf, func(_ []byte, _, _ string) (map[string]any, error) {
 		return nil, nil
 	})
 	require.NoError(t, err, "failed to publish Conjure")
