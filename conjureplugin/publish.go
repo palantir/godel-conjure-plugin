@@ -28,7 +28,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, dryRun bool, stdout io.Writer, groupId string, repo string, url string, assets ...string) error {
+func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, dryRun bool, stdout io.Writer, groupId string, url string, assets ...string) error {
 	var paramsToPublishKeys []string
 	var paramsToPublish []ConjureProjectParam
 	for i, param := range params.OrderedParams() {
