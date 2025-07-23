@@ -26,7 +26,6 @@ import (
 type ExtensionsProvider func(conjureProject string, irBytesWithoutExtensions []byte, version string) (map[string]any, error)
 
 func NewExtensionsProvider(url string, groupID string, assets []string) ExtensionsProvider {
-	// url + "/artifactory/" + groupId + "/" + key is what is needed for resolvinng the older conjure IRs
 	return func(conjureProject string, irBytesWithoutExtensions []byte, version string) (_ map[string]any, rErr error) {
 		irFilePathWithoutExtensions, err := writeBytesToFile(irBytesWithoutExtensions)
 		if err != nil {
