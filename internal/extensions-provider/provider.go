@@ -1,17 +1,23 @@
 package extensionsprovider
 
 import (
+	"errors"
 	"maps"
+	"os"
 	"os/exec"
 
 	"github.com/palantir/pkg/safejson"
 )
 
-type ExtensionsProvider func(key string, tmpIRFilePath string, version string) (map[string]any, error)
+type ExtensionsProvider func(conjureProject string, irBytesWithoutExtensions []byte, version string) (map[string]any, error)
 
 func NewExtensionsProvider(url string, groupId string, assets []string) ExtensionsProvider {
 	// url + "/artifactory/" + groupId + "/" + key is what is needed for resolvinng the older conjure IRs
-	return func(conjureProject string, irFilePathWithoutExtensions string, version string) (map[string]any, error) {
+	return func(conjureProject string, irBytesWithoutExtensions []byte, version string) (_ map[string]any, rErr error) {
+		irFilePathWithoutExtensions, err := writeBytesToFile(irBytesWithoutExtensions)
+		if err != nil {
+			return nil, err
+		}
 
 		allExtensions := make(map[string]any)
 		for _, asset := range assets {
@@ -55,6 +61,22 @@ func NewExtensionsProvider(url string, groupId string, assets []string) Extensio
 
 		return allExtensions, nil
 	}
+}
+
+func writeBytesToFile(bytes []byte) (_ string, rErr error) {
+	file, err := os.CreateTemp("", "")
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		rErr = errors.Join(rErr, file.Close())
+	}()
+
+	if _, rErr = file.Write(bytes); err != nil {
+		return
+	}
+
+	return file.Name(), nil
 }
 
 type extensionsAssetArgs struct {
