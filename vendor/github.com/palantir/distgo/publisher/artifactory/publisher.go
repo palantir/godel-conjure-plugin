@@ -49,13 +49,13 @@ func PublisherCreator() publisher.Creator {
 	})
 }
 
-func NewArtifactoryPublisher() Publisher {
+func NewArtifactoryPublisher() *artifactoryPublisher {
 	return &artifactoryPublisher{}
 }
 
 type artifactoryPublisher struct{}
 
-func (p *artifactoryPublisher) TypeName() (string, error) {
+func (*artifactoryPublisher) TypeName() (string, error) {
 	return TypeName, nil
 }
 
@@ -67,7 +67,7 @@ var (
 	}
 )
 
-func (p *artifactoryPublisher) Flags() ([]distgo.PublisherFlag, error) {
+func (*artifactoryPublisher) Flags() ([]distgo.PublisherFlag, error) {
 	return append(publisher.BasicConnectionInfoFlags(),
 		PublisherRepositoryFlag,
 		publisher.GroupIDFlag,
@@ -111,9 +111,11 @@ func (p *artifactoryPublisher) ArtifactoryRunPublish(productTaskOutputInfo distg
 	}
 	publisher.FilterProductTaskOutputInfoArtifactNames(&productTaskOutputInfo, filterRegexp, excludeRegexp)
 
+	// url
 	artifactoryURL := strings.Join([]string{cfg.URL, "artifactory"}, "/")
 	productPath := publisher.MavenProductPath(productTaskOutputInfo, groupID)
 	artifactExists := func(dstFileName string, checksums publisher.Checksums, username, password string) bool {
+		// not this url
 		rawCheckArtifactURL := strings.Join([]string{artifactoryURL, "api", "storage", cfg.Repository, productPath, dstFileName}, "/")
 		checkArtifactURL, err := url.Parse(rawCheckArtifactURL)
 		if err != nil {
@@ -134,7 +136,7 @@ func (p *artifactoryPublisher) ArtifactoryRunPublish(productTaskOutputInfo distg
 				_ = resp.Body.Close()
 			}()
 
-			if bytes, err := ioutil.ReadAll(resp.Body); err == nil {
+			if bytes, err := io.ReadAll(resp.Body); err == nil {
 				var jsonMap map[string]*json.RawMessage
 				if err := json.Unmarshal(bytes, &jsonMap); err == nil {
 					if checksumJSON, ok := jsonMap["Checksums"]; ok && checksumJSON != nil {
@@ -150,10 +152,13 @@ func (p *artifactoryPublisher) ArtifactoryRunPublish(productTaskOutputInfo distg
 		return false
 	}
 
-	deploymentURL, err := p.getDeploymentURL(cfg)
+	// check here
+	deploymentURL, err := getDeploymentURL(cfg)
 	if err != nil {
 		return nil, err
 	}
+
+	// check here
 	baseURL := strings.Join([]string{deploymentURL, productPath}, "/")
 	artifactPaths, uploadedURLs, err := cfg.BasicConnectionInfo.UploadDistArtifacts(productTaskOutputInfo, baseURL, artifactExists, dryRun, stdout)
 	if err != nil {
@@ -184,7 +189,7 @@ func (p *artifactoryPublisher) ArtifactoryRunPublish(productTaskOutputInfo distg
 
 	if !dryRun {
 		// compute SHA-256 Checksums for artifacts
-		if err := p.computeArtifactChecksums(cfg, artifactoryURL, productPath, artifactNames); err != nil {
+		if err := computeArtifactChecksums(cfg, artifactoryURL, productPath, artifactNames); err != nil {
 			// if triggering checksum computation fails, print message but don't throw error
 			_, _ = fmt.Fprintln(stdout, "Uploading artifacts succeeded, but failed to trigger computation of SHA-256 checksums:", err)
 		}
@@ -193,17 +198,17 @@ func (p *artifactoryPublisher) ArtifactoryRunPublish(productTaskOutputInfo distg
 }
 
 // computeArtifactChecksums uses the "api/checksum/sha256" endpoint to compute the checksums for the provided artifacts.
-func (p *artifactoryPublisher) computeArtifactChecksums(cfg config.Artifactory, artifactoryURL, productPath string, artifactNames []string) error {
+func computeArtifactChecksums(cfg config.Artifactory, artifactoryURL, productPath string, artifactNames []string) error {
 	for _, currArtifactName := range artifactNames {
 		currArtifactURL := strings.Join([]string{productPath, currArtifactName}, "/")
-		if err := p.artifactorySetSHA256Checksum(cfg, artifactoryURL, currArtifactURL); err != nil {
+		if err := artifactorySetSHA256Checksum(cfg, artifactoryURL, currArtifactURL); err != nil {
 			return errors.Wrapf(err, "")
 		}
 	}
 	return nil
 }
 
-func (p *artifactoryPublisher) artifactorySetSHA256Checksum(cfg config.Artifactory, baseURLString, filePath string) (rErr error) {
+func artifactorySetSHA256Checksum(cfg config.Artifactory, baseURLString, filePath string) (rErr error) {
 	apiURLString := baseURLString + "/api/checksum/sha256"
 	uploadURL, err := url.Parse(apiURLString)
 	if err != nil {
@@ -240,7 +245,7 @@ func (p *artifactoryPublisher) artifactorySetSHA256Checksum(cfg config.Artifacto
 	return nil
 }
 
-func (p *artifactoryPublisher) getDeploymentURL(cfg config.Artifactory) (string, error) {
+func getDeploymentURL(cfg config.Artifactory) (string, error) {
 	url := strings.Join([]string{cfg.URL, "artifactory", cfg.Repository}, "/")
 	encodedProps, err := encodeProperties(cfg.Properties)
 	if err != nil {

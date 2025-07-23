@@ -110,12 +110,14 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			panic(errors.WithStack(err))
 		}
 
+		// url + "/artifactory/" + groupId + "/" + key is what is needed for resolvinng the older conjure IRs
+
 		type assetArgs struct {
-			Proposed   string `json:"proposed"` // proposed IR (copying nameing from conjure backcompat)
-			Version    string `json:"version"`  // take this version if you incompatible
-			GroupId    string `json:"group-id"`
-			Repository string `json:"repository"`
-			Url        string `json:"url"`
+			Proposed string `json:"proposed"` // proposed IR (copying nameing from conjure backcompat)
+			Version  string `json:"version"`  // take this version if you incompatible
+			Url      string `json:"url"`
+			GroupId  string `json:"group-id"`
+			Project  string `json:"project"`
 		}
 
 		// discover assets that return the ir-plugin info thing
@@ -141,11 +143,11 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		combinedExtensions := make(map[string]any)
 		for _, asset := range extensionsAssets {
 			arg, err := safejson.Marshal(assetArgs{
-				Proposed:   tmpIRFilePath,
-				Version:    version,
-				GroupId:    groupId,
-				Repository: repo,
-				Url:        url,
+				Proposed: tmpIRFilePath,
+				Version:  version,
+				Url:      url,
+				GroupId:  groupId,
+				Project:  key,
 			})
 			if err != nil {
 				panic(errors.WithStack(err))
@@ -192,7 +194,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		if err := publisher.RunPublish(distgo.ProductTaskOutputInfo{
+		if _, err := publisher.ArtifactoryRunPublish(distgo.ProductTaskOutputInfo{
 			Project: projectInfo,
 			Product: productOutputInfo,
 		}, nil, flagVals, dryRun, stdout); err != nil {
