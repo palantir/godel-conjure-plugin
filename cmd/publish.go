@@ -70,13 +70,8 @@ var publishCmd = &cobra.Command{
 			flagVals[currFlag.Name] = val
 		}
 
-		assets := strings.Split(assetsFlagVal, ",")
-		if slices.Equal(assets, []string{""}) {
-			assets = nil
-		}
-
 		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.NewExtensionsProvider(configFileFlag, assets, urlFlagVal, groupIDFlagVal),
+			extensionsprovider.NewExtensionsProvider(configFileFlag, strings.Split(assetsFlagVal, ","), urlFlagVal, groupIDFlagVal),
 		)
 	},
 }
