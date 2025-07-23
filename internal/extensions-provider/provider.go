@@ -15,11 +15,10 @@
 package extensionsprovider
 
 import (
-	"errors"
 	"maps"
-	"os"
 	"os/exec"
 
+	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/palantir/pkg/safejson"
 )
 
@@ -27,7 +26,7 @@ type ExtensionsProvider func(irBytesWithoutExtensions []byte, conjureProject str
 
 func NewExtensionsProvider(assets []string, config, url, groupID string) ExtensionsProvider {
 	return func(irBytes []byte, conjureProject string, version string) (_ map[string]any, rErr error) {
-		irFile, err := writeBytesToFile(irBytes)
+		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +43,7 @@ func NewExtensionsProvider(assets []string, config, url, groupID string) Extensi
 				return nil, err
 			}
 
-			if response.Type != "conjure-ir-extensions-provider" { // skip assets that do not support `extensions`
+			if response.Type != "conjure-ir-extensions-provider" {
 				continue
 			}
 
@@ -75,22 +74,6 @@ func NewExtensionsProvider(assets []string, config, url, groupID string) Extensi
 
 		return allExtensions, nil
 	}
-}
-
-func writeBytesToFile(bytes []byte) (_ string, rErr error) {
-	file, err := os.CreateTemp("", "")
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		rErr = errors.Join(rErr, file.Close())
-	}()
-
-	if _, err = file.Write(bytes); err != nil {
-		return "", err
-	}
-
-	return file.Name(), nil
 }
 
 type extensionsAssetArgs struct {

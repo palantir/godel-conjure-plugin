@@ -16,6 +16,7 @@ package integration_test
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -28,6 +29,7 @@ import (
 	"testing"
 
 	"github.com/nmiyake/pkg/dirs"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/palantir/godel/v2/framework/pluginapitester"
 	"github.com/palantir/godel/v2/pkg/products"
 	"github.com/stretchr/testify/assert"
@@ -360,6 +362,12 @@ projects:
 	assert.True(t, strings.Contains(stdout, structsFile+": checksum changed"), "Unexpected standard out: %s", stdout)
 }
 
+//go:embed asset1.sh
+var asset1 []byte
+
+//go:embed asset2.sh
+var asset2 []byte
+
 func TestConjurePluginPublish(t *testing.T) {
 	// add in a test over here
 	const (
@@ -401,9 +409,15 @@ projects:
 	err = ioutil.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
 	require.NoError(t, err)
 
+	asset1 := tempfilecreator.MustWriteBytesToTempFile(asset1)
+	asset2 := tempfilecreator.MustWriteBytesToTempFile(asset2)
+	require.NoError(t, os.Chmod(asset1, 0700))
+	require.NoError(t, os.Chmod(asset2, 0700))
+
 	outputBuf := &bytes.Buffer{}
 	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure-publish", []string{
 		"--dry-run",
+		"--assets=" + asset1 + "," + asset2,
 		"--group-id=com.palantir.test-group",
 		"--repository=test-repo",
 		"--url=" + ts.URL,
