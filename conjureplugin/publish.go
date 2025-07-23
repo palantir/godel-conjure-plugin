@@ -103,7 +103,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 
 		irBytes, err := param.IRProvider.IRBytes()
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 
 		irBytes, err = addExtensionsToIrBytes(irBytes, extensionsProvider, key, version)
