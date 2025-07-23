@@ -194,7 +194,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		if _, err := publisher.ArtifactoryRunPublish(distgo.ProductTaskOutputInfo{
+		if err := publisher.RunPublish(distgo.ProductTaskOutputInfo{
 			Project: projectInfo,
 			Product: productOutputInfo,
 		}, nil, flagVals, dryRun, stdout); err != nil {
