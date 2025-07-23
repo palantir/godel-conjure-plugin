@@ -362,11 +362,8 @@ projects:
 	assert.True(t, strings.Contains(stdout, structsFile+": checksum changed"), "Unexpected standard out: %s", stdout)
 }
 
-//go:embed asset1.sh
-var asset1 []byte
-
-//go:embed asset2.sh
-var asset2 []byte
+//go:embed asset.sh
+var asset []byte
 
 func TestConjurePluginPublish(t *testing.T) {
 	// add in a test over here
@@ -409,8 +406,8 @@ projects:
 	err = ioutil.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
 	require.NoError(t, err)
 
-	asset1 := tempfilecreator.MustWriteBytesToTempFile(asset1)
-	asset2 := tempfilecreator.MustWriteBytesToTempFile(asset2)
+	asset1 := tempfilecreator.MustWriteBytesToTempFile(asset)
+	asset2 := tempfilecreator.MustWriteBytesToTempFile(asset)
 	require.NoError(t, os.Chmod(asset1, 0700))
 	require.NoError(t, os.Chmod(asset2, 0700))
 
