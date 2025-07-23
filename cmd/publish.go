@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/palantir/distgo/distgo"
 	"github.com/palantir/distgo/publisher"
@@ -27,6 +28,7 @@ import (
 )
 
 var (
+	assetsFlagVal     string
 	groupIDFlagVal    string
 	urlFlagVal        string
 	usernameFlagVal   string
@@ -65,13 +67,14 @@ var publishCmd = &cobra.Command{
 			}
 			flagVals[currFlag.Name] = val
 		}
-		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout())
+		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(), groupIDFlagVal, repositoryFlagVal, urlFlagVal, strings.Split(assetsFlagVal, ",")...)
 	},
 }
 
 func init() {
 	publishCmd.Flags().BoolVar(&dryRunFlagVal, "dry-run", false, "print the operations that would be performed")
 
+	publishCmd.Flags().StringVar(&assetsFlagVal, "assets", "", "for godel use only")
 	publishCmd.Flags().StringVar(&groupIDFlagVal, string(publisher.GroupIDFlag.Name), "", publisher.GroupIDFlag.Description)
 	publishCmd.Flags().StringVar(&repositoryFlagVal, string(artifactory.PublisherRepositoryFlag.Name), "", artifactory.PublisherRepositoryFlag.Description)
 	publishCmd.Flags().StringVar(&urlFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", publisher.ConnectionInfoURLFlag.Description)

@@ -18,15 +18,17 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path"
 
 	"github.com/palantir/distgo/distgo"
 	gitversioner "github.com/palantir/distgo/projectversioner/git"
 	"github.com/palantir/distgo/publisher/artifactory"
+	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 )
 
-func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, dryRun bool, stdout io.Writer) error {
+func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, dryRun bool, stdout io.Writer, groupId string, repo string, url string, assets ...string) error {
 	var paramsToPublishKeys []string
 	var paramsToPublish []ConjureProjectParam
 	for i, param := range params.OrderedParams() {
@@ -62,6 +64,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		key := paramsToPublishKeys[i]
 		currDir := path.Join(tmpDir, fmt.Sprintf("conjure-%s", key))
 		irFileName := fmt.Sprintf("%s-%s.conjure.json", key, version)
+		tmpIRFileName := fmt.Sprintf("%s-%s.conjure.without-extensions.json", key, version)
 		keyAsDistID := distgo.DistID(key)
 		if err := os.Mkdir(currDir, 0755); err != nil {
 			return errors.WithStack(err)
@@ -102,8 +105,90 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return err
 		}
 
+		tmpIRFilePath := path.Join(directoryPath, tmpIRFileName)
+		if err := os.WriteFile(tmpIRFileName, irBytes, 0644); err != nil {
+			panic(errors.WithStack(err))
+		}
+
+		type assetArgs struct {
+			Proposed   string `json:"proposed"` // proposed IR (copying nameing from conjure backcompat)
+			Version    string `json:"version"`  // take this version if you incompatible
+			GroupId    string `json:"group-id"`
+			Repository string `json:"repository"`
+			Url        string `json:"url"`
+		}
+
+		// discover assets that return the ir-plugin info thing
+		var extensionsAssets []string
+		for _, asset := range assets {
+			var response struct {
+				Type string `json:"type"`
+			}
+			bytes, err := exec.Command(asset, "_assetInfo").Output()
+			if err != nil {
+				panic(errors.WithStack(err))
+			}
+
+			if err := safejson.Unmarshal(bytes, &response); err != nil {
+				panic(errors.WithStack(err))
+			}
+
+			if response.Type == "conjure-ir-extensions-provider" {
+				extensionsAssets = append(extensionsAssets, asset)
+			}
+		}
+
+		combinedExtensions := make(map[string]any)
+		for _, asset := range extensionsAssets {
+			arg, err := safejson.Marshal(assetArgs{
+				Proposed:   tmpIRFilePath,
+				Version:    version,
+				GroupId:    groupId,
+				Repository: repo,
+				Url:        url,
+			})
+			if err != nil {
+				panic(errors.WithStack(err))
+			}
+
+			extensionBytes, err := exec.Command(asset, string(arg)).Output()
+			// os.Stderr.Write([]byte("saying hi"))
+			// os.Stderr.Write(extensionBytes)
+			if err != nil {
+				panic(errors.WithStack(err))
+			}
+			// os.Stderr.Write([]byte("hello world"))
+
+			var extensions map[string]any // must be this way for merging purposes
+			if err := safejson.Unmarshal(extensionBytes, &extensions); err != nil {
+				panic(errors.WithStack(err))
+			}
+			for k, v := range extensions {
+				combinedExtensions[k] = v
+			}
+
+		}
+
+		var theRest map[string]any
+		if err := safejson.Unmarshal(irBytes, &theRest); err != nil {
+			panic(errors.WithStack(err))
+		}
+
+		theRest["extensions"] = combinedExtensions
+
+		irBytesWithExtensions, err := safejson.Marshal(theRest)
+		if err != nil {
+			panic(errors.WithStack(err))
+		}
+
+		_, err = os.Stderr.Write(irBytesWithExtensions)
+		if err != nil {
+			panic(errors.WithStack(err))
+		}
+
+		// send tmpIR file path to the asset, along with params to get the prior ir, that will print to stoud the extensions
 		irFilePath := path.Join(directoryPath, irFileName)
-		if err := os.WriteFile(irFilePath, irBytes, 0644); err != nil {
+		if err := os.WriteFile(irFilePath, irBytesWithExtensions, 0644); err != nil {
 			return errors.WithStack(err)
 		}
 
