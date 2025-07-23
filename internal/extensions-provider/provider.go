@@ -64,7 +64,7 @@ func NewExtensionsProvider(config string, assets []string, url, groupID string) 
 				return nil, err
 			}
 
-			var additionalExtensions map[string]any // must be this way for merging purposes
+			var additionalExtensions map[string]any
 			if err := safejson.Unmarshal(additionExtensionsBytes, &additionalExtensions); err != nil {
 				return nil, err
 			}
