@@ -362,11 +362,7 @@ projects:
 	assert.True(t, strings.Contains(stdout, structsFile+": checksum changed"), "Unexpected standard out: %s", stdout)
 }
 
-//go:embed asset.sh
-var asset []byte
-
 func TestConjurePluginPublish(t *testing.T) {
-	// add in a test over here
 	const (
 		conjureSpecYML = `
 types:
@@ -383,6 +379,20 @@ projects:
   project-1:
     output-dir: conjure-output
     ir-locator: ` + yamlDir + `
+`
+		asset = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "conjure-ir-extensions-provider" }'
+    exit 0
+fi
+
+printf '%s\n' '{}'
+exit 0
 `
 	)
 
@@ -406,8 +416,8 @@ projects:
 	err = ioutil.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
 	require.NoError(t, err)
 
-	asset1 := tempfilecreator.MustWriteBytesToTempFile(asset)
-	asset2 := tempfilecreator.MustWriteBytesToTempFile(asset)
+	asset1 := tempfilecreator.MustWriteBytesToTempFile([]byte(asset))
+	asset2 := tempfilecreator.MustWriteBytesToTempFile([]byte(asset))
 	require.NoError(t, os.Chmod(asset1, 0700))
 	require.NoError(t, os.Chmod(asset2, 0700))
 
