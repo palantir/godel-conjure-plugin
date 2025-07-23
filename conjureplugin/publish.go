@@ -100,13 +100,15 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		irBytes, err := param.IRProvider.IRBytes()
+		irBytesWithoutExtensions, err := param.IRProvider.IRBytes()
 		if err != nil {
 			return err
 		}
 
+		// start
+
 		tmpIRFilePath := path.Join(directoryPath, tmpIRFileName)
-		if err := os.WriteFile(tmpIRFileName, irBytes, 0644); err != nil {
+		if err := os.WriteFile(tmpIRFileName, irBytesWithoutExtensions, 0644); err != nil {
 			panic(errors.WithStack(err))
 		}
 
@@ -172,7 +174,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		}
 
 		var theRest map[string]any
-		if err := safejson.Unmarshal(irBytes, &theRest); err != nil {
+		if err := safejson.Unmarshal(irBytesWithoutExtensions, &theRest); err != nil {
 			panic(errors.WithStack(err))
 		}
 
@@ -189,6 +191,8 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		}
 
 		// send tmpIR file path to the asset, along with params to get the prior ir, that will print to stoud the extensions
+		// end
+
 		irFilePath := path.Join(directoryPath, irFileName)
 		if err := os.WriteFile(irFilePath, irBytesWithExtensions, 0644); err != nil {
 			return errors.WithStack(err)
