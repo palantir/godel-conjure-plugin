@@ -111,7 +111,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		m, ok := conjureCliIr["extensions"].(map[string]any)
+		conjureCliExtensions, ok := conjureCliIr["extensions"].(map[string]any)
 		if !ok {
 			return fmt.Errorf("conjure CLI generated Conjure IR with an extensions block that was not a json object")
 		}
@@ -121,7 +121,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		maps.Copy(m, providedExtensions)
+		maps.Copy(conjureCliExtensions, providedExtensions)
 
 		irBytesWithExtensions, err := safejson.Marshal(conjureCliIr)
 		if err != nil {
