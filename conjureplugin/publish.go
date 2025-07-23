@@ -174,7 +174,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			panic(errors.WithStack(err))
 		}
 
-		theRest["extensions"] = combinedExtensions
+		theRest["extensions"] = combinedExtensions // maybe defend against extensions already present
 
 		irBytesWithExtensions, err := safejson.Marshal(theRest)
 		if err != nil {
