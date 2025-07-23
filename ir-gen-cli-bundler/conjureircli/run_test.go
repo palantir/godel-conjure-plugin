@@ -15,20 +15,18 @@
 package conjureircli_test
 
 import (
-	"os"
-	"path"
 	"testing"
 
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestYAMLtoIR(t *testing.T) {
 	for i, tc := range []struct {
-		in   string
-		want string
+		in     string
+		params []conjureircli.Param
+		want   string
 	}{
 		{
 			in: `
@@ -61,27 +59,67 @@ types:
   "extensions" : { }
 }`,
 		},
+		{
+			in: `
+types:
+  definitions:
+    default-package: com.palantir.conjure
+    objects:
+      BooleanExample: { fields: { value: boolean } }
+`,
+			params: []conjureircli.Param{
+				mustExtensionsParam(map[string]interface{}{
+					"recommended-product-dependencies": []map[string]interface{}{
+						{
+							"product-group":   "com.palantir.assetserver",
+							"product-name":    "asset-server",
+							"minimum-version": "2.78.0",
+							"maximum-version": "2.x.x",
+						},
+					},
+				}),
+			},
+			want: `{
+  "version" : 1,
+  "errors" : [ ],
+  "types" : [ {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "BooleanExample",
+        "package" : "com.palantir.conjure"
+      },
+      "fields" : [ {
+        "fieldName" : "value",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BOOLEAN"
+        }
+      } ]
+    }
+  } ],
+  "services" : [ ],
+  "extensions" : {
+    "recommended-product-dependencies" : [ {
+      "maximum-version" : "2.x.x",
+      "minimum-version" : "2.78.0",
+      "product-group" : "com.palantir.assetserver",
+      "product-name" : "asset-server"
+    } ]
+  }
+}`,
+		},
 	} {
-		got, err := yamlToIRWithExtensions([]byte(tc.in))
+		got, err := conjureircli.YAMLtoIRWithParams([]byte(tc.in), tc.params...)
 		require.NoError(t, err, "Case %d", i)
 		assert.Equal(t, tc.want, string(got), "Case %d\nGot:\n%s", i, got)
 	}
 }
 
-func yamlToIRWithExtensions(in []byte) (rBytes []byte, rErr error) {
-	tmpDir, err := os.MkdirTemp("", "")
+func mustExtensionsParam(in map[string]interface{}) conjureircli.Param {
+	param, err := conjureircli.ExtensionsParam(in)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create temporary directory")
+		panic(err)
 	}
-	defer func() {
-		if err := os.RemoveAll(tmpDir); rErr == nil && err != nil {
-			rErr = errors.Wrapf(err, "failed to remove temporary directory")
-		}
-	}()
-
-	inPath := path.Join(tmpDir, "in.yml")
-	if err := os.WriteFile(inPath, in, 0644); err != nil {
-		return nil, errors.WithStack(err)
-	}
-	return conjureircli.InputPathToIR(inPath)
+	return param
 }
