@@ -48,13 +48,13 @@ func NewExtensionsProvider(url string, groupID string, assets []string) Extensio
 				continue
 			}
 
-			arg, err := safejson.Marshal(extensionsAssetArgs{
+			arg, err := safejson.MarshalIndent(extensionsAssetArgs{
 				Proposed: irFilePathWithoutExtensions,
 				Version:  version,
 				URL:      url,
 				GroupID:  groupID,
 				Project:  conjureProject,
-			})
+			}, "", "\t")
 			if err != nil {
 				return nil, err
 			}
