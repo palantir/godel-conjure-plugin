@@ -25,9 +25,9 @@ import (
 
 type ExtensionsProvider func(irBytesWithoutExtensions []byte, conjureProject string, version string) (map[string]any, error)
 
-func NewExtensionsProvider(url string, groupID string, assets []string) ExtensionsProvider {
-	return func(irBytesWithoutExtensions []byte, conjureProject string, version string) (_ map[string]any, rErr error) {
-		irFilePathWithoutExtensions, err := writeBytesToFile(irBytesWithoutExtensions)
+func NewExtensionsProvider(assets []string, config, url, groupID string) ExtensionsProvider {
+	return func(irBytes []byte, conjureProject string, version string) (_ map[string]any, rErr error) {
+		irFile, err := writeBytesToFile(irBytes)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +49,8 @@ func NewExtensionsProvider(url string, groupID string, assets []string) Extensio
 			}
 
 			arg, err := safejson.MarshalIndent(extensionsAssetArgs{
-				Proposed: irFilePathWithoutExtensions,
+				Config:   config,
+				Proposed: irFile,
 				Version:  version,
 				URL:      url,
 				GroupID:  groupID,
@@ -59,17 +60,17 @@ func NewExtensionsProvider(url string, groupID string, assets []string) Extensio
 				return nil, err
 			}
 
-			extensionBytes, err := exec.Command(asset, string(arg)).Output()
+			additionExtensionsBytes, err := exec.Command(asset, string(arg)).Output()
 			if err != nil {
 				return nil, err
 			}
 
-			var extensions map[string]any // must be this way for merging purposes
-			if err := safejson.Unmarshal(extensionBytes, &extensions); err != nil {
+			var additionalExtensions map[string]any // must be this way for merging purposes
+			if err := safejson.Unmarshal(additionExtensionsBytes, &additionalExtensions); err != nil {
 				return nil, err
 			}
 
-			maps.Copy(allExtensions, extensions)
+			maps.Copy(allExtensions, additionalExtensions)
 		}
 
 		return allExtensions, nil
@@ -85,19 +86,20 @@ func writeBytesToFile(bytes []byte) (_ string, rErr error) {
 		rErr = errors.Join(rErr, file.Close())
 	}()
 
-	if _, rErr = file.Write(bytes); rErr != nil {
-		return
+	if _, err = file.Write(bytes); err != nil {
+		return "", err
 	}
 
 	return file.Name(), nil
 }
 
 type extensionsAssetArgs struct {
-	Proposed string `json:"proposed,omitempty"` // proposed IR (copying naming from conjure backcompat)
-	Version  string `json:"version,omitempty"`  // take this version if you incompatible
+	Config   string `json:"config,omitempty"`
+	Proposed string `json:"proposed,omitempty"`
 	URL      string `json:"url,omitempty"`
 	GroupID  string `json:"group-id,omitempty"`
 	Project  string `json:"project,omitempty"`
+	Version  string `json:"version,omitempty"`
 }
 
 type assetTypeResponse struct {
