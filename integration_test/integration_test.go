@@ -361,6 +361,7 @@ projects:
 }
 
 func TestConjurePluginPublish(t *testing.T) {
+	// add in a test over here
 	const (
 		conjureSpecYML = `
 types:
