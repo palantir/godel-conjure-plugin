@@ -101,13 +101,13 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		irBytesWithoutExtensions, err := param.IRProvider.IRBytes()
+		irBytes, err := param.IRProvider.IRBytes()
 		if err != nil {
 			return err
 		}
 
 		var conjureCliIr map[string]any
-		if err := safejson.Unmarshal(irBytesWithoutExtensions, &conjureCliIr); err != nil {
+		if err := safejson.Unmarshal(irBytes, &conjureCliIr); err != nil {
 			return errors.WithStack(err)
 		}
 
@@ -116,7 +116,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return fmt.Errorf("conjure CLI generated Conjure IR with an extensions block that was not a json object")
 		}
 
-		providedExtensions, err := extensionsProvider(key, irBytesWithoutExtensions, version)
+		providedExtensions, err := extensionsProvider(key, irBytes, version)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -128,8 +128,8 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		irFilePathWithExtensions := path.Join(directoryPath, irFileName)
-		if err := os.WriteFile(irFilePathWithExtensions, irBytesWithExtensions, 0644); err != nil {
+		irFilePath := path.Join(directoryPath, irFileName)
+		if err := os.WriteFile(irFilePath, irBytesWithExtensions, 0644); err != nil {
 			return errors.WithStack(err)
 		}
 
