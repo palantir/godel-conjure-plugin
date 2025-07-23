@@ -23,10 +23,10 @@ import (
 	"github.com/palantir/pkg/safejson"
 )
 
-type ExtensionsProvider func(conjureProject string, irBytesWithoutExtensions []byte, version string) (map[string]any, error)
+type ExtensionsProvider func(irBytesWithoutExtensions []byte, conjureProject string, version string) (map[string]any, error)
 
 func NewExtensionsProvider(url string, groupID string, assets []string) ExtensionsProvider {
-	return func(conjureProject string, irBytesWithoutExtensions []byte, version string) (_ map[string]any, rErr error) {
+	return func(irBytesWithoutExtensions []byte, conjureProject string, version string) (_ map[string]any, rErr error) {
 		irFilePathWithoutExtensions, err := writeBytesToFile(irBytesWithoutExtensions)
 		if err != nil {
 			return nil, err

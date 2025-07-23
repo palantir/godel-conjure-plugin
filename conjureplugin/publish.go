@@ -129,8 +129,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 func addExtensionsToIrBytes(
 	irBytes []byte,
 	extensionsProvider extensionsprovider.ExtensionsProvider,
-	conjureProject,
-	version string,
+	conjureProject, version string,
 ) ([]byte, error) {
 	var conjureCliIr map[string]any
 	if err := safejson.Unmarshal(irBytes, &conjureCliIr); err != nil {
@@ -142,7 +141,7 @@ func addExtensionsToIrBytes(
 		return nil, fmt.Errorf("conjure CLI generated Conjure IR with an extensions block that was not a json object")
 	}
 
-	providedExtensions, err := extensionsProvider(conjureProject, irBytes, version)
+	providedExtensions, err := extensionsProvider(irBytes, conjureProject, version)
 	if err != nil {
 		return nil, err
 	}
