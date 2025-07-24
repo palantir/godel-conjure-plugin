@@ -25,11 +25,13 @@ func WriteBytesToTempFile(bytes []byte) (_ string, rErr error) {
 		return "", err
 	}
 	defer func() {
-		rErr = errors.Join(rErr, file.Close())
+		if rErr != nil {
+			rErr = errors.Join(rErr, os.Remove(file.Name()))
+		}
 	}()
+	defer func() { rErr = errors.Join(rErr, file.Close()) }()
 
 	if _, err = file.Write(bytes); err != nil {
-		defer func() { rErr = errors.Join(rErr, os.Remove(file.Name())) }()
 		return "", err
 	}
 

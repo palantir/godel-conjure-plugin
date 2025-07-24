@@ -48,12 +48,12 @@ func NewExtensionsProvider(config string, assets []string, url, groupID string) 
 			}
 
 			arg, err := safejson.MarshalIndent(extensionsAssetArgs{
-				Config:   config,
-				Proposed: irFile,
-				URL:      url,
-				GroupID:  groupID,
-				Project:  conjureProject,
-				Version:  version,
+				Config:         config,
+				ProposedIRFile: irFile,
+				URL:            url,
+				GroupID:        groupID,
+				Project:        conjureProject,
+				Version:        version,
 			}, "", "\t")
 			if err != nil {
 				return nil, err
@@ -77,12 +77,12 @@ func NewExtensionsProvider(config string, assets []string, url, groupID string) 
 }
 
 type extensionsAssetArgs struct {
-	Config   string `json:"config,omitempty"`
-	Proposed string `json:"proposed,omitempty"`
-	URL      string `json:"url,omitempty"`
-	GroupID  string `json:"group-id,omitempty"`
-	Project  string `json:"project,omitempty"`
-	Version  string `json:"version,omitempty"`
+	Config         string `json:"config,omitempty"`
+	ProposedIRFile string `json:"proposed,omitempty"`
+	URL            string `json:"url,omitempty"`
+	GroupID        string `json:"group-id,omitempty"`
+	Project        string `json:"project,omitempty"`
+	Version        string `json:"version,omitempty"`
 }
 
 type assetTypeResponse struct {
