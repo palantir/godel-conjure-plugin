@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.67.0
+	github.com/palantir/conjure-go/v6 v6.68.0
 	github.com/palantir/distgo v1.84.0
 	github.com/palantir/godel/v2 v2.134.0
 	github.com/palantir/pkg/cobracli v1.2.0
@@ -36,7 +36,7 @@ require (
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/palantir/distgo/pkg/git v1.0.0 // indirect
-	github.com/palantir/go-ptimports/v2 v2.10.0 // indirect
+	github.com/palantir/go-ptimports/v2 v2.46.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/matcher v1.2.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.3.0 // indirect
