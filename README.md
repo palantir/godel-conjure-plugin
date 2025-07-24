@@ -2,7 +2,7 @@
 <a href="https://autorelease.general.dmz.palantir.tech/palantir/godel-conjure-plugin"><img src="https://img.shields.io/badge/Perform%20an-Autorelease-success.svg" alt="Autorelease"></a>
 </p>
 
-godel-conjure-plugin
+godel-conjure-plugin does it always fail?
 ====================
 godel-conjure-plugin is a [godel](https://github.com/palantir/godel) plugin for [conjure-go](https://github.com/palantir/conjure-go/).
 The plugin runs conjure-go based on project configuration. It also runs as part of the `--verify` task and verifies that
