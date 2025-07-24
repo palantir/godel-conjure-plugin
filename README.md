@@ -8,6 +8,7 @@ godel-conjure-plugin is a [godel](https://github.com/palantir/godel) plugin for 
 The plugin runs conjure-go based on project configuration. It also runs as part of the `--verify` task and verifies that
 the running the task would not alter the content of the output directory.
 
+Tasks
 -----
 * `conjure`: runs Conjure generation. Runs for all of the entries specified in the configuration in order. The working
   directory is set to be the project directory.
