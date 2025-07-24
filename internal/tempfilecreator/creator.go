@@ -19,6 +19,9 @@ import (
 	"os"
 )
 
+// WriteBytesToTempFile writes the provided bytes to a new temporary file.
+// Returns the closed file path on success, or an error if any operation fails.
+// On error, attempts to remove the temp file.
 func WriteBytesToTempFile(bytes []byte) (_ string, rErr error) {
 	file, err := os.CreateTemp("", "")
 	if err != nil {
@@ -38,6 +41,9 @@ func WriteBytesToTempFile(bytes []byte) (_ string, rErr error) {
 	return file.Name(), nil
 }
 
+// MustWriteBytesToTempFile is a helper that panics if WriteBytesToTempFile fails.
+// Returns the temp file path on success.
+// Panics on failure.
 func MustWriteBytesToTempFile(bytes []byte) string {
 	if path, err := WriteBytesToTempFile(bytes); err != nil {
 		panic(err)
