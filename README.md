@@ -87,37 +87,56 @@ The `--dry-run` flag can be added to print the operation that would be performed
 Assets
 ======
 
-Currently, `godel-conjure-plugin` only supports assets for a single use case: **adding extensions to the Conjure IR that gets published**. This mechanism allows external executables (assets) to programmatically provide additional key-value pairs that will be merged into the `extensions` block of the Conjure IR during the publish process.
+`godel-conjure-plugin` allows external executables ([assets](https://github.com/palantir/godel/wiki/Plugins#assets)) to extend its functionality by following a simple, well-defined protocol.
 
-### Asset Requirements
+## General Asset Contract
 
-An asset must satisfy the following requirements to be recognized and invoked by `godel-conjure-plugin`:
+An asset for `godel-conjure-plugin` is an executable that communicates via JSON on stdout and receives information through command-line arguments. The contract is as follows:
 
-1. **_assetInfo Probe**:
-When the asset is executed with the single argument `_assetInfo`, it must output the following JSON to stdout:
+1. **Asset Discovery (`_assetInfo` probe):**
+- When invoked with a single argument `_assetInfo`, the asset must output a JSON object to stdout.
+- This JSON object must include at least a `type` key, whose value determines how the asset will be used by `godel-conjure-plugin`.
+- Example:
 ```json
-{ "type": "<ASSET_TYPE>" }
+{ "type": "conjure-ir-extensions-provider" }
+// note: `conjure-ir-extensions-provider` is the only currently supported `type`
 ```
-The only `ASSET_TYPE` that is currently supported is  `"conjure-ir-extensions-provider"`.
-If the asset does not output this exact type, it will not be used as an extensions provider.
+- If the asset does not output a valid JSON object with a `type` field, `godel-conjure-plugin` will fail
 
-2. **Single-Argument Invocation**:
-The asset will only ever be invoked with a single command-line argument: a JSON-encoded object that is hard coded with the key value pairs specified [here](https://github.com/palantir/godel-conjure-plugin/blob/df2fa3c6cf515848c444446c4df22054ee01c8fe/internal/extensions-provider/provider.go#L101-L108).
+2. **Asset Invocation:**
+- When invoked for its intended purpose, the asset will be called with a **single argument**: a JSON-encoded object containing contextual information (the exact schema depends on the asset type).
+- The asset should process this input and output a JSON object to stdout.
+- If the asset encounters an error, it should return a non-zero exit code. If successful, it should exit with code 0.
+
+3. **Argument Handling:**
+- The asset must **fail immediately** if invoked with anything other than one argument.
+- All information must be passed via the JSON blob argument.
+
+---
+
+## Conjure IR Extensions Asset
+
+The only asset type currently supported by `godel-conjure-plugin` is `"conjure-ir-extensions-provider"`, which allows assets to add key-value pairs to the [`extensions`](https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions) block of the Conjure IR during publishing.
+
+### Requirements
+
+- **Type Declaration:**
+  The asset must respond to the `_assetInfo` probe with:
+  ```json
+  { "type": "conjure-ir-extensions-provider" }
+  ```
+
+- **Invocation:**
+When invoked with a JSON blob (see [schema](https://github.com/palantir/godel-conjure-plugin/blob/df2fa3c6cf515848c444446c4df22054ee01c8fe/internal/extensions-provider/provider.go#L101-L108)), the asset should output a JSON object to stdout. Each key-value pair in this object will be merged into the `extensions` block of the Conjure IR.
+
+- **Key Overwrites:**
+If multiple assets provide the same keys, **last write wins**—the order in which assets are invoked is **indeterminate** and should not be relied upon.
+
+- **Error Handling:**
 If the asset is invoked with more than one argument, it must immediately fail.
-Any arguements sent to the asset should be sent via the JSON blob argument.
-
-3. **Extensions Response**:
-When invoked with the JSON blob, the asset should output a valid JSON object to stdout.
-Each key-value pair in this object will be merged into the `extensions` block of the Conjure IR.
 If the output is not a valid JSON object, `godel-conjure-plugin` will fail.
 
-4. **Key Overwrites**:
-If multiple assets provide the same keys, **last write wins** will be applied.
-The order in which assets are invoked is **indeterminate** and should not be relied upon for key precedence.
-
 ### Example: Minimally Viable `conjure-ir-extensions-provider` Asset
-
-Below is an example of a minimal shell asset that satisfies all requirements.
 
 ```sh
 #!/bin/sh
@@ -140,5 +159,4 @@ exit 0
 
 This asset will:
 - Respond to `_assetInfo` with the required JSON and type.
-- Accept only a single argument (the JSON blob).
-- Output an empty extensions object when invoked during publishing.
+- Accept only a single argument (the JSON blob) and return a valid JSON object when invoked.
