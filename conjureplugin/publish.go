@@ -126,6 +126,22 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 	return nil
 }
 
+// addExtensionsToIrBytes takes a Conjure IR JSON byte slice, parses it, and updates its "extensions" block
+// by merging in additional extensions provided by the given ExtensionsProvider. The function then marshals
+// and returns the updated IR as a byte slice.
+//
+// Parameters:
+//   - irBytes: The original Conjure IR as a JSON-encoded byte slice.
+//   - extensionsProvider: A function that, given the IR, project name, and version, returns additional extensions.
+//   - conjureProject: The name of the current Conjure project.
+//   - version: The version string of the current Conjure project.
+//
+// Returns:
+//   - []byte: The updated Conjure IR as a JSON-encoded byte slice.
+//   - error: Any error encountered during unmarshalling, extension provision, or marshalling.
+//
+// An error is returned if the input is not valid JSON, if the "extensions" block is missing or malformed,
+// or if the extensionsProvider fails.
 func addExtensionsToIrBytes(
 	irBytes []byte,
 	extensionsProvider extensionsprovider.ExtensionsProvider,
