@@ -83,3 +83,62 @@ Here is an example invocation to publish a Conjure definition:
 ```
 
 The `--dry-run` flag can be added to print the operation that would be performed (including the upload URL).
+
+Assets
+======
+
+Currently, `godel-conjure-plugin` only supports assets for a single use case: **adding extensions to the Conjure IR that gets published**. This mechanism allows external executables (assets) to programmatically provide additional key-value pairs that will be merged into the `extensions` block of the Conjure IR during the publish process.
+
+### Asset Requirements
+
+An asset must satisfy the following requirements to be recognized and invoked by `godel-conjure-plugin`:
+
+1. **_assetInfo Probe**:
+When the asset is executed with the single argument `_assetInfo`, it must output the following JSON to stdout:
+```json
+{ "type": "<ASSET_TYPE>" }
+```
+The only `ASSET_TYPE` that is currently supported is  `"conjure-ir-extensions-provider"`.
+If the asset does not output this exact type, it will not be used as an extensions provider.
+
+2. **Single-Argument Invocation**:
+The asset will only ever be invoked with a single command-line argument: a JSON-encoded object that is hard coded with the key value pairs specified [here](https://github.com/palantir/godel-conjure-plugin/blob/df2fa3c6cf515848c444446c4df22054ee01c8fe/internal/extensions-provider/provider.go#L101-L108).
+If the asset is invoked with more than one argument, it must immediately fail.
+Any arguements sent to the asset should be sent via the JSON blob argument.
+
+3. **Extensions Response**:
+When invoked with the JSON blob, the asset should output a valid JSON object to stdout.
+Each key-value pair in this object will be merged into the `extensions` block of the Conjure IR.
+If the output is not a valid JSON object, `godel-conjure-plugin` will fail.
+
+4. **Key Overwrites**:
+If multiple assets provide the same keys, **last write wins** will be applied.
+The order in which assets are invoked is **indeterminate** and should not be relied upon for key precedence.
+
+### Example: Minimally Viable `conjure-ir-extensions-provider` Asset
+
+Below is an example of a minimal shell asset that satisfies all requirements.
+
+```sh
+#!/bin/sh
+
+# Fail if not exactly one argument
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+# Respond to the _assetInfo probe
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "conjure-ir-extensions-provider" }'
+    exit 0
+fi
+
+# Otherwise, output an empty object (no extensions)
+printf '%s\n' '{}'
+exit 0
+```
+
+This asset will:
+- Respond to `_assetInfo` with the required JSON and type.
+- Accept only a single argument (the JSON blob).
+- Output an empty extensions object when invoked during publishing.
