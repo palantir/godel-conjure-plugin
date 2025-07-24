@@ -91,7 +91,8 @@ Assets
 
 ## General Asset Contract
 
-An asset for `godel-conjure-plugin` is an executable that communicates via JSON on stdout and receives information through command-line arguments. The contract is as follows:
+An asset for `godel-conjure-plugin` is an executable that communicates via JSON on stdout and receives information through command-line arguments.
+The contract is as follows:
 
 1. **Asset Discovery (`_assetInfo` probe):**
 - When invoked with a single argument `_assetInfo`, the asset must output a JSON object to stdout.
