@@ -22,10 +22,10 @@ import (
 	"github.com/palantir/pkg/safejson"
 )
 
-type ExtensionsProvider func(irBytesWithoutExtensions []byte, conjureProject string, version string) (map[string]any, error)
+type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (map[string]any, error)
 
 func NewExtensionsProvider(config string, assets []string, url, groupID string) ExtensionsProvider {
-	return func(irBytes []byte, conjureProject string, version string) (_ map[string]any, rErr error) {
+	return func(irBytes []byte, conjureProject, version string) (map[string]any, error) {
 		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
 			return nil, err
@@ -50,10 +50,10 @@ func NewExtensionsProvider(config string, assets []string, url, groupID string) 
 			arg, err := safejson.MarshalIndent(extensionsAssetArgs{
 				Config:   config,
 				Proposed: irFile,
-				Version:  version,
 				URL:      url,
 				GroupID:  groupID,
 				Project:  conjureProject,
+				Version:  version,
 			}, "", "\t")
 			if err != nil {
 				return nil, err

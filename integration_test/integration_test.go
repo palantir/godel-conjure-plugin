@@ -16,7 +16,6 @@ package integration_test
 
 import (
 	"bytes"
-	_ "embed"
 	"fmt"
 	"io/ioutil"
 	"net/http"
