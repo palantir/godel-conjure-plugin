@@ -168,6 +168,10 @@ func TestAddExtensionsToIrBytes(t *testing.T) {
 			name:    "invalid input IR: not a JSON object",
 			inputIR: `[]`,
 		},
+		{
+			name:    "invalid input IR: extensions does not map to an object",
+			inputIR: `{"extensions":[]}`,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := conjureplugin.AddExtensionsToIrBytes(
