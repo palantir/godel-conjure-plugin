@@ -172,7 +172,9 @@ func addExtensionsToIrBytes(
 
 	maps.Copy(extensionsAccumulator, providedExtensions)
 
-	conjureCliIr["extensions"] = extensionsAccumulator
+	if len(extensionsAccumulator) > 0 {
+		conjureCliIr["extensions"] = extensionsAccumulator
+	}
 
 	return safejson.Marshal(conjureCliIr)
 }
