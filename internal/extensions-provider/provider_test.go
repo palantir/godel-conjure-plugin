@@ -78,7 +78,7 @@ exit 1
 	}
 
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("maps are not equal: got:\n%v\nwant:\n%v", got, want)
+		t.Errorf("maps are not equal:\ngot: %v\nwant:%v", got, want)
 	}
 
 	empty, err := extensionsprovider.New("", nil, "", "")([]byte{}, "", "")
