@@ -459,24 +459,12 @@ exit 1
 
 func TestConjurePluginPublishAssetSpec(t *testing.T) {
 	const (
-		conjureSpecYML = `
-types:
-  definitions:
-    default-package: com.palantir.conjure.test.api
-    objects:
-      TestCase:
-        fields:
-          name: string
-`
 		yamlDir    = "yamlDir"
 		conjureYML = `
 projects:
-  project-1:
-    output-dir: conjure-output
-    ir-locator: ` + yamlDir + `
+  project-1: { }
 `
-
-		doesNotReturnValidJsonObject = `#!/bin/sh
+		assetDoesNotReturnValidJsonObject = `#!/bin/sh
 
 if [ "$#" -ne 1 ]; then
     exit 1
@@ -487,10 +475,10 @@ if [ "$1" = "_assetInfo" ]; then
     exit 0
 fi
 
-printf '%s\n' '[]'
+printf '%s\n' '"not a json object"'
 exit 0
 `
-		doesNotReturnValidAssetInfo = `#!/bin/sh
+		assetDoesNotReturnValidAssetInfo = `#!/bin/sh
 
 if [ "$#" -ne 1 ]; then
     exit 1
@@ -502,8 +490,8 @@ if [ "$1" = "_assetInfo" ]; then
     exit 0
 fi
 
-printf '%s\n' '[]'
-exit 0
+printf '%s\n' 'unreachable: something is wrong if the asset with more than _assetInfo as an arg'
+exit 1
 `
 	)
 
@@ -524,18 +512,15 @@ exit 0
 	err = os.WriteFile(path.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
 	require.NoError(t, err)
 
-	err = os.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
-	require.NoError(t, err)
-
-	for i, assetString := range [...]string{
-		doesNotReturnValidJsonObject,
-		doesNotReturnValidAssetInfo,
+	for _, assetString := range [...]string{
+		assetDoesNotReturnValidJsonObject,
+		assetDoesNotReturnValidAssetInfo,
 	} {
 		assetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(assetString))
 		require.NoError(t, os.Chmod(assetFile, 0700))
 
 		err = inner(pluginapitester.NewPluginProvider(pluginPath), assetFile, ts.URL, projectDir)
-		assert.Error(t, err, i)
+		assert.Error(t, err)
 	}
 
 }
