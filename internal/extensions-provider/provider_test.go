@@ -23,6 +23,7 @@ import (
 
 	extensionsprovider "github.com/palantir/godel-conjure-plugin/v6/internal/extensions-provider"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -79,6 +80,10 @@ exit 1
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("maps are not equal: got:\n%v\nwant:\n%v", got, want)
 	}
+
+	empty, err := extensionsprovider.New("", nil, "", "")([]byte{}, "", "")
+	assert.NoError(t, err)
+	assert.Empty(t, empty)
 }
 
 func createExtensionsAsset(assetReturnValue string) string {
