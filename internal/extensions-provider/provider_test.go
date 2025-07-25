@@ -82,7 +82,6 @@ exit 1
 }
 
 func createExtensionsAsset(assetReturnValue string) string {
-
 	return fmt.Sprintf(`#!/bin/sh
 
 if [ "$#" -ne 1 ]; then
