@@ -60,7 +60,7 @@ func NewExtensionsProvider(config string, assets []string, url, groupID string) 
 				return nil, err
 			}
 
-			var response assetTypeResponse
+			var response assetInfoResponse
 			if err := safejson.Unmarshal(bytes, &response); err != nil {
 				return nil, err
 			}
@@ -107,6 +107,6 @@ type extensionsAssetArgs struct {
 	Version        string `json:"version,omitempty"`
 }
 
-type assetTypeResponse struct {
+type assetInfoResponse struct {
 	Type string `json:"type"`
 }
