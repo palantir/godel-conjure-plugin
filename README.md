@@ -130,6 +130,30 @@ The only asset type currently supported by `godel-conjure-plugin` is `"conjure-i
 - **Invocation:**
 When invoked with a JSON blob (see [schema](https://github.com/palantir/godel-conjure-plugin/blob/df2fa3c6cf515848c444446c4df22054ee01c8fe/internal/extensions-provider/provider.go#L101-L108)), the asset should output a JSON object to stdout. Each key-value pair in this object will be merged into the `extensions` block of the Conjure IR.
 
+- **Example:**
+
+If invoking the asset:
+```sh
+./asset "<JSON OBJECT>"
+```
+results in sending the following to stdout:
+```json
+{
+  "hello": "world"
+}
+```
+then the resulting conjure IR that will get published will be:
+```json
+{
+  "versions": ...
+  "services": ...
+  ...
+  "extensions": {
+    "hello": "world"
+  }
+}
+```
+
 - **Key Overwrites:**
 If multiple assets provide the same keys, **last write wins**—the order in which assets are invoked is **indeterminate** and should not be relied upon.
 
