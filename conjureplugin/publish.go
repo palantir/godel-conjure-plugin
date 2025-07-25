@@ -101,6 +101,8 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
+		// checkpoint: manual tests pass
+
 		irBytes, err := param.IRProvider.IRBytes()
 		if err != nil {
 			return err
