@@ -152,9 +152,17 @@ func addExtensionsToIrBytes(
 		return nil, err
 	}
 
-	conjureCliExtensions, ok := conjureCliIr["extensions"].(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("conjure CLI generated Conjure IR with an extensions block that was not a json object")
+	extensionsAccumulator := make(map[string]any)
+
+	// if there is a valid `extensions` block in irBytes...
+	if conjureCliIrExtensions, ok := conjureCliIr["extensions"]; ok {
+		conjureCliIrExtensionsObject, ok := conjureCliIrExtensions.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("conjure CLI generated Conjure IR with an extensions block that was not a json object violating the Conjure spec; see https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions for more details")
+		}
+
+		// ...add it
+		maps.Copy(extensionsAccumulator, conjureCliIrExtensionsObject)
 	}
 
 	providedExtensions, err := extensionsProvider(irBytes, conjureProject, version)
@@ -162,7 +170,9 @@ func addExtensionsToIrBytes(
 		return nil, err
 	}
 
-	maps.Copy(conjureCliExtensions, providedExtensions)
+	maps.Copy(extensionsAccumulator, providedExtensions)
+
+	conjureCliIr["extensions"] = extensionsAccumulator
 
 	return safejson.Marshal(conjureCliIr)
 }
