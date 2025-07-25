@@ -24,7 +24,7 @@ import (
 
 type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (map[string]any, error)
 
-// NewExtensionsProvider returns an ExtensionsProvider that, when invoked, collects and merges
+// New returns an ExtensionsProvider that, when invoked, collects and merges
 // extension data from a set of external assets. Each asset is queried to determine if it is a
 // "conjure-ir-extensions-provider" and, if so, is executed with extensionsAssetArgs; arguments
 // describing the current IR, configuration, and project metadata.
@@ -46,7 +46,7 @@ type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (ma
 //   - If the asset is a provider, invoke it with the relevant arguments to retrieve extension data.
 //   - Merge all extension maps from the assets into a single result.
 //   - Return the combined extensions map or an error if any asset invocation or JSON parsing fails.
-func NewExtensionsProvider(configFile string, assets []string, url, groupID string) ExtensionsProvider {
+func New(configFile string, assets []string, url, groupID string) ExtensionsProvider {
 	return func(irBytes []byte, conjureProject, version string) (map[string]any, error) {
 		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
