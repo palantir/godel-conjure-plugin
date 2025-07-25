@@ -525,9 +525,6 @@ exit 1
 `
 	)
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
-	defer ts.Close()
-
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
 
@@ -551,19 +548,19 @@ exit 1
 		assetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(assetString))
 		require.NoError(t, os.Chmod(assetFile, 0700))
 
-		err = innerTestConjurePluginPublishAssetSpec(pluginapitester.NewPluginProvider(pluginPath), assetFile, ts.URL, projectDir)
+		err = innerTestConjurePluginPublishAssetSpec(pluginapitester.NewPluginProvider(pluginPath), assetFile, projectDir)
 		assert.Error(t, err)
 	}
 
 }
 
-func innerTestConjurePluginPublishAssetSpec(pluginProvider pluginapitester.PluginProvider, assetFile, url, projectDir string) error {
+func innerTestConjurePluginPublishAssetSpec(pluginProvider pluginapitester.PluginProvider, assetFile, projectDir string) error {
 	runPluginCleanup, err := pluginapitester.RunPlugin(pluginProvider, nil, "conjure-publish", []string{
 		"--dry-run",
 		"--assets=" + assetFile,
 		"--group-id=com.palantir.test-group",
 		"--repository=test-repo",
-		"--url=" + url,
+		"--url=unreachable.palantir.com",
 		"--username=test-username",
 		"--password=test-password",
 	}, projectDir, false, &bytes.Buffer{})
