@@ -22,6 +22,7 @@ import (
 	"github.com/palantir/distgo/publisher/artifactory"
 	"github.com/palantir/distgo/publisher/maven"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	extensionsprovider "github.com/palantir/godel-conjure-plugin/v6/internal/extensions-provider"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -65,7 +66,10 @@ var publishCmd = &cobra.Command{
 			}
 			flagVals[currFlag.Name] = val
 		}
-		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout())
+
+		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
+			extensionsprovider.New(configFileFlag, assetsFlag, urlFlagVal, groupIDFlagVal),
+		)
 	},
 }
 

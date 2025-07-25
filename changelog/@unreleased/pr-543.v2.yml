@@ -1,0 +1,8 @@
+type: feature
+feature:
+  description: |-
+    Add support for asset-based extension injection during Conjure IR publishing.
+
+    Assets of type `conjure-ir-extensions-provider` can now provide key-value pairs for the published IR `extensions` block by implementing the `Asset Spec` for `godel-conjure-plugin` specified in the README.
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/543

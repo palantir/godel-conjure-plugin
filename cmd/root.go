@@ -26,6 +26,7 @@ var (
 	debugFlagVal   bool
 	projectDirFlag string
 	configFileFlag string
+	assetsFlag     []string
 )
 
 var rootCmd = &cobra.Command{
@@ -47,4 +48,5 @@ func init() {
 	if err := rootCmd.MarkPersistentFlagRequired(pluginapi.ConfigFlagName); err != nil {
 		panic(err)
 	}
+	pluginapi.AddAssetsPFlagPtr(rootCmd.PersistentFlags(), &assetsFlag)
 }

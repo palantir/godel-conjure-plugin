@@ -17,16 +17,20 @@ package conjureplugin
 import (
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path"
 
 	"github.com/palantir/distgo/distgo"
 	gitversioner "github.com/palantir/distgo/projectversioner/git"
 	"github.com/palantir/distgo/publisher/artifactory"
+	extensionsprovider "github.com/palantir/godel-conjure-plugin/v6/internal/extensions-provider"
+	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 )
 
-func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{}, dryRun bool, stdout io.Writer) error {
+func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{},
+	dryRun bool, stdout io.Writer, extensionsProvider extensionsprovider.ExtensionsProvider) error {
 	var paramsToPublishKeys []string
 	var paramsToPublish []ConjureProjectParam
 	for i, param := range params.OrderedParams() {
@@ -102,6 +106,11 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return err
 		}
 
+		irBytes, err = AddExtensionsToIrBytes(irBytes, extensionsProvider, key, version)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
 		irFilePath := path.Join(directoryPath, irFileName)
 		if err := os.WriteFile(irFilePath, irBytes, 0644); err != nil {
 			return errors.WithStack(err)
@@ -115,6 +124,59 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		}
 	}
 	return nil
+}
+
+// AddExtensionsToIrBytes takes a Conjure IR JSON byte slice, parses it, and updates its "extensions" block
+// by merging in additional extensions provided by the given ExtensionsProvider. The function then marshals
+// and returns the updated IR as a byte slice.
+//
+// Parameters:
+//   - irBytes: The original Conjure IR as a JSON-encoded byte slice.
+//   - extensionsProvider: A function that, given the IR, project name, and version, returns additional extensions.
+//   - conjureProject: The name of the current Conjure project.
+//   - version: The version string of the current Conjure project.
+//
+// Returns:
+//   - []byte: The updated Conjure IR as a JSON-encoded byte slice.
+//   - error: Any error encountered during unmarshalling, extension provision, or marshalling.
+//
+// An error is returned if the input is not valid JSON, if the "extensions" block is missing or malformed,
+// or if the extensionsProvider fails.
+func AddExtensionsToIrBytes(
+	irBytes []byte,
+	extensionsProvider extensionsprovider.ExtensionsProvider,
+	conjureProject, version string,
+) ([]byte, error) {
+	var conjureCliIr map[string]any
+	if err := safejson.Unmarshal(irBytes, &conjureCliIr); err != nil {
+		return nil, err
+	}
+
+	extensionsAccumulator := make(map[string]any)
+
+	// if there is a valid `extensions` block in irBytes...
+	if conjureCliIrExtensions, ok := conjureCliIr["extensions"]; ok {
+		conjureCliIrExtensionsObject, ok := conjureCliIrExtensions.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("conjure CLI generated Conjure IR with an extensions block that was not a json object violating the Conjure spec; see https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions for more details")
+		}
+
+		// ...add it
+		maps.Copy(extensionsAccumulator, conjureCliIrExtensionsObject)
+	}
+
+	providedExtensions, err := extensionsProvider(irBytes, conjureProject, version)
+	if err != nil {
+		return nil, err
+	}
+
+	maps.Copy(extensionsAccumulator, providedExtensions)
+
+	if len(extensionsAccumulator) > 0 {
+		conjureCliIr["extensions"] = extensionsAccumulator
+	}
+
+	return safejson.Marshal(conjureCliIr)
 }
 
 func PublisherFlags() ([]distgo.PublisherFlag, error) {

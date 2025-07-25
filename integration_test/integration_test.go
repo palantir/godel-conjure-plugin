@@ -28,6 +28,7 @@ import (
 	"testing"
 
 	"github.com/nmiyake/pkg/dirs"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/palantir/godel/v2/framework/pluginapitester"
 	"github.com/palantir/godel/v2/pkg/products"
 	"github.com/stretchr/testify/assert"
@@ -378,6 +379,34 @@ projects:
     output-dir: conjure-output
     ir-locator: ` + yamlDir + `
 `
+		asset1 = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "conjure-ir-extensions-provider" }'
+    exit 0
+fi
+
+printf '%s\n' '{}'
+exit 0
+`
+		asset2 = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "valid type that follows the spec but is not supported yet so it should just not be called again and everything will exit OK" }'
+    exit 0
+fi
+
+printf '%s\n' 'test failed: should be unreachable'
+exit 1
+`
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
@@ -400,9 +429,15 @@ projects:
 	err = ioutil.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
 	require.NoError(t, err)
 
+	asset1File := tempfilecreator.MustWriteBytesToTempFile([]byte(asset1))
+	asset2File := tempfilecreator.MustWriteBytesToTempFile([]byte(asset2))
+	require.NoError(t, os.Chmod(asset1File, 0700))
+	require.NoError(t, os.Chmod(asset2File, 0700))
+
 	outputBuf := &bytes.Buffer{}
 	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure-publish", []string{
 		"--dry-run",
+		"--assets=" + asset1File + "," + asset2File,
 		"--group-id=com.palantir.test-group",
 		"--repository=test-repo",
 		"--url=" + ts.URL,
@@ -420,6 +455,117 @@ projects:
 
 	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/") + ".*?" + regexp.QuoteMeta(".pom")
 	assert.Regexp(t, wantRegexp, lines[1])
+}
+
+func TestConjurePluginPublishAssetSpec(t *testing.T) {
+	const (
+		yamlDir    = "yamlDir"
+		conjureYML = `
+projects:
+  project-1: { }
+`
+		assetDoesNotReturnValidJsonObject = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "conjure-ir-extensions-provider" }'
+    exit 0
+fi
+
+printf '%s\n' '"not a json object"'
+exit 0
+`
+		assetDoesNotReturnValidAssetInfoType = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+	touch /Volumes/git/ran-invalid-info
+    printf '%s\n' '{ "Type": "conjure-ir-extensions-provider" }'
+    exit 0
+fi
+
+printf '%s\n' 'unreachable: something is wrong if the asset was called with more anything other than _assetInfo as the only arg'
+exit 1
+`
+		assetDoesNotReturnValidAssetInfoJson = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+	touch /Volumes/git/ran-invalid-info
+    printf '%s\n' 'invalid json'
+    exit 0
+fi
+
+printf '%s\n' 'unreachable: something is wrong if the asset was called with more anything other than _assetInfo as the only arg'
+exit 1
+`
+		assetDoesNotReturnValidAssetInfoJsonObject = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+	touch /Volumes/git/ran-invalid-info
+    printf '%s\n' '"invalid json object"'
+    exit 0
+fi
+
+printf '%s\n' 'unreachable: something is wrong if the asset was called with more anything other than _assetInfo as the only arg'
+exit 1
+`
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	ymlDir := path.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+	defer cleanup()
+	err = os.MkdirAll(path.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(path.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+	require.NoError(t, err)
+
+	for _, assetString := range [...]string{
+		assetDoesNotReturnValidJsonObject,
+		assetDoesNotReturnValidAssetInfoType,
+		assetDoesNotReturnValidAssetInfoJson,
+		assetDoesNotReturnValidAssetInfoJsonObject,
+	} {
+		assetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(assetString))
+		require.NoError(t, os.Chmod(assetFile, 0700))
+
+		err = innerTestConjurePluginPublishAssetSpec(pluginapitester.NewPluginProvider(pluginPath), assetFile, projectDir)
+		assert.Error(t, err)
+	}
+
+}
+
+func innerTestConjurePluginPublishAssetSpec(pluginProvider pluginapitester.PluginProvider, assetFile, projectDir string) error {
+	runPluginCleanup, err := pluginapitester.RunPlugin(pluginProvider, nil, "conjure-publish", []string{
+		"--dry-run",
+		"--assets=" + assetFile,
+		"--group-id=com.palantir.test-group",
+		"--repository=test-repo",
+		"--url=unreachable.palantir.com",
+		"--username=test-username",
+		"--password=test-password",
+	}, projectDir, false, &bytes.Buffer{})
+	defer runPluginCleanup()
+	return err
 }
 
 func TestUpgradeConfig(t *testing.T) {
