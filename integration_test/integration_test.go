@@ -478,7 +478,7 @@ fi
 printf '%s\n' '"not a json object"'
 exit 0
 `
-		assetDoesNotReturnValidAssetInfo = `#!/bin/sh
+		assetDoesNotReturnValidAssetInfoType = `#!/bin/sh
 
 if [ "$#" -ne 1 ]; then
     exit 1
@@ -486,11 +486,41 @@ fi
 
 if [ "$1" = "_assetInfo" ]; then
 	touch /Volumes/git/ran-invalid-info
-    printf '%s\n' '{ "Tipe": "conjure-ir-extensions-provider" }'
+    printf '%s\n' '{ "Type": "conjure-ir-extensions-provider" }'
     exit 0
 fi
 
-printf '%s\n' 'unreachable: something is wrong if the asset with more than _assetInfo as an arg'
+printf '%s\n' 'unreachable: something is wrong if the asset was called with more anything other than _assetInfo as the only arg'
+exit 1
+`
+		assetDoesNotReturnValidAssetInfoJson = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+	touch /Volumes/git/ran-invalid-info
+    printf '%s\n' 'invalid json'
+    exit 0
+fi
+
+printf '%s\n' 'unreachable: something is wrong if the asset was called with more anything other than _assetInfo as the only arg'
+exit 1
+`
+		assetDoesNotReturnValidAssetInfoJsonObject = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+	touch /Volumes/git/ran-invalid-info
+    printf '%s\n' '"invalid json object"'
+    exit 0
+fi
+
+printf '%s\n' 'unreachable: something is wrong if the asset was called with more anything other than _assetInfo as the only arg'
 exit 1
 `
 	)
@@ -514,18 +544,20 @@ exit 1
 
 	for _, assetString := range [...]string{
 		assetDoesNotReturnValidJsonObject,
-		assetDoesNotReturnValidAssetInfo,
+		assetDoesNotReturnValidAssetInfoType,
+		assetDoesNotReturnValidAssetInfoJson,
+		assetDoesNotReturnValidAssetInfoJsonObject,
 	} {
 		assetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(assetString))
 		require.NoError(t, os.Chmod(assetFile, 0700))
 
-		err = inner(pluginapitester.NewPluginProvider(pluginPath), assetFile, ts.URL, projectDir)
+		err = innerTestConjurePluginPublishAssetSpec(pluginapitester.NewPluginProvider(pluginPath), assetFile, ts.URL, projectDir)
 		assert.Error(t, err)
 	}
 
 }
 
-func inner(pluginProvider pluginapitester.PluginProvider, assetFile, url, projectDir string) error {
+func innerTestConjurePluginPublishAssetSpec(pluginProvider pluginapitester.PluginProvider, assetFile, url, projectDir string) error {
 	runPluginCleanup, err := pluginapitester.RunPlugin(pluginProvider, nil, "conjure-publish", []string{
 		"--dry-run",
 		"--assets=" + assetFile,
