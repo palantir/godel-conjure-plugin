@@ -28,7 +28,6 @@ import (
 )
 
 var (
-	assetsFlagVal     string
 	groupIDFlagVal    string
 	urlFlagVal        string
 	usernameFlagVal   string
@@ -77,7 +76,6 @@ var publishCmd = &cobra.Command{
 func init() {
 	publishCmd.Flags().BoolVar(&dryRunFlagVal, "dry-run", false, "print the operations that would be performed")
 
-	publishCmd.Flags().StringVar(&assetsFlagVal, "assets", "", "for godel use only")
 	publishCmd.Flags().StringVar(&groupIDFlagVal, string(publisher.GroupIDFlag.Name), "", publisher.GroupIDFlag.Description)
 	publishCmd.Flags().StringVar(&repositoryFlagVal, string(artifactory.PublisherRepositoryFlag.Name), "", artifactory.PublisherRepositoryFlag.Description)
 	publishCmd.Flags().StringVar(&urlFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", publisher.ConnectionInfoURLFlag.Description)
