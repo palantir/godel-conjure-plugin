@@ -106,7 +106,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return err
 		}
 
-		irBytes, err = addExtensionsToIrBytes(irBytes, extensionsProvider, key, version)
+		irBytes, err = AddExtensionsToIrBytes(irBytes, extensionsProvider, key, version)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -126,7 +126,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 	return nil
 }
 
-// addExtensionsToIrBytes takes a Conjure IR JSON byte slice, parses it, and updates its "extensions" block
+// AddExtensionsToIrBytes takes a Conjure IR JSON byte slice, parses it, and updates its "extensions" block
 // by merging in additional extensions provided by the given ExtensionsProvider. The function then marshals
 // and returns the updated IR as a byte slice.
 //
@@ -142,7 +142,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 //
 // An error is returned if the input is not valid JSON, if the "extensions" block is missing or malformed,
 // or if the extensionsProvider fails.
-func addExtensionsToIrBytes(
+func AddExtensionsToIrBytes(
 	irBytes []byte,
 	extensionsProvider extensionsprovider.ExtensionsProvider,
 	conjureProject, version string,

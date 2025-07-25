@@ -91,3 +91,94 @@ projects:
 	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta("http://artifactory.domain.com/artifactory/repo/com/palantir/foo/") + ".*?" + regexp.QuoteMeta(".pom")
 	assert.Regexp(t, wantRegexp, lines[1])
 }
+
+func TestAddExtensionsToIrBytes(t *testing.T) {
+	for _, tc := range [...]struct {
+		name               string
+		inputIR            string
+		providedExtensions map[string]any
+		expected           string
+	}{
+		{
+			name:               "add extension to empty object",
+			inputIR:            `{}`,
+			providedExtensions: map[string]any{"hello": "world"},
+			expected:           `{"extensions":{"hello":"world"}}`,
+		},
+		{
+			name:               "no extensions to add, empty object",
+			inputIR:            `{}`,
+			providedExtensions: map[string]any{},
+			expected:           `{}`,
+		},
+		{
+			name:               "no extensions to add, empty extensions field",
+			inputIR:            `{"extensions":{}}`,
+			providedExtensions: map[string]any{},
+			expected:           `{"extensions":{}}`,
+		},
+		{
+			name:               "no extensions to add, extensions already present",
+			inputIR:            `{"extensions":{"already":"present"}}`,
+			providedExtensions: map[string]any{},
+			expected:           `{"extensions":{"already":"present"}}`,
+		},
+		{
+			name:               "add extension to existing extensions",
+			inputIR:            `{"extensions":{"already":"present"}}`,
+			providedExtensions: map[string]any{"new": "value"},
+			expected:           `{"extensions":{"already":"present","new":"value"}}`,
+		},
+		{
+			name:               "add extension to existing extensions; other fields are preserved",
+			inputIR:            `{"a":"b","c":"d","extensions":{"already":"present"}}`,
+			providedExtensions: map[string]any{"new": "value"},
+			expected:           `{"a":"b","c":"d","extensions":{"already":"present","new":"value"}}`,
+		},
+		{
+			name:               "overwrite existing extensions",
+			inputIR:            `{"extensions":{"value":"old"}}`,
+			providedExtensions: map[string]any{"value": "new"},
+			expected:           `{"extensions":{"value":"new"}}`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := conjureplugin.AddExtensionsToIrBytes(
+				[]byte(tc.inputIR),
+				func(_ []byte, _, _ string) (map[string]any, error) {
+					return tc.providedExtensions, nil
+				},
+				"",
+				"",
+			)
+			require.NoError(t, err)
+			assert.Equal(t, tc.expected, string(actual))
+		})
+	}
+	for _, tc := range [...]struct {
+		name               string
+		inputIR            string
+		providedExtensions map[string]any
+	}{
+		{
+			name:    "invalid input IR: empty string",
+			inputIR: ``,
+		},
+		{
+			name:    "invalid input IR: not a JSON object",
+			inputIR: `[]`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := conjureplugin.AddExtensionsToIrBytes(
+				[]byte(tc.inputIR),
+				func(_ []byte, _, _ string) (map[string]any, error) {
+					return nil, nil
+				},
+				"",
+				"",
+			)
+			require.Error(t, err)
+		})
+	}
+}
