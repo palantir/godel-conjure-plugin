@@ -100,37 +100,37 @@ func TestAddExtensionsToIrBytes(t *testing.T) {
 		expected           string
 	}{
 		{
-			name:               "add extension to empty object",
-			inputIR:            `{}`,
-			providedExtensions: map[string]any{"hello": "world"},
-			expected:           `{"extensions":{"hello":"world"}}`,
-		},
-		{
-			name:               "no extensions to add, empty object",
+			name:               "no extensions to add, empty IR",
 			inputIR:            `{}`,
 			providedExtensions: map[string]any{},
 			expected:           `{}`,
 		},
 		{
-			name:               "no extensions to add, empty extensions field",
+			name:               "add extension to empty IR",
+			inputIR:            `{}`,
+			providedExtensions: map[string]any{"hello": "world"},
+			expected:           `{"extensions":{"hello":"world"}}`,
+		},
+		{
+			name:               "no extensions to add, empty IR extensions field",
 			inputIR:            `{"extensions":{}}`,
 			providedExtensions: map[string]any{},
 			expected:           `{"extensions":{}}`,
 		},
 		{
-			name:               "no extensions to add, extensions already present",
+			name:               "no extensions to add, IR extensions already present",
 			inputIR:            `{"extensions":{"already":"present"}}`,
 			providedExtensions: map[string]any{},
 			expected:           `{"extensions":{"already":"present"}}`,
 		},
 		{
-			name:               "add extension to existing extensions",
+			name:               "add extension to existing IR extensions",
 			inputIR:            `{"extensions":{"already":"present"}}`,
 			providedExtensions: map[string]any{"new": "value"},
 			expected:           `{"extensions":{"already":"present","new":"value"}}`,
 		},
 		{
-			name:               "add extension to existing extensions; other fields are preserved",
+			name:               "add extension to existing IR extensions; other IR fields are preserved",
 			inputIR:            `{"a":"b","c":"d","extensions":{"already":"present"}}`,
 			providedExtensions: map[string]any{"new": "value"},
 			expected:           `{"a":"b","c":"d","extensions":{"already":"present","new":"value"}}`,
