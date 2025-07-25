@@ -379,7 +379,7 @@ projects:
     output-dir: conjure-output
     ir-locator: ` + yamlDir + `
 `
-		asset = `#!/bin/sh
+		asset1 = `#!/bin/sh
 
 if [ "$#" -ne 1 ]; then
     exit 1
@@ -392,6 +392,20 @@ fi
 
 printf '%s\n' '{}'
 exit 0
+`
+		asset2 = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "valid type that follows the spec but is not supported yet so it should just not be called again and everything will exit OK" }'
+    exit 0
+fi
+
+printf '%s\n' 'test failed: should be unreachable'
+exit 1
 `
 	)
 
@@ -415,15 +429,15 @@ exit 0
 	err = ioutil.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
 	require.NoError(t, err)
 
-	asset1 := tempfilecreator.MustWriteBytesToTempFile([]byte(asset))
-	asset2 := tempfilecreator.MustWriteBytesToTempFile([]byte(asset))
-	require.NoError(t, os.Chmod(asset1, 0700))
-	require.NoError(t, os.Chmod(asset2, 0700))
+	asset1File := tempfilecreator.MustWriteBytesToTempFile([]byte(asset1))
+	asset2File := tempfilecreator.MustWriteBytesToTempFile([]byte(asset2))
+	require.NoError(t, os.Chmod(asset1File, 0700))
+	require.NoError(t, os.Chmod(asset2File, 0700))
 
 	outputBuf := &bytes.Buffer{}
 	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure-publish", []string{
 		"--dry-run",
-		"--assets=" + asset1 + "," + asset2,
+		"--assets=" + asset1File + "," + asset2File,
 		"--group-id=com.palantir.test-group",
 		"--repository=test-repo",
 		"--url=" + ts.URL,
@@ -441,6 +455,103 @@ exit 0
 
 	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/") + ".*?" + regexp.QuoteMeta(".pom")
 	assert.Regexp(t, wantRegexp, lines[1])
+}
+
+func TestConjurePluginPublishAssetSpec(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.conjure.test.api
+    objects:
+      TestCase:
+        fields:
+          name: string
+`
+		yamlDir    = "yamlDir"
+		conjureYML = `
+projects:
+  project-1:
+    output-dir: conjure-output
+    ir-locator: ` + yamlDir + `
+`
+
+		doesNotReturnValidJsonObject = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "conjure-ir-extensions-provider" }'
+    exit 0
+fi
+
+printf '%s\n' '[]'
+exit 0
+`
+		doesNotReturnValidAssetInfo = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+	touch /Volumes/git/ran-invalid-info
+    printf '%s\n' '{ "Tipe": "conjure-ir-extensions-provider" }'
+    exit 0
+fi
+
+printf '%s\n' '[]'
+exit 0
+`
+	)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	defer ts.Close()
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	ymlDir := path.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+	defer cleanup()
+	err = os.MkdirAll(path.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(path.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+	require.NoError(t, err)
+
+	err = os.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	require.NoError(t, err)
+
+	for i, assetString := range [...]string{
+		doesNotReturnValidJsonObject,
+		doesNotReturnValidAssetInfo,
+	} {
+		assetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(assetString))
+		require.NoError(t, os.Chmod(assetFile, 0700))
+
+		err = inner(pluginapitester.NewPluginProvider(pluginPath), assetFile, ts.URL, projectDir)
+		assert.Error(t, err, i)
+	}
+
+}
+
+func inner(pluginProvider pluginapitester.PluginProvider, assetFile, url, projectDir string) error {
+	runPluginCleanup, err := pluginapitester.RunPlugin(pluginProvider, nil, "conjure-publish", []string{
+		"--dry-run",
+		"--assets=" + assetFile,
+		"--group-id=com.palantir.test-group",
+		"--repository=test-repo",
+		"--url=" + url,
+		"--username=test-username",
+		"--password=test-password",
+	}, projectDir, false, &bytes.Buffer{})
+	defer runPluginCleanup()
+	return err
 }
 
 func TestUpgradeConfig(t *testing.T) {

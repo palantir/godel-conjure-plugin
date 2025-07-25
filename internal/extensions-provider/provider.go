@@ -15,6 +15,7 @@
 package extensionsprovider
 
 import (
+	"fmt"
 	"maps"
 	"os/exec"
 
@@ -67,7 +68,11 @@ func New(configFile string, assets []string, url, groupID string) ExtensionsProv
 				return nil, err
 			}
 
-			if response.Type != "conjure-ir-extensions-provider" {
+			if response.Type == nil {
+				return nil, fmt.Errorf("invalid response from calling %v; wanted a JSON object with a `type` key; but got:\n%v", cmd.Args, string(assetInfoOutput))
+			}
+
+			if *response.Type != "conjure-ir-extensions-provider" {
 				continue
 			}
 
@@ -110,5 +115,5 @@ type extensionsAssetArgs struct {
 }
 
 type assetInfoResponse struct {
-	Type string `json:"type"`
+	Type *string `json:"type"`
 }
