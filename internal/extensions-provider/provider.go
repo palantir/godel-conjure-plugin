@@ -69,14 +69,14 @@ func New(configFile string, assets []string, url, groupID string) ExtensionsProv
 				continue
 			}
 
-			arg, err := safejson.MarshalIndent(extensionsAssetArgs{
+			arg, err := safejson.Marshal(extensionsAssetArgs{
 				PluginConfigFile: &configFile,
 				CurrentIRFile:    &irFile,
 				URL:              &url,
 				GroupID:          &groupID,
 				ProjectName:      &conjureProject,
 				Version:          &version,
-			}, "", "\t")
+			})
 			if err != nil {
 				return nil, err
 			}
