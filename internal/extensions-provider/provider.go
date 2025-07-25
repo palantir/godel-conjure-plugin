@@ -20,6 +20,7 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/palantir/pkg/safejson"
+	"github.com/pkg/errors"
 )
 
 type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (map[string]any, error)
@@ -55,13 +56,14 @@ func New(configFile string, assets []string, url, groupID string) ExtensionsProv
 
 		allExtensions := make(map[string]any)
 		for _, asset := range assets {
-			bytes, err := exec.Command(asset, "_assetInfo").Output()
+			cmd := exec.Command(asset, "_assetInfo")
+			assetInfoOutput, err := cmd.Output()
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(assetInfoOutput))
 			}
 
 			var response assetInfoResponse
-			if err := safejson.Unmarshal(bytes, &response); err != nil {
+			if err := safejson.Unmarshal(assetInfoOutput, &response); err != nil {
 				return nil, err
 			}
 
