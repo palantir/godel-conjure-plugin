@@ -128,7 +128,7 @@ The only `asset type` currently supported by `godel-conjure-plugin` is `"conjure
   { "type": "conjure-ir-extensions-provider" }
   ```
 
-- **Invocation:**
+**Invocation:**
 - When invoked, the asset receives a JSON object matching [this schema](https://github.com/palantir/godel-conjure-plugin/blob/2ea36c5c1dd002b2a0017449d75eaf1cc0929283/internal/extensions-provider/provider.go#L108-L115):
   ```go
   struct {
