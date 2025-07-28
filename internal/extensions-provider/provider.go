@@ -36,6 +36,7 @@ type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (ma
 //   - config:      The configuration string to be passed to each asset.
 //   - assets:      A list of asset executable paths to be queried for extensions.
 //   - url:         The Conjure IR URL associated with the current project.
+//   - repo:        The Conjure IR repo associated with the current project.
 //   - groupID:     The group ID of the current project.
 //
 // Returns:
