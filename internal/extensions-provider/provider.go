@@ -48,7 +48,7 @@ type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (ma
 //   - If the asset is a provider, invoke it with the relevant arguments to retrieve extension data.
 //   - Merge all extension maps from the assets into a single result.
 //   - Return the combined extensions map or an error if any asset invocation or JSON parsing fails.
-func New(configFile string, assets []string, url, groupID string) ExtensionsProvider {
+func New(configFile string, assets []string, url, repo, groupID string) ExtensionsProvider {
 	return func(irBytes []byte, conjureProject, version string) (map[string]any, error) {
 		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
@@ -80,6 +80,7 @@ func New(configFile string, assets []string, url, groupID string) ExtensionsProv
 				PluginConfigFile: &configFile,
 				CurrentIRFile:    &irFile,
 				URL:              &url,
+				Repo:             &repo,
 				GroupID:          &groupID,
 				ProjectName:      &conjureProject,
 				Version:          &version,
@@ -109,6 +110,7 @@ type extensionsAssetArgs struct {
 	PluginConfigFile *string `json:"config,omitempty"`
 	CurrentIRFile    *string `json:"current-ir-file,omitempty"`
 	URL              *string `json:"url,omitempty"`
+	Repo             *string `json:"repo,omitempty"`
 	GroupID          *string `json:"group-id,omitempty"`
 	ProjectName      *string `json:"project-name,omitempty"`
 	Version          *string `json:"version,omitempty"`
