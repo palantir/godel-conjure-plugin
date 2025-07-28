@@ -122,7 +122,7 @@ The only `asset type` currently supported by `godel-conjure-plugin` is `"conjure
 
 ### Requirements
 
-- **Type Declaration:**
+**Type Declaration:**
 - The asset must respond to the `_assetInfo` probe with:
   ```json
   { "type": "conjure-ir-extensions-provider" }
@@ -143,7 +143,7 @@ The only `asset type` currently supported by `godel-conjure-plugin` is `"conjure
   ```
 - The asset should output a JSON object to stdout. Each key-value pair in this object will be merged into the `extensions` block of the Conjure IR.
 
-- **Example:**
+**Example:**
 
 If you invoke the asset as follows:
 ```sh
@@ -167,10 +167,10 @@ then the resulting Conjure IR will include:
 }
 ```
 
-- **Key Overwrites:**
+**Key Overwrites:**
 - If multiple assets provide the same keys, **last write wins**. The order in which assets are invoked is **indeterminate** and should not be relied upon.
 
-- **Error Handling:**
+**Error Handling:**
 - If the asset is invoked with more than one argument, it must immediately fail.
 - If the asset output is not a valid JSON object, `godel-conjure-plugin` will fail.
 
