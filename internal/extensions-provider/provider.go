@@ -21,7 +21,6 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/palantir/pkg/safejson"
-	"github.com/pkg/errors"
 )
 
 type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (map[string]any, error)
@@ -59,18 +58,21 @@ func New(configFile string, assets []string, url, repo, groupID string) Extensio
 		allExtensions := make(map[string]any)
 		for _, asset := range assets {
 			cmd := exec.Command(asset, "_assetInfo")
-			assetInfoOutput, err := cmd.Output()
+			stdout, err := cmd.Output()
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(assetInfoOutput))
+				if exitErr, ok := err.(*exec.ExitError); ok {
+					return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s\nstderr:\n%s", err, cmd.Args, string(stdout), string(exitErr.Stderr))
+				}
+				return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
 			}
 
 			var response assetInfoResponse
-			if err := safejson.Unmarshal(assetInfoOutput, &response); err != nil {
+			if err := safejson.Unmarshal(stdout, &response); err != nil {
 				return nil, err
 			}
 
 			if response.Type == nil {
-				return nil, fmt.Errorf("invalid response from calling %v; wanted a JSON object with a `type` key; but got:\n%v", cmd.Args, string(assetInfoOutput))
+				return nil, fmt.Errorf("invalid response from calling %v; wanted a JSON object with a `type` key; but got:\n%v", cmd.Args, string(stdout))
 			}
 
 			if *response.Type != "conjure-ir-extensions-provider" {
@@ -90,13 +92,17 @@ func New(configFile string, assets []string, url, repo, groupID string) Extensio
 				return nil, err
 			}
 
-			additionExtensionsBytes, err := exec.Command(asset, string(arg)).Output()
+			cmd = exec.Command(asset, string(arg))
+			stdout, err = cmd.Output()
 			if err != nil {
-				return nil, err
+				if exitErr, ok := err.(*exec.ExitError); ok {
+					return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s\nstderr:\n%s", err, cmd.Args, string(stdout), string(exitErr.Stderr))
+				}
+				return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
 			}
 
 			var additionalExtensions map[string]any
-			if err := safejson.Unmarshal(additionExtensionsBytes, &additionalExtensions); err != nil {
+			if err := safejson.Unmarshal(stdout, &additionalExtensions); err != nil {
 				return nil, err
 			}
 
