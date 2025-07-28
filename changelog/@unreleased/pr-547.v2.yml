@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Better error handling when`exec`ing assets
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/547
