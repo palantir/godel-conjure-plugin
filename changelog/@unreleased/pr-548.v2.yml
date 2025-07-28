@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: 'feature: add dedicated field for configuring assets of type `conjure-ir-extensions-provider`'
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/548
