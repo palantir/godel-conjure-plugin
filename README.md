@@ -148,7 +148,7 @@ struct {
 
 If you invoke the asset as follows:
 ```sh
-./asset "<JSON OBJECT>"
+./asset '{"config":"godel/config/conjure-plugin.yml",...}'
 ```
 and the asset outputs:
 ```json
