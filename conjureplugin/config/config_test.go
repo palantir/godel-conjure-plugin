@@ -241,6 +241,42 @@ projects:
 				},
 			},
 		},
+		{
+			`
+projects:
+ project:
+   output-dir: outputDir
+   ir-locator:
+     type: remote
+     locator: localhost:8080/ir.json
+   accept-funcs: true
+   extensions:
+     foo: bar
+     baz:
+       - 1
+       - 2
+     blah:
+       key: value
+`,
+			config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeRemote,
+							Locator: "localhost:8080/ir.json",
+						},
+						Server:      false,
+						AcceptFuncs: boolPtr(true),
+						Extensions: map[string]any{
+							"foo":  "bar",
+							"baz":  []any{1, 2},
+							"blah": map[any]any{"key": "value"},
+						},
+					},
+				},
+			},
+		},
 	} {
 		var got config.ConjurePluginConfig
 		err := yaml.Unmarshal([]byte(tc.in), &got)
