@@ -35,7 +35,6 @@ type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (ma
 //   - config:      The configuration string to be passed to each asset.
 //   - assets:      A list of asset executable paths to be queried for extensions.
 //   - url:         The Conjure IR URL associated with the current project.
-//   - repo:        The Conjure IR repo associated with the current project.
 //   - groupID:     The group ID of the current project.
 //
 // Returns:
@@ -48,7 +47,7 @@ type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (ma
 //   - If the asset is a provider, invoke it with the relevant arguments to retrieve extension data.
 //   - Merge all extension maps from the assets into a single result.
 //   - Return the combined extensions map or an error if any asset invocation or JSON parsing fails.
-func New(configFile string, assets []string, url, repo, groupID string) ExtensionsProvider {
+func New(configFile string, assets []string, url, groupID string) ExtensionsProvider {
 	return func(irBytes []byte, conjureProject, version string) (map[string]any, error) {
 		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
@@ -83,7 +82,6 @@ func New(configFile string, assets []string, url, repo, groupID string) Extensio
 				PluginConfigFile: &configFile,
 				CurrentIRFile:    &irFile,
 				URL:              &url,
-				Repo:             &repo,
 				GroupID:          &groupID,
 				ProjectName:      &conjureProject,
 				Version:          &version,
@@ -117,7 +115,6 @@ type extensionsAssetArgs struct {
 	PluginConfigFile *string `json:"config,omitempty"`
 	CurrentIRFile    *string `json:"current-ir-file,omitempty"`
 	URL              *string `json:"url,omitempty"`
-	Repo             *string `json:"repo,omitempty"`
 	GroupID          *string `json:"group-id,omitempty"`
 	ProjectName      *string `json:"project-name,omitempty"`
 	Version          *string `json:"version,omitempty"`
