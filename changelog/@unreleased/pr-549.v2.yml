@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: 'Revert "fix: pass `repo` flag to `conjure-ir-extensions-provider`
+    ass…'
+  links:
+  - https://github.com/palantir/godel-conjure-plugin/pull/549
