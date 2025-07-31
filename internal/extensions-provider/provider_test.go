@@ -62,7 +62,7 @@ exit 1
 		assets = append(assets, asset)
 	}
 
-	provider := extensionsprovider.New("", assets, "", "", "")
+	provider := extensionsprovider.New("", assets, "", "")
 
 	got, err := provider([]byte{}, "", "")
 	require.NoError(t, err)
@@ -81,7 +81,7 @@ exit 1
 		t.Errorf("maps are not equal:\ngot: %v\nwant:%v", got, want)
 	}
 
-	empty, err := extensionsprovider.New("", nil, "", "", "")([]byte{}, "", "")
+	empty, err := extensionsprovider.New("", nil, "", "")([]byte{}, "", "")
 	assert.NoError(t, err)
 	assert.Empty(t, empty)
 }
