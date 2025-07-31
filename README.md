@@ -129,14 +129,13 @@ The only `asset type` currently supported by `godel-conjure-plugin` is `"conjure
   ```
 
 **Invocation:**
-- When invoked, the asset receives a JSON object matching [this schema](https://github.com/palantir/godel-conjure-plugin/blob/70eb965b8bccf0d0113277576876e8c06d9ed33a/internal/extensions-provider/provider.go#L109-L117) **with ALL of the _keys_ having non-empty values**:
+- When invoked, the asset receives a JSON object matching [this schema](https://github.com/palantir/godel-conjure-plugin/blob/cd9ab97ab707c1ae9d8a99366fc9419cf7f53c67/internal/extensions-provider/provider.go#L114-L121) **with ALL of the _keys_ having non-empty values**:
 
 ```go
 struct {
   PluginConfigFile string `json:"config"`
   CurrentIRFile    string `json:"current-ir-file"`
   URL              string `json:"url"`
-  Repo             string `json:"repo"`
   GroupID          string `json:"group-id"`
   ProjectName      string `json:"project-name"`
   Version          string `json:"version"`
