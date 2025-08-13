@@ -34,7 +34,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
-	github.com/nwaples/rardecode v1.1.0 // indirect
+	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/palantir/distgo/pkg/git v1.0.0 // indirect
 	github.com/palantir/go-ptimports/v2 v2.46.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
