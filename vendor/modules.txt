@@ -126,29 +126,29 @@ github.com/palantir/godel/v2/pkg/versionedconfig
 # github.com/palantir/pkg v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg
-# github.com/palantir/pkg/cobracli v1.2.0
-## explicit; go 1.19
+# github.com/palantir/pkg/cobracli v1.3.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/cobracli
-# github.com/palantir/pkg/matcher v1.2.0
-## explicit; go 1.19
+# github.com/palantir/pkg/matcher v1.3.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/matcher
-# github.com/palantir/pkg/pkgpath v1.3.0
-## explicit; go 1.21
+# github.com/palantir/pkg/pkgpath v1.4.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/pkgpath
-# github.com/palantir/pkg/safehttp v1.1.0
-## explicit; go 1.19
+# github.com/palantir/pkg/safehttp v1.2.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/safehttp
-# github.com/palantir/pkg/safejson v1.1.0
-## explicit; go 1.19
+# github.com/palantir/pkg/safejson v1.2.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/safejson
-# github.com/palantir/pkg/safeyaml v1.1.0
-## explicit; go 1.19
+# github.com/palantir/pkg/safeyaml v1.2.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/safeyaml
-# github.com/palantir/pkg/specdir v1.2.0
-## explicit; go 1.19
+# github.com/palantir/pkg/specdir v1.3.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/specdir
-# github.com/palantir/pkg/transform v1.1.0
-## explicit; go 1.19
+# github.com/palantir/pkg/transform v1.2.0
+## explicit; go 1.25.0
 github.com/palantir/pkg/transform
 # github.com/palantir/witchcraft-go-error v1.42.0
 ## explicit; go 1.25.0
