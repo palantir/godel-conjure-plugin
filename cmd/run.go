@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -31,6 +32,7 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run conjure-go based on project configuration",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		log.SetOutput(cmd.ErrOrStderr())
 		parsedConfigSet, err := toProjectParams(configFileFlag)
 		if err != nil {
 			return err

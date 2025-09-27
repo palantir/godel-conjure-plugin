@@ -16,6 +16,7 @@ package config
 
 import (
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"sort"
@@ -40,8 +41,11 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 	}
 	sort.Strings(keys)
 
+	seenDirs := make(map[string][]string)
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	for key, currConfig := range c.ProjectConfigs {
+		seenDirs[currConfig.OutputDir] = append(seenDirs[currConfig.OutputDir], key)
+
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
 		if err != nil {
 			return conjureplugin.ConjureProjectParams{}, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
@@ -65,6 +69,18 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 			Publish:     publishVal,
 		}
 	}
+
+	for outputDir, projects := range seenDirs {
+		if len(projects) > 1 {
+			log.Printf(
+				"[WARNING] Duplicate outputDir detected in Conjure config (godel/config/conjure-plugin.yml): '%s'\n"+
+					"  Conflicting projects: %v\n"+
+					"  [NOTE] Multiple projects sharing the same outputDir can cause code generation to overwrite itself, which may result in 'conjure --verify' failures or other unexpected issues.\n",
+				outputDir, projects,
+			)
+		}
+	}
+
 	return conjureplugin.ConjureProjectParams{
 		SortedKeys: keys,
 		Params:     params,
