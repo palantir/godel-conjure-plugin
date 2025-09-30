@@ -9,6 +9,10 @@ github.com/andybalholm/brotli/matchfinder
 ## explicit; go 1.18
 github.com/cheggaaa/pb/v3
 github.com/cheggaaa/pb/v3/termutil
+# github.com/clipperhouse/uax29/v2 v2.2.0
+## explicit; go 1.18
+github.com/clipperhouse/uax29/v2/graphemes
+github.com/clipperhouse/uax29/v2/internal/iterators
 # github.com/dave/jennifer v1.7.1
 ## explicit; go 1.20
 github.com/dave/jennifer/jen
@@ -57,8 +61,8 @@ github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
-# github.com/mattn/go-runewidth v0.0.16
-## explicit; go 1.9
+# github.com/mattn/go-runewidth v0.0.19
+## explicit; go 1.20
 github.com/mattn/go-runewidth
 # github.com/mholt/archiver/v3 v3.5.1
 ## explicit; go 1.13
@@ -72,7 +76,7 @@ github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.1.3
 ## explicit
 github.com/nwaples/rardecode
-# github.com/palantir/conjure-go/v6 v6.76.0
+# github.com/palantir/conjure-go/v6 v6.77.0
 ## explicit; go 1.25.0
 github.com/palantir/conjure-go/v6/conjure
 github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
@@ -96,7 +100,7 @@ github.com/palantir/distgo/pkg/git
 # github.com/palantir/go-ptimports/v2 v2.47.0
 ## explicit; go 1.25.0
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel/v2 v2.141.0
+# github.com/palantir/godel/v2 v2.143.0
 ## explicit; go 1.25.0
 github.com/palantir/godel/v2/framework/artifactresolver
 github.com/palantir/godel/v2/framework/builtintasks
@@ -170,9 +174,6 @@ github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/rivo/uniseg v0.4.7
-## explicit; go 1.18
-github.com/rivo/uniseg
 # github.com/rogpeppe/go-internal v1.14.1
 ## explicit; go 1.23
 github.com/rogpeppe/go-internal/internal/syscall/windows
