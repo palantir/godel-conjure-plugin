@@ -41,7 +41,7 @@ var publishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publish Conjure IR",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		projectParams, err := toProjectParams(configFileFlag)
+		projectParams, err := toProjectParams(configFileFlag, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}

@@ -15,8 +15,9 @@
 package config
 
 import (
+	"fmt"
+	"io"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"sort"
@@ -34,7 +35,7 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v1.ConjurePluginConfig {
 	return (*v1.ConjurePluginConfig)(in)
 }
 
-func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, error) {
+func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
 	var keys []string
 	for k := range c.ProjectConfigs {
 		keys = append(keys, k)
@@ -72,7 +73,7 @@ func (c *ConjurePluginConfig) ToParams() (conjureplugin.ConjureProjectParams, er
 
 	for outputDir, projects := range seenDirs {
 		if len(projects) > 1 {
-			log.Printf(
+			_, _ = fmt.Fprintf(stdout,
 				"[WARNING] Duplicate outputDir detected in Conjure config (godel/config/conjure-plugin.yml): '%s'\n"+
 					"  Conflicting projects: %v\n"+
 					"  [NOTE] Multiple projects sharing the same outputDir can cause code generation to overwrite itself, which may result in 'conjure --verify' failures or other unexpected issues.\n",

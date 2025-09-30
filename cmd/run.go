@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"log"
+	"io"
 	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -32,15 +32,15 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run conjure-go based on project configuration",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		log.SetOutput(cmd.ErrOrStderr())
-		parsedConfigSet, err := toProjectParams(configFileFlag)
+		stdout := cmd.OutOrStdout()
+		parsedConfigSet, err := toProjectParams(configFileFlag, stdout)
 		if err != nil {
 			return err
 		}
 		if err := os.Chdir(projectDirFlag); err != nil {
 			return errors.Wrapf(err, "failed to set working directory")
 		}
-		return conjureplugin.Run(parsedConfigSet, verifyFlag, projectDirFlag, cmd.OutOrStdout())
+		return conjureplugin.Run(parsedConfigSet, verifyFlag, projectDirFlag, stdout)
 	},
 }
 
@@ -49,10 +49,10 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 }
 
-func toProjectParams(cfgFile string) (conjureplugin.ConjureProjectParams, error) {
+func toProjectParams(cfgFile string, stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
 	config, err := config.ReadConfigFromFile(cfgFile)
 	if err != nil {
 		return conjureplugin.ConjureProjectParams{}, err
 	}
-	return config.ToParams()
+	return config.ToParams(stdout)
 }
