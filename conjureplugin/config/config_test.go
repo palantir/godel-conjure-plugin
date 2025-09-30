@@ -15,6 +15,7 @@
 package config_test
 
 import (
+	"io"
 	"testing"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -394,7 +395,7 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 			},
 		},
 	} {
-		got, err := tc.in.ToParams()
+		got, err := tc.in.ToParams(io.Discard)
 		require.NoError(t, err, "Case %d", i)
 		assert.Equal(t, tc.want, got, "Case %d", i)
 	}
