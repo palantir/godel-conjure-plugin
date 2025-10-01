@@ -110,37 +110,63 @@ func TestAddExtensionsToIrBytes(t *testing.T) {
 			name:               "add extension to empty IR",
 			inputIR:            `{}`,
 			providedExtensions: map[string]any{"hello": "world"},
-			expected:           `{"extensions":{"hello":"world"}}`,
+			expected: `{
+	"extensions": {
+		"hello": "world"
+	}
+}`,
 		},
 		{
 			name:               "no extensions to add, empty IR extensions field",
 			inputIR:            `{"extensions":{}}`,
 			providedExtensions: map[string]any{},
-			expected:           `{"extensions":{}}`,
+			expected: `{
+	"extensions": {}
+}`,
 		},
 		{
 			name:               "no extensions to add, IR extensions already present",
 			inputIR:            `{"extensions":{"already":"present"}}`,
 			providedExtensions: map[string]any{},
-			expected:           `{"extensions":{"already":"present"}}`,
+			expected: `{
+	"extensions": {
+		"already": "present"
+	}
+}`,
 		},
 		{
 			name:               "add extension to existing IR extensions",
 			inputIR:            `{"extensions":{"already":"present"}}`,
 			providedExtensions: map[string]any{"new": "value"},
-			expected:           `{"extensions":{"already":"present","new":"value"}}`,
+			expected: `{
+	"extensions": {
+		"already": "present",
+		"new": "value"
+	}
+}`,
 		},
 		{
 			name:               "add extension to existing IR extensions; other IR fields are preserved",
 			inputIR:            `{"a":"b","c":"d","extensions":{"already":"present"}}`,
 			providedExtensions: map[string]any{"new": "value"},
-			expected:           `{"a":"b","c":"d","extensions":{"already":"present","new":"value"}}`,
+			expected: `{
+	"a": "b",
+	"c": "d",
+	"extensions": {
+		"already": "present",
+		"new": "value"
+	}
+}`,
 		},
 		{
 			name:               "overwrite existing extensions",
 			inputIR:            `{"extensions":{"value":"old"}}`,
 			providedExtensions: map[string]any{"value": "new"},
-			expected:           `{"extensions":{"value":"new"}}`,
+			expected: `{
+	"extensions": {
+		"value": "new"
+	}
+}`,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
