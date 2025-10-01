@@ -176,7 +176,7 @@ func AddExtensionsToIrBytes(
 		conjureCliIr["extensions"] = extensionsAccumulator
 	}
 
-	return safejson.Marshal(conjureCliIr)
+	return safejson.MarshalIndent(conjureCliIr, "", "\t")
 }
 
 func PublisherFlags() ([]distgo.PublisherFlag, error) {
