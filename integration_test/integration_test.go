@@ -237,7 +237,7 @@ func (u *TestUnion) AcceptFuncs(testCaseFunc func(TestCase) error, unknownFunc f
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in TestUnion type")
 		}
 		return unknownFunc(u.typ)
 	case "testCase":
@@ -248,7 +248,7 @@ func (u *TestUnion) AcceptFuncs(testCaseFunc func(TestCase) error, unknownFunc f
 	}
 }
 
-func (u *TestUnion) TestCaseNoopSuccess(TestCase) error {
+func (u *TestUnion) TestCaseNoopSuccess(_ TestCase) error {
 	return nil
 }
 
