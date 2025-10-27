@@ -22,12 +22,16 @@ import (
 
 type ConjurePluginConfig struct {
 	versionedconfig.ConfigWithVersion `yaml:",inline,omitempty"`
-	ProjectConfigs                    map[string]SingleConjureConfig `yaml:"projects"`
+	// GroupID is the default group ID for all projects. Individual projects can override this.
+	GroupID        *string                        `yaml:"group-id,omitempty"`
+	ProjectConfigs map[string]SingleConjureConfig `yaml:"projects"`
 }
 
 type SingleConjureConfig struct {
 	OutputDir string          `yaml:"output-dir"`
 	IRLocator IRLocatorConfig `yaml:"ir-locator"`
+	// GroupID is the group ID for this project. If not specified, the top-level group-id is used.
+	GroupID *string `yaml:"group-id,omitempty"`
 	// Publish specifies whether or not the IR specified by this project should be included in the publish operation.
 	// If this value is not explicitly specified in configuration, it is treated as "true" for YAML sources of IR and
 	// "false" for all other sources.

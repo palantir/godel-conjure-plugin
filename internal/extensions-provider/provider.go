@@ -23,7 +23,7 @@ import (
 	"github.com/palantir/pkg/safejson"
 )
 
-type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (map[string]any, error)
+type ExtensionsProvider func(irBytes []byte, groupID, conjureProject, version string) (map[string]any, error)
 
 // New returns an ExtensionsProvider that, when invoked, collects and merges
 // extension data from a set of external assets. Each asset is queried to determine if it is a
@@ -47,8 +47,8 @@ type ExtensionsProvider func(irBytes []byte, conjureProject, version string) (ma
 //   - If the asset is a provider, invoke it with the relevant arguments to retrieve extension data.
 //   - Merge all extension maps from the assets into a single result.
 //   - Return the combined extensions map or an error if any asset invocation or JSON parsing fails.
-func New(configFile string, assets []string, url, groupID string) ExtensionsProvider {
-	return func(irBytes []byte, conjureProject, version string) (map[string]any, error) {
+func New(configFile string, assets []string, url string) ExtensionsProvider {
+	return func(irBytes []byte, groupID, conjureProject, version string) (map[string]any, error) {
 		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
 			return nil, err

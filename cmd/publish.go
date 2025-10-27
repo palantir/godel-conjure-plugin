@@ -67,8 +67,18 @@ var publishCmd = &cobra.Command{
 			flagVals[currFlag.Name] = val
 		}
 
+		var groupID *string
+
+		if cmd.Flags().Changed(string(publisher.GroupIDFlag.Name)) {
+			val, err := currFlag.GetFlagValue(cmd.Flags())
+			if err != nil {
+				return err
+			}
+			groupID = &val
+		}
+
 		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.New(configFileFlag, assetsFlag, urlFlagVal, groupIDFlagVal),
+			extensionsprovider.New(configFileFlag, assetsFlag, urlFlagVal),
 		)
 	},
 }

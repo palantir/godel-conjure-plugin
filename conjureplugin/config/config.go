@@ -61,6 +61,15 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+
+		var groupID string
+		if c.GroupID != nil {
+			groupID = *c.GroupID
+		}
+		if currConfig.GroupID != nil {
+			groupID = *currConfig.GroupID
+		}
+
 		params[key] = conjureplugin.ConjureProjectParam{
 			OutputDir:   currConfig.OutputDir,
 			IRProvider:  irProvider,
@@ -68,6 +77,7 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 			Server:      currConfig.Server,
 			CLI:         currConfig.CLI,
 			Publish:     publishVal,
+			GroupID:     groupID,
 		}
 	}
 
