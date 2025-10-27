@@ -90,8 +90,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 				},
 			},
 			PublishOutputInfo: &distgo.PublishOutputInfo{
-				// TODO: allow this to be specified in config?
-				GroupID: "",
+				GroupID: param.GroupID,
 			},
 		}
 
@@ -106,7 +105,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return err
 		}
 
-		irBytes, err = AddExtensionsToIrBytes(irBytes, extensionsProvider, key, version)
+		irBytes, err = AddExtensionsToIrBytes(irBytes, extensionsProvider, param.GroupID, key, version)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -145,7 +144,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 func AddExtensionsToIrBytes(
 	irBytes []byte,
 	extensionsProvider extensionsprovider.ExtensionsProvider,
-	conjureProject, version string,
+	groupID, conjureProject, version string,
 ) ([]byte, error) {
 	var conjureCliIr map[string]any
 	if err := safejson.Unmarshal(irBytes, &conjureCliIr); err != nil {
@@ -165,7 +164,7 @@ func AddExtensionsToIrBytes(
 		maps.Copy(extensionsAccumulator, conjureCliIrExtensionsObject)
 	}
 
-	providedExtensions, err := extensionsProvider(irBytes, conjureProject, version)
+	providedExtensions, err := extensionsProvider(irBytes, groupID, conjureProject, version)
 	if err != nil {
 		return nil, err
 	}

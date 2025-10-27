@@ -41,7 +41,13 @@ var publishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publish Conjure IR",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		projectParams, err := toProjectParams(configFileFlag, cmd.OutOrStdout())
+		// Determine if --group-id CLI flag was explicitly provided
+		var cliGroupID *string
+		if cmd.Flags().Changed(string(publisher.GroupIDFlag.Name)) {
+			cliGroupID = &groupIDFlagVal
+		}
+
+		projectParams, err := toProjectParams(configFileFlag, cliGroupID, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}
@@ -68,7 +74,7 @@ var publishCmd = &cobra.Command{
 		}
 
 		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.New(configFileFlag, assetsFlag, urlFlagVal, groupIDFlagVal),
+			extensionsprovider.New(configFileFlag, assetsFlag, urlFlagVal),
 		)
 	},
 }

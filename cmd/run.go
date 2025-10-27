@@ -33,7 +33,7 @@ var runCmd = &cobra.Command{
 	Short: "Run conjure-go based on project configuration",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		stdout := cmd.OutOrStdout()
-		parsedConfigSet, err := toProjectParams(configFileFlag, stdout)
+		parsedConfigSet, err := toProjectParams(configFileFlag, nil, stdout)
 		if err != nil {
 			return err
 		}
@@ -49,10 +49,10 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 }
 
-func toProjectParams(cfgFile string, stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
+func toProjectParams(cfgFile string, groupID *string, stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
 	config, err := config.ReadConfigFromFile(cfgFile)
 	if err != nil {
 		return conjureplugin.ConjureProjectParams{}, err
 	}
-	return config.ToParams(stdout)
+	return config.ToParams(groupID, stdout)
 }

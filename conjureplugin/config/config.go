@@ -35,7 +35,7 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v1.ConjurePluginConfig {
 	return (*v1.ConjurePluginConfig)(in)
 }
 
-func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
+func (c *ConjurePluginConfig) ToParams(cliGroupID *string, stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
 	var keys []string
 	for k := range c.ProjectConfigs {
 		keys = append(keys, k)
@@ -61,6 +61,22 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+
+		var groupID *string
+		if c.GroupID != nil {
+			groupID = c.GroupID
+		}
+		if currConfig.GroupID != nil {
+			groupID = currConfig.GroupID
+		}
+		if cliGroupID != nil {
+			groupID = cliGroupID
+		}
+
+		if groupID == nil {
+			return conjureplugin.ConjureProjectParams{}, errors.Errorf("group-id must be specified by command line or config")
+		}
+
 		params[key] = conjureplugin.ConjureProjectParam{
 			OutputDir:   currConfig.OutputDir,
 			IRProvider:  irProvider,
@@ -68,6 +84,7 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 			Server:      currConfig.Server,
 			CLI:         currConfig.CLI,
 			Publish:     publishVal,
+			GroupID:     *groupID,
 		}
 	}
 
@@ -157,4 +174,31 @@ func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
 		return ConjurePluginConfig{}, errors.WithStack(err)
 	}
 	return cfg, nil
+}
+
+// ResolveGroupID determines the group ID for a given project based on the following precedence:
+// 1. CLI flag override (if cliGroupID is non-nil, indicating it was explicitly provided)
+// 2. Per-project group-id in config
+// 3. Top-level group-id in config
+// Returns an error if no group-id is found.
+func (c *ConjurePluginConfig) ResolveGroupID(projectKey string, cliGroupID *string) (string, error) {
+	// If CLI flag was explicitly provided, use CLI value
+	if cliGroupID != nil {
+		return *cliGroupID, nil
+	}
+
+	// Check per-project group-id first
+	if projectConfig, ok := c.ProjectConfigs[projectKey]; ok {
+		if projectConfig.GroupID != nil {
+			return *projectConfig.GroupID, nil
+		}
+	}
+
+	// Fall back to top-level group-id
+	if c.GroupID != nil {
+		return *c.GroupID, nil
+	}
+
+	// No group-id found
+	return "", errors.Errorf("group-id must be specified via CLI flag (--group-id) or in configuration (top-level or per-project) for project %s", projectKey)
 }

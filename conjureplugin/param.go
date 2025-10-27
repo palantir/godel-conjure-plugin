@@ -39,4 +39,5 @@ type ConjureProjectParam struct {
 	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
+	GroupID string
 }

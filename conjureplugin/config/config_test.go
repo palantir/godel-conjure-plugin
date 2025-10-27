@@ -395,7 +395,8 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 			},
 		},
 	} {
-		got, err := tc.in.ToParams(io.Discard)
+		e := ""
+		got, err := tc.in.ToParams(&e, io.Discard)
 		require.NoError(t, err, "Case %d", i)
 		assert.Equal(t, tc.want, got, "Case %d", i)
 	}
