@@ -73,11 +73,11 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		}
 
 		var groupID string
-		if param.GroupID != nil {
-			groupID = *param.GroupID
+		if param.GroupID != "" {
+			groupID = param.GroupID
 		}
-		if cliGroupID != nil {
-			groupID = *cliGroupID
+		if cliGroupID != "" {
+			groupID = cliGroupID
 		}
 
 		projectInfo := distgo.ProjectInfo{

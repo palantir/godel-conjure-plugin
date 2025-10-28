@@ -53,7 +53,7 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 		}
 
 		groupID := c.GroupID
-		if currConfig.GroupID != nil {
+		if currConfig.GroupID != "" {
 			groupID = currConfig.GroupID
 		}
 

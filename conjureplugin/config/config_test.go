@@ -417,7 +417,7 @@ projects:
     ir-locator: local/yaml-dir
 `,
 			want: config.ConjurePluginConfig{
-				GroupID: toPtr("com.palantir.signals"),
+				GroupID: "com.palantir.signals",
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
@@ -446,7 +446,7 @@ projects:
 							Type:    v1.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
-						GroupID: toPtr("com.palantir.project"),
+						GroupID: "com.palantir.project",
 					},
 				},
 			},
@@ -465,7 +465,7 @@ projects:
     group-id: com.palantir.override
 `,
 			want: config.ConjurePluginConfig{
-				GroupID: toPtr("com.palantir.default"),
+				GroupID: "com.palantir.default",
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir1",
@@ -480,7 +480,7 @@ projects:
 							Type:    v1.LocatorTypeAuto,
 							Locator: "local/yaml-dir2",
 						},
-						GroupID: toPtr("com.palantir.override"),
+						GroupID: "com.palantir.override",
 					},
 				},
 			},
@@ -502,7 +502,7 @@ func TestGroupIDToParams(t *testing.T) {
 		{
 			name: "top-level group-id is inherited by project",
 			in: config.ConjurePluginConfig{
-				GroupID: toPtr("com.palantir.signals"),
+				GroupID: "com.palantir.signals",
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
@@ -523,7 +523,7 @@ func TestGroupIDToParams(t *testing.T) {
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
 						Publish:     true,
 						AcceptFuncs: true,
-						GroupID:     toPtr("com.palantir.signals"),
+						GroupID:     "com.palantir.signals",
 					},
 				},
 			},
@@ -531,7 +531,7 @@ func TestGroupIDToParams(t *testing.T) {
 		{
 			name: "per-project group-id overrides top-level",
 			in: config.ConjurePluginConfig{
-				GroupID: toPtr("com.palantir.default"),
+				GroupID: "com.palantir.default",
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
@@ -539,7 +539,7 @@ func TestGroupIDToParams(t *testing.T) {
 							Type:    v1.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
-						GroupID: toPtr("com.palantir.override"),
+						GroupID: "com.palantir.override",
 					},
 				},
 			},
@@ -553,7 +553,7 @@ func TestGroupIDToParams(t *testing.T) {
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
 						Publish:     true,
 						AcceptFuncs: true,
-						GroupID:     toPtr("com.palantir.override"),
+						GroupID:     "com.palantir.override",
 					},
 				},
 			},
@@ -581,7 +581,7 @@ func TestGroupIDToParams(t *testing.T) {
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
 						Publish:     true,
 						AcceptFuncs: true,
-						GroupID:     nil,
+						GroupID:     "",
 					},
 				},
 			},
@@ -589,7 +589,7 @@ func TestGroupIDToParams(t *testing.T) {
 		{
 			name: "multiple projects with different group-ids",
 			in: config.ConjurePluginConfig{
-				GroupID: toPtr("com.palantir.default"),
+				GroupID: "com.palantir.default",
 				ProjectConfigs: map[string]v1.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir1",
@@ -604,7 +604,7 @@ func TestGroupIDToParams(t *testing.T) {
 							Type:    v1.LocatorTypeAuto,
 							Locator: "input2.yml",
 						},
-						GroupID: toPtr("com.palantir.custom"),
+						GroupID: "com.palantir.custom",
 					},
 				},
 			},
@@ -619,14 +619,14 @@ func TestGroupIDToParams(t *testing.T) {
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input1.yml"),
 						Publish:     true,
 						AcceptFuncs: true,
-						GroupID:     toPtr("com.palantir.default"),
+						GroupID:     "com.palantir.default",
 					},
 					"project-2": {
 						OutputDir:   "outputDir2",
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input2.yml"),
 						Publish:     true,
 						AcceptFuncs: true,
-						GroupID:     toPtr("com.palantir.custom"),
+						GroupID:     "com.palantir.custom",
 					},
 				},
 			},

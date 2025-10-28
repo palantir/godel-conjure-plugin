@@ -80,7 +80,7 @@ projects:
 		artifactory.PublisherRepositoryFlag.Name: "repo",
 	}, true, outputBuf, func(_ []byte, _, _, _ string) (map[string]any, error) {
 		return nil, nil
-	}, nil)
+	}, "")
 	require.NoError(t, err, "failed to publish Conjure")
 
 	lines := strings.Split(outputBuf.String(), "\n")

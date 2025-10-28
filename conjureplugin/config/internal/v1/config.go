@@ -23,7 +23,7 @@ import (
 type ConjurePluginConfig struct {
 	versionedconfig.ConfigWithVersion `yaml:",inline,omitempty"`
 	// GroupID is the default group ID for all projects. Individual projects can override this.
-	GroupID        string                        `yaml:"group-id,omitempty"`
+	GroupID        string                         `yaml:"group-id,omitempty"`
 	ProjectConfigs map[string]SingleConjureConfig `yaml:"projects"`
 }
 
