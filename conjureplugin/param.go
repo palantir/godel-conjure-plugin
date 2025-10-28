@@ -32,7 +32,7 @@ type ConjureProjectParam struct {
 	IRProvider   IRProvider
 	IROutputPath string
 	// GroupID is the group ID for this project
-	GroupID *string
+	GroupID string
 	// Server will optionally generate server code in addition to client code for services specified in this project.
 	Server bool
 	// CLI will optionally generate cobra CLI bindings in addition to client code for services specified in this project.

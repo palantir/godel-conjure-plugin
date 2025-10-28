@@ -31,7 +31,7 @@ import (
 
 func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{},
 	dryRun bool, stdout io.Writer, extensionsProvider extensionsprovider.ExtensionsProvider,
-	cliGroupID *string) error {
+	cliGroupID string) error {
 	var paramsToPublishKeys []string
 	var paramsToPublish []ConjureProjectParam
 	for i, param := range params.OrderedParams() {
