@@ -30,7 +30,8 @@ import (
 )
 
 func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{},
-	dryRun bool, stdout io.Writer, extensionsProvider extensionsprovider.ExtensionsProvider) error {
+	dryRun bool, stdout io.Writer, extensionsProvider extensionsprovider.ExtensionsProvider,
+	cliGroupID *string) error {
 	var paramsToPublishKeys []string
 	var paramsToPublish []ConjureProjectParam
 	for i, param := range params.OrderedParams() {
@@ -70,6 +71,15 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		if err := os.Mkdir(currDir, 0755); err != nil {
 			return errors.WithStack(err)
 		}
+
+		var groupID string
+		if param.GroupID != nil {
+			groupID = *param.GroupID
+		}
+		if cliGroupID != nil {
+			groupID = *cliGroupID
+		}
+
 		projectInfo := distgo.ProjectInfo{
 			ProjectDir: currDir,
 			Version:    version,
@@ -90,8 +100,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 				},
 			},
 			PublishOutputInfo: &distgo.PublishOutputInfo{
-				// TODO: allow this to be specified in config?
-				GroupID: "",
+				GroupID: groupID,
 			},
 		}
 
@@ -106,7 +115,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return err
 		}
 
-		irBytes, err = AddExtensionsToIrBytes(irBytes, extensionsProvider, key, version)
+		irBytes, err = AddExtensionsToIrBytes(irBytes, extensionsProvider, groupID, key, version)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -145,7 +154,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 func AddExtensionsToIrBytes(
 	irBytes []byte,
 	extensionsProvider extensionsprovider.ExtensionsProvider,
-	conjureProject, version string,
+	groupID, conjureProject, version string,
 ) ([]byte, error) {
 	var conjureCliIr map[string]any
 	if err := safejson.Unmarshal(irBytes, &conjureCliIr); err != nil {
@@ -165,7 +174,7 @@ func AddExtensionsToIrBytes(
 		maps.Copy(extensionsAccumulator, conjureCliIrExtensionsObject)
 	}
 
-	providedExtensions, err := extensionsProvider(irBytes, conjureProject, version)
+	providedExtensions, err := extensionsProvider(irBytes, groupID, conjureProject, version)
 	if err != nil {
 		return nil, err
 	}

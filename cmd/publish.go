@@ -54,6 +54,11 @@ var publishCmd = &cobra.Command{
 			return err
 		}
 
+		var groupID *string
+		if groupIDFlagVal != "" {
+			groupID = &groupIDFlagVal
+		}
+
 		flagVals := make(map[distgo.PublisherFlagName]interface{})
 		for _, currFlag := range publisherFlags {
 			// if flag was not explicitly provided, don't add it to the flagVals map
@@ -68,7 +73,8 @@ var publishCmd = &cobra.Command{
 		}
 
 		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.New(configFileFlag, assetsFlag, urlFlagVal, groupIDFlagVal),
+			extensionsprovider.New(configFileFlag, assetsFlag, urlFlagVal),
+			groupID,
 		)
 	},
 }

@@ -78,9 +78,9 @@ projects:
 		publisher.ConnectionInfoURLFlag.Name:     "http://artifactory.domain.com",
 		publisher.GroupIDFlag.Name:               "com.palantir.foo",
 		artifactory.PublisherRepositoryFlag.Name: "repo",
-	}, true, outputBuf, func(_ []byte, _, _ string) (map[string]any, error) {
+	}, true, outputBuf, func(_ []byte, _, _, _ string) (map[string]any, error) {
 		return nil, nil
-	})
+	}, nil)
 	require.NoError(t, err, "failed to publish Conjure")
 
 	lines := strings.Split(outputBuf.String(), "\n")
@@ -172,9 +172,10 @@ func TestAddExtensionsToIrBytes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			actual, err := conjureplugin.AddExtensionsToIrBytes(
 				[]byte(tc.inputIR),
-				func(_ []byte, _, _ string) (map[string]any, error) {
+				func(_ []byte, _, _, _ string) (map[string]any, error) {
 					return tc.providedExtensions, nil
 				},
+				"",
 				"",
 				"",
 			)
@@ -203,9 +204,10 @@ func TestAddExtensionsToIrBytes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := conjureplugin.AddExtensionsToIrBytes(
 				[]byte(tc.inputIR),
-				func(_ []byte, _, _ string) (map[string]any, error) {
+				func(_ []byte, _, _, _ string) (map[string]any, error) {
 					return nil, nil
 				},
+				"",
 				"",
 				"",
 			)
