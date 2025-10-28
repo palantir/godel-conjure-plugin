@@ -74,13 +74,14 @@ projects:
 	require.NoError(t, err, "failed to parse config set")
 
 	outputBuf := &bytes.Buffer{}
+	groupID := "com.palantir.foo"
 	err = conjureplugin.Publish(params, tmpDir, map[distgo.PublisherFlagName]interface{}{
 		publisher.ConnectionInfoURLFlag.Name:     "http://artifactory.domain.com",
-		publisher.GroupIDFlag.Name:               "com.palantir.foo",
+		publisher.GroupIDFlag.Name:               groupID,
 		artifactory.PublisherRepositoryFlag.Name: "repo",
-	}, true, outputBuf, func(_ []byte, _, _ string) (map[string]any, error) {
+	}, true, outputBuf, func(_ []byte, _, _, _ string) (map[string]any, error) {
 		return nil, nil
-	})
+	}, &groupID)
 	require.NoError(t, err, "failed to publish Conjure")
 
 	lines := strings.Split(outputBuf.String(), "\n")
@@ -172,9 +173,10 @@ func TestAddExtensionsToIrBytes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			actual, err := conjureplugin.AddExtensionsToIrBytes(
 				[]byte(tc.inputIR),
-				func(_ []byte, _, _ string) (map[string]any, error) {
+				func(_ []byte, _, _, _ string) (map[string]any, error) {
 					return tc.providedExtensions, nil
 				},
+				"",
 				"",
 				"",
 			)
@@ -203,9 +205,10 @@ func TestAddExtensionsToIrBytes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := conjureplugin.AddExtensionsToIrBytes(
 				[]byte(tc.inputIR),
-				func(_ []byte, _, _ string) (map[string]any, error) {
+				func(_ []byte, _, _, _ string) (map[string]any, error) {
 					return nil, nil
 				},
+				"",
 				"",
 				"",
 			)
