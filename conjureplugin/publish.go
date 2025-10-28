@@ -72,12 +72,12 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		var groupId string
+		var groupID string
 		if param.GroupID != nil {
-			groupId = *param.GroupID
+			groupID = *param.GroupID
 		}
 		if cliGroupID != nil {
-			groupId = *cliGroupID
+			groupID = *cliGroupID
 		}
 
 		projectInfo := distgo.ProjectInfo{
@@ -100,8 +100,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 				},
 			},
 			PublishOutputInfo: &distgo.PublishOutputInfo{
-				// TODO: allow this to be specified in config?
-				GroupID: groupId,
+				GroupID: groupID,
 			},
 		}
 
@@ -116,7 +115,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return err
 		}
 
-		irBytes, err = AddExtensionsToIrBytes(irBytes, extensionsProvider, groupId, key, version)
+		irBytes, err = AddExtensionsToIrBytes(irBytes, extensionsProvider, groupID, key, version)
 		if err != nil {
 			return errors.WithStack(err)
 		}
