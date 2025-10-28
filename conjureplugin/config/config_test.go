@@ -66,7 +66,7 @@ projects:
 							Type:    v1.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
-						Publish: boolPtr(false),
+						Publish: toPtr(false),
 					},
 				},
 			},
@@ -127,7 +127,7 @@ projects:
 							Type:    v1.LocatorTypeAuto,
 							Locator: "http://foo.com/ir.json",
 						},
-						Publish: boolPtr(true),
+						Publish: toPtr(true),
 					},
 				},
 			},
@@ -237,7 +237,7 @@ projects:
 							Locator: "localhost:8080/ir.json",
 						},
 						Server:      false,
-						AcceptFuncs: boolPtr(true),
+						AcceptFuncs: toPtr(true),
 					},
 				},
 			},
@@ -268,7 +268,7 @@ projects:
 							Locator: "localhost:8080/ir.json",
 						},
 						Server:      false,
-						AcceptFuncs: boolPtr(true),
+						AcceptFuncs: toPtr(true),
 						Extensions: map[string]any{
 							"foo":  "bar",
 							"baz":  []any{1, 2},
@@ -352,7 +352,7 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 							Type:    v1.LocatorTypeAuto,
 							Locator: "input.json",
 						},
-						AcceptFuncs: boolPtr(true),
+						AcceptFuncs: toPtr(true),
 					},
 				},
 			},
@@ -401,6 +401,243 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 	}
 }
 
-func boolPtr(in bool) *bool {
+func TestGroupIDConfiguration(t *testing.T) {
+	for i, tc := range []struct {
+		name string
+		in   string
+		want config.ConjurePluginConfig
+	}{
+		{
+			name: "top-level group-id only",
+			in: `
+group-id: com.palantir.signals
+projects:
+  project:
+    output-dir: outputDir
+    ir-locator: local/yaml-dir
+`,
+			want: config.ConjurePluginConfig{
+				GroupID: toPtr("com.palantir.signals"),
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "per-project group-id only",
+			in: `
+projects:
+  project:
+    output-dir: outputDir
+    ir-locator: local/yaml-dir
+    group-id: com.palantir.project
+`,
+			want: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						GroupID: toPtr("com.palantir.project"),
+					},
+				},
+			},
+		},
+		{
+			name: "both top-level and per-project group-id",
+			in: `
+group-id: com.palantir.default
+projects:
+  project-1:
+    output-dir: outputDir1
+    ir-locator: local/yaml-dir1
+  project-2:
+    output-dir: outputDir2
+    ir-locator: local/yaml-dir2
+    group-id: com.palantir.override
+`,
+			want: config.ConjurePluginConfig{
+				GroupID: toPtr("com.palantir.default"),
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir1",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir1",
+						},
+					},
+					"project-2": {
+						OutputDir: "outputDir2",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir2",
+						},
+						GroupID: toPtr("com.palantir.override"),
+					},
+				},
+			},
+		},
+	} {
+		var got config.ConjurePluginConfig
+		err := yaml.Unmarshal([]byte(tc.in), &got)
+		require.NoError(t, err, "Case %d: %s", i, tc.name)
+		assert.Equal(t, tc.want, got, "Case %d: %s", i, tc.name)
+	}
+}
+
+func TestGroupIDToParams(t *testing.T) {
+	for i, tc := range []struct {
+		name string
+		in   config.ConjurePluginConfig
+		want conjureplugin.ConjureProjectParams
+	}{
+		{
+			name: "top-level group-id is inherited by project",
+			in: config.ConjurePluginConfig{
+				GroupID: toPtr("com.palantir.signals"),
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+						GroupID:     toPtr("com.palantir.signals"),
+					},
+				},
+			},
+		},
+		{
+			name: "per-project group-id overrides top-level",
+			in: config.ConjurePluginConfig{
+				GroupID: toPtr("com.palantir.default"),
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						GroupID: toPtr("com.palantir.override"),
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+						GroupID:     toPtr("com.palantir.override"),
+					},
+				},
+			},
+		},
+		{
+			name: "no group-id specified",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+						GroupID:     nil,
+					},
+				},
+			},
+		},
+		{
+			name: "multiple projects with different group-ids",
+			in: config.ConjurePluginConfig{
+				GroupID: toPtr("com.palantir.default"),
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir1",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "input1.yml",
+						},
+					},
+					"project-2": {
+						OutputDir: "outputDir2",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "input2.yml",
+						},
+						GroupID: toPtr("com.palantir.custom"),
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+					"project-2",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir1",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input1.yml"),
+						Publish:     true,
+						AcceptFuncs: true,
+						GroupID:     toPtr("com.palantir.default"),
+					},
+					"project-2": {
+						OutputDir:   "outputDir2",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input2.yml"),
+						Publish:     true,
+						AcceptFuncs: true,
+						GroupID:     toPtr("com.palantir.custom"),
+					},
+				},
+			},
+		},
+	} {
+		got, err := tc.in.ToParams(io.Discard)
+		require.NoError(t, err, "Case %d: %s", i, tc.name)
+		assert.Equal(t, tc.want, got, "Case %d: %s", i, tc.name)
+	}
+}
+
+func toPtr[T any](in T) *T {
 	return &in
 }
