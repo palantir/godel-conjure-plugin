@@ -52,6 +52,11 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 			return conjureplugin.ConjureProjectParams{}, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
 		}
 
+		groupID := c.GroupID
+		if currConfig.GroupID != "" {
+			groupID = currConfig.GroupID
+		}
+
 		publishVal := false
 		// if value for "publish" is not specified, treat as "true" only if provider generates IR from YAML
 		if currConfig.Publish == nil {
@@ -68,6 +73,7 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 			Server:      currConfig.Server,
 			CLI:         currConfig.CLI,
 			Publish:     publishVal,
+			GroupID:     groupID,
 		}
 	}
 
