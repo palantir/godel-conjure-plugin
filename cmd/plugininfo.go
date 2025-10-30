@@ -46,6 +46,16 @@ var (
 			"Publish Conjure IR",
 			pluginapi.TaskInfoCommand("publish"),
 		),
+		pluginapi.PluginInfoTaskInfo(
+			"conjure-backcompat",
+			"Check Conjure API backward compatibility",
+			pluginapi.TaskInfoCommand("backcompat"),
+		),
+		pluginapi.PluginInfoTaskInfo(
+			"conjure-accept-backcompat-breaks",
+			"Accept Conjure API backward compatibility breaks",
+			pluginapi.TaskInfoCommand("accept-backcompat-breaks"),
+		),
 		pluginapi.PluginInfoUpgradeConfigTaskInfo(
 			pluginapi.UpgradeConfigTaskInfoCommand("upgrade-config"),
 			pluginapi.LegacyConfigFile("conjure.yml"),
