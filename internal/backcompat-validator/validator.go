@@ -22,7 +22,7 @@ import (
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // BackCompatAsset provides methods for performing backcompat validation and accepting breaks.
