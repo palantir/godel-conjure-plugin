@@ -41,7 +41,7 @@ func runBackcompatOperation(
 		return pkgerrors.Wrapf(err, "failed to set working directory")
 	}
 
-	asset := backcompatvalidator.New(configFileFlag, assetsFlag)
+	asset := backcompatvalidator.New(configFileFlag, assetsFlag, debugFlagVal)
 
 	if projectFlag != "" {
 		// Run operation for specific project
