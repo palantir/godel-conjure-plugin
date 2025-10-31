@@ -13,6 +13,8 @@ Tasks
 * `conjure`: runs Conjure generation. Runs for all of the entries specified in the configuration in order. The working
   directory is set to be the project directory.
 * `conjure-publish`: publishes IR to a specified destination.
+* `check-conjure-backcompat`: checks backward compatibility of Conjure APIs by comparing the current IR against the base IR as determined by the asset. Runs automatically as part of `./godelw verify`.
+* `accept-conjure-breaks`: accepts any compatibility breaks identified by `check-conjure-backcompat` (if supported by the asset).
 
 Verify
 ------
@@ -100,7 +102,7 @@ An asset for `godel-conjure-plugin` is an executable that communicates via JSON 
 ```json
 { "type": "conjure-ir-extensions-provider" }
 ```
-> _Note: `conjure-ir-extensions-provider` is currently the only supported type._
+> _Note: The supported asset types are `conjure-ir-extensions-provider` and `backcompat`._
 
 - If the asset does not output a valid JSON object with a `type` field, `godel-conjure-plugin` will fail.
 - If the asset outputs a valid JSON object where the `type` key maps to an unknown value, `godel-conjure-plugin` will ignore that asset and continure execution.
@@ -203,3 +205,102 @@ exit 1
 This example asset:
 - Responds to `_assetInfo` with the required JSON and type.
 - Accepts only a single argument (the JSON object) and outputs a valid JSON object when invoked.
+
+---
+
+## Conjure Backcompat Asset
+
+The `backcompat` asset type enables backward compatibility checking of Conjure APIs.
+
+### Requirements
+
+**Type Declaration:**
+- The asset must respond to the `_assetInfo` command with:
+  ```json
+  { "type": "backcompat" }
+  ```
+
+**Invocation:**
+- The asset is invoked with a single JSON argument that uses a discriminated union pattern based on operation type.
+- See the [type definitions](https://github.com/palantir/godel-conjure-plugin/blob/master/conjureplugin/backcompat/types.go) for the full specification.
+
+**Input Type Specification:**
+
+```go
+// Input represents the JSON input sent to the backcompat asset.
+type Input struct {
+    Type                   string                `json:"type"`  // Either "checkBackCompat" or "acceptBackCompatBreaks"
+    CheckBackCompat        *CheckBackCompatInput `json:"checkBackCompat,omitempty"`
+    AcceptBackCompatBreaks *AcceptBreaksInput    `json:"acceptBackCompatBreaks,omitempty"`
+}
+
+// CheckBackCompatInput contains the inputs for checking backcompat.
+type CheckBackCompatInput struct {
+    CurrentIR       string `json:"currentIR"`       // Path to a temporary file containing the current Conjure IR
+    Project         string `json:"project"`         // The name of the Conjure project
+    GroupID         string `json:"groupId"`         // The Maven group ID for the project
+    GodelProjectDir string `json:"godelProjectDir"` // The root directory of the gödel project
+}
+
+// AcceptBreaksInput contains the inputs for accepting backcompat breaks.
+type AcceptBreaksInput struct {
+    CurrentIR       string `json:"currentIR"`       // Path to a temporary file containing the current Conjure IR
+    Project         string `json:"project"`         // The name of the Conjure project
+    GroupID         string `json:"groupId"`         // The Maven group ID for the project
+    GodelProjectDir string `json:"godelProjectDir"` // The root directory of the gödel project
+}
+```
+
+**Check Backcompat Mode Example:**
+```json
+{
+  "type": "checkBackCompat",
+  "checkBackCompat": {
+    "currentIR": "/tmp/current-ir.json",
+    "project": "my-api",
+    "groupId": "com.example",
+    "godelProjectDir": "/path/to/project"
+  }
+}
+```
+
+**Accept Backcompat Breaks Mode Example:**
+```json
+{
+  "type": "acceptBackCompatBreaks",
+  "acceptBackCompatBreaks": {
+    "currentIR": "/tmp/current-ir.json",
+    "project": "my-api",
+    "groupId": "com.example",
+    "godelProjectDir": "/path/to/project"
+  }
+}
+```
+
+### Usage
+
+**Running Backcompat Checks:**
+```bash
+./godelw check-conjure-backcompat
+```
+
+**Accepting Backcompat Breaks:**
+```bash
+./godelw accept-conjure-breaks
+```
+
+### Behavior
+
+- **No backcompat asset**: If no backcompat asset is configured, the tasks are no-ops.
+- **Multiple assets**: Only one backcompat asset is supported. If multiple backcompat assets are configured, the plugin will fail with an error.
+- **YAML sources only**: The plugin only checks compatibility for IRs generated from YAML sources defined in the project.
+
+### Error Handling
+
+**Success:**
+- The asset should output nothing to stdout and exit with code 0.
+
+**Failure:**
+- The asset should output an error message to stderr and exit with a non-zero code.
+- **Exit code 1**: Analysis succeeded but found incompatibilities (for `checkBackCompat` mode).
+- **Exit code 2+**: Actual error occurred during execution.
