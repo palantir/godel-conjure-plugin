@@ -16,12 +16,11 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 
-	backcompatvalidator "github.com/palantir/godel-conjure-plugin/v6/internal/backcompat-validator"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	backcompatvalidator "github.com/palantir/godel-conjure-plugin/v6/internal/backcompat-validator"
 	pkgerrors "github.com/pkg/errors"
 )
 
@@ -47,7 +46,7 @@ func runBackcompatOperation(
 		// Run operation for specific project
 		param, ok := parsedConfigSet.Params[projectFlag]
 		if !ok {
-			return fmt.Errorf("project %s not found in configuration", projectFlag)
+			return pkgerrors.Errorf("project %s not found in configuration", projectFlag)
 		}
 		return operation(asset, projectFlag, param, projectDirFlag)
 	}
@@ -57,7 +56,7 @@ func runBackcompatOperation(
 	for _, projectName := range parsedConfigSet.SortedKeys {
 		param := parsedConfigSet.Params[projectName]
 		if err := operation(asset, projectName, param, projectDirFlag); err != nil {
-			errs = append(errs, fmt.Errorf("%s failed for project %s: %w", operationName, projectName, err))
+			errs = append(errs, pkgerrors.Errorf("%s failed for project %s: %w", operationName, projectName, err))
 		}
 	}
 
