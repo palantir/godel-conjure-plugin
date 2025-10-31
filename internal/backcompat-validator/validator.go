@@ -61,23 +61,12 @@ func (b *BackCompatAsset) AcceptBackCompatBreaks(projectName string, param conju
 	return b.runOperation(projectName, param, godelProjectDir, "acceptBackCompatBreaks")
 }
 
-func (b *BackCompatAsset) debugf(format string, args ...interface{}) {
-	if b.debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] "+format+"\n", args...)
-	}
-}
-
 func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.ConjureProjectParam, godelProjectDir string, operationType string) error {
-	b.debugf("Starting %s for project %s", operationType, projectName)
-	b.debugf("GroupID: %s, Publish: %v", param.GroupID, param.Publish)
-
 	if param.GroupID == "" {
-		b.debugf("Skipping project %s: no group-id configured", projectName)
 		// Skip projects without group-id
 		return nil
 	}
 	if !param.Publish {
-		b.debugf("Skipping project %s: publish is false", projectName)
 		// Skip projects that don't publish
 		return nil
 	}
@@ -86,25 +75,20 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	if err != nil {
 		return fmt.Errorf("failed to get IR bytes: %w", err)
 	}
-	b.debugf("Got IR bytes: %d bytes", len(irBytes))
 
 	irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 	if err != nil {
 		return fmt.Errorf("failed to write IR to temp file: %w", err)
 	}
-	b.debugf("Wrote IR to temp file: %s", irFile)
 
 	projectConfig, err := getProjectConfig(b.configFile, projectName)
 	if err != nil {
 		return fmt.Errorf("failed to get project config: %w", err)
 	}
-	b.debugf("Got project config for %s", projectName)
 
 	// Discover backcompat assets
-	b.debugf("Discovering backcompat assets from %d total assets", len(b.assets))
 	var backcompatAssets []string
 	for _, asset := range b.assets {
-		b.debugf("Checking asset: %s", asset)
 		cmd := exec.Command(asset, "_assetInfo")
 		stdout, err := cmd.Output()
 		if err != nil {
@@ -124,17 +108,13 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 		}
 
 		if *response.Type == "backcompat" {
-			b.debugf("Asset %s is a backcompat asset", asset)
 			backcompatAssets = append(backcompatAssets, asset)
 		} else {
-			b.debugf("Asset %s is type %s, not backcompat", asset, *response.Type)
 		}
 	}
 
 	// Validate that exactly one backcompat asset is present
-	b.debugf("Found %d backcompat assets", len(backcompatAssets))
 	if len(backcompatAssets) == 0 {
-		b.debugf("No backcompat assets configured, skipping")
 		// No backcompat assets configured, skip silently
 		return nil
 	}
@@ -143,7 +123,6 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	}
 
 	asset := backcompatAssets[0]
-	b.debugf("Using backcompat asset: %s", asset)
 
 	// Invoke the asset with the appropriate operation
 	var arg []byte
@@ -176,23 +155,17 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	if err != nil {
 		return fmt.Errorf("failed to marshal %s input: %w", operationType, err)
 	}
-	b.debugf("Marshaled input for %s: %s", operationType, string(arg))
 
 	cmd := exec.Command(asset, string(arg))
 	cmd.Stderr = os.Stderr
-	b.debugf("Executing: %v", cmd.Args)
 	stdout, err := cmd.Output()
 	if err != nil {
-		b.debugf("Command failed with error: %v", err)
 		if _, ok := err.(*exec.ExitError); ok {
 			// Print the stdout which contains the user-facing error message
-			b.debugf("ExitError stdout: %s", string(stdout))
 			return fmt.Errorf("%s", string(stdout))
 		}
 		return fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
 	}
-
-	b.debugf("Command succeeded, stdout: %s", string(stdout))
 
 	// Success case: asset should output {}
 	var result map[string]any
@@ -200,7 +173,6 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 		return fmt.Errorf("failed to parse %s result: %w", operationType, err)
 	}
 
-	b.debugf("Successfully completed %s for project %s", operationType, projectName)
 	return nil
 }
 
