@@ -53,9 +53,9 @@ var (
 			pluginapi.TaskInfoVerifyOptions(),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			"conjure-accept-backcompat-breaks",
+			"accept-conjure-breaks",
 			"Accept Conjure API backward compatibility breaks",
-			pluginapi.TaskInfoCommand("accept-backcompat-breaks"),
+			pluginapi.TaskInfoCommand("accept-breaks"),
 		),
 		pluginapi.PluginInfoUpgradeConfigTaskInfo(
 			pluginapi.UpgradeConfigTaskInfoCommand("upgrade-config"),

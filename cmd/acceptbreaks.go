@@ -21,7 +21,7 @@ import (
 )
 
 var acceptBackcompatBreaksCmd = &cobra.Command{
-	Use:   "accept-backcompat-breaks",
+	Use:   "accept-breaks",
 	Short: "Accept backward compatibility breaks",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackcompatOperation(

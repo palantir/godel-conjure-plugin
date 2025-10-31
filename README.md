@@ -14,7 +14,7 @@ Tasks
   directory is set to be the project directory.
 * `conjure-publish`: publishes IR to a specified destination.
 * `check-conjure-backcompat`: checks backward compatibility of Conjure APIs by comparing the current IR against the base IR as determined by the asset. Runs automatically as part of `./godelw verify`.
-* `conjure-accept-backcompat-breaks`: accepts any compatibility breaks identified by `check-conjure-backcompat` (if supported by the asset).
+* `accept-conjure-breaks`: accepts any compatibility breaks identified by `check-conjure-backcompat` (if supported by the asset).
 
 Verify
 ------
@@ -292,7 +292,7 @@ type AcceptBreaksInput struct {
 
 **Accepting Backcompat Breaks:**
 ```bash
-./godelw conjure-accept-backcompat-breaks
+./godelw accept-conjure-breaks
 ```
 
 ### Behavior
