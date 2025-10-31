@@ -16,13 +16,13 @@ package backcompatvalidator
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
 
@@ -73,17 +73,17 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 
 	irBytes, err := param.IRProvider.IRBytes()
 	if err != nil {
-		return fmt.Errorf("failed to get IR bytes: %w", err)
+		return errors.Wrapf(err, "failed to get IR bytes")
 	}
 
 	irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 	if err != nil {
-		return fmt.Errorf("failed to write IR to temp file: %w", err)
+		return errors.Wrapf(err, "failed to write IR to temp file")
 	}
 
 	projectConfig, err := getProjectConfig(b.configFile, projectName)
 	if err != nil {
-		return fmt.Errorf("failed to get project config: %w", err)
+		return errors.Wrapf(err, "failed to get project config")
 	}
 
 	// Discover backcompat assets
@@ -93,18 +93,18 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 		stdout, err := cmd.Output()
 		if err != nil {
 			if exitErr, ok := err.(*exec.ExitError); ok {
-				return fmt.Errorf("%w: failed to execute %v\nstdout:\n%s\nstderr:\n%s", err, cmd.Args, string(stdout), string(exitErr.Stderr))
+				return errors.Wrapf(err, "failed to execute %v\nstdout:\n%s\nstderr:\n%s", cmd.Args, string(stdout), string(exitErr.Stderr))
 			}
-			return fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
+			return errors.Wrapf(err, "failed to execute %v\nstdout:\n%s", cmd.Args, string(stdout))
 		}
 
 		var response assetInfoResponse
 		if err := json.Unmarshal(stdout, &response); err != nil {
-			return fmt.Errorf("failed to parse asset info response: %w", err)
+			return errors.Wrapf(err, "failed to parse asset info response")
 		}
 
 		if response.Type == nil {
-			return fmt.Errorf("invalid response from calling %v; wanted a JSON object with a `type` key; but got:\n%v", cmd.Args, string(stdout))
+			return errors.Errorf("invalid response from calling %v; wanted a JSON object with a `type` key; but got:\n%v", cmd.Args, string(stdout))
 		}
 
 		if *response.Type == "backcompat" {
@@ -119,7 +119,7 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 		return nil
 	}
 	if len(backcompatAssets) > 1 {
-		return fmt.Errorf("multiple backcompat assets detected (%d), but only one is supported. Please configure exactly one backcompat asset", len(backcompatAssets))
+		return errors.Errorf("multiple backcompat assets detected (%d), but only one is supported. Please configure exactly one backcompat asset", len(backcompatAssets))
 	}
 
 	asset := backcompatAssets[0]
@@ -150,10 +150,10 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 			},
 		})
 	default:
-		return fmt.Errorf("unknown operation type: %s", operationType)
+		return errors.Errorf("unknown operation type: %s", operationType)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to marshal %s input: %w", operationType, err)
+		return errors.Wrapf(err, "failed to marshal %s input", operationType)
 	}
 
 	cmd := exec.Command(asset, string(arg))
@@ -162,15 +162,15 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	if err != nil {
 		if _, ok := err.(*exec.ExitError); ok {
 			// Print the stdout which contains the user-facing error message
-			return fmt.Errorf("%s", string(stdout))
+			return errors.Errorf("%s", string(stdout))
 		}
-		return fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
+		return errors.Wrapf(err, "failed to execute %v\nstdout:\n%s", cmd.Args, string(stdout))
 	}
 
 	// Success case: asset should output {}
 	var result map[string]any
 	if err := json.Unmarshal(stdout, &result); err != nil {
-		return fmt.Errorf("failed to parse %s result: %w", operationType, err)
+		return errors.Wrapf(err, "failed to parse %s result", operationType)
 	}
 
 	return nil
@@ -179,22 +179,22 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 func getProjectConfig(configFile string, projectName string) (map[string]any, error) {
 	cfg, err := config.ReadConfigFromFile(configFile)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
+		return nil, errors.Wrapf(err, "failed to read config file")
 	}
 
 	projectCfg, ok := cfg.ProjectConfigs[projectName]
 	if !ok {
-		return nil, fmt.Errorf("project %s not found in config", projectName)
+		return nil, errors.Errorf("project %s not found in config", projectName)
 	}
 
 	yamlBytes, err := yaml.Marshal(projectCfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal project config to YAML: %w", err)
+		return nil, errors.Wrapf(err, "failed to marshal project config to YAML")
 	}
 
 	var result map[string]any
 	if err := yaml.Unmarshal(yamlBytes, &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal YAML to map: %w", err)
+		return nil, errors.Wrapf(err, "failed to unmarshal YAML to map")
 	}
 
 	return result, nil
