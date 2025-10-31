@@ -23,7 +23,7 @@ import (
 
 // Input represents the JSON input sent to the backcompat asset.
 type Input struct {
-	Type                   string                `json:"type"`
+	Type                   string                `json:"type"` // Either "checkBackCompat" or "acceptBackCompatBreaks"
 	CheckBackCompat        *CheckBackCompatInput `json:"checkBackCompat,omitempty"`
 	AcceptBackCompatBreaks *AcceptBreaksInput    `json:"acceptBackCompatBreaks,omitempty"`
 }
