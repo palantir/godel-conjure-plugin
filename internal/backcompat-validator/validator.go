@@ -16,7 +16,6 @@ package backcompatvalidator
 
 import (
 	"encoding/json"
-	"os"
 	"os/exec"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -31,7 +30,6 @@ import (
 type BackCompatAsset struct {
 	configFile string
 	assets     []string
-	debug      bool
 }
 
 // New creates a new BackCompatAsset that discovers and invokes backcompat assets.
@@ -39,15 +37,13 @@ type BackCompatAsset struct {
 // Parameters:
 //   - configFile:  The path to the plugin configuration file.
 //   - assets:      A list of asset executable paths to be queried for backcompat validation.
-//   - debug:       Enable debug logging.
 //
 // Returns:
 //   - *BackCompatAsset: An asset handler that provides methods for checking backcompat and accepting breaks.
-func New(configFile string, assets []string, debug bool) *BackCompatAsset {
+func New(configFile string, assets []string) *BackCompatAsset {
 	return &BackCompatAsset{
 		configFile: configFile,
 		assets:     assets,
-		debug:      debug,
 	}
 }
 
@@ -91,26 +87,22 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	var backcompatAssets []string
 	for _, asset := range b.assets {
 		cmd := exec.Command(asset, "_assetInfo")
-		stdout, err := cmd.Output()
+		output, err := cmd.Output()
 		if err != nil {
-			if exitErr, ok := err.(*exec.ExitError); ok {
-				return errors.Wrapf(err, "failed to execute %v\nstdout:\n%s\nstderr:\n%s", cmd.Args, string(stdout), string(exitErr.Stderr))
-			}
-			return errors.Wrapf(err, "failed to execute %v\nstdout:\n%s", cmd.Args, string(stdout))
+			return errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(output))
 		}
 
 		var response assetInfoResponse
-		if err := json.Unmarshal(stdout, &response); err != nil {
+		if err := json.Unmarshal(output, &response); err != nil {
 			return errors.Wrapf(err, "failed to parse asset info response")
 		}
 
 		if response.Type == nil {
-			return errors.Errorf("invalid response from calling %v; wanted a JSON object with a `type` key; but got:\n%v", cmd.Args, string(stdout))
+			return errors.Errorf(`invalid response from calling %v; wanted a JSON object with a "type" key; but got:\n%v`, cmd.Args, string(output))
 		}
 
 		if *response.Type == "backcompat" {
 			backcompatAssets = append(backcompatAssets, asset)
-		} else {
 		}
 	}
 
@@ -158,20 +150,9 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	}
 
 	cmd := exec.Command(asset, string(arg))
-	cmd.Stderr = os.Stderr
-	stdout, err := cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		if _, ok := err.(*exec.ExitError); ok {
-			// Print the stdout which contains the user-facing error message
-			return errors.Errorf("%s", string(stdout))
-		}
-		return errors.Wrapf(err, "failed to execute %v\nstdout:\n%s", cmd.Args, string(stdout))
-	}
-
-	// Success case: asset should output {}
-	var result map[string]any
-	if err := json.Unmarshal(stdout, &result); err != nil {
-		return errors.Wrapf(err, "failed to parse %s result", operationType)
+		return errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(output))
 	}
 
 	return nil
