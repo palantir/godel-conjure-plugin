@@ -294,7 +294,6 @@ type AcceptBreaksInput struct {
 - **No backcompat asset**: If no backcompat asset is configured, the tasks are no-ops.
 - **Multiple assets**: Only one backcompat asset is supported. If multiple backcompat assets are configured, the plugin will fail with an error.
 - **YAML sources only**: The plugin only checks compatibility for IRs generated from YAML sources defined in the project.
-- **Project filtering**: The asset is responsible for any additional filtering logic.
 
 ### Error Handling
 
