@@ -287,20 +287,12 @@ type AcceptBreaksInput struct {
 
 **Running Backcompat Checks:**
 ```bash
-# Check all projects
 ./godelw check-conjure-backcompat
-
-# Check a specific project
-./godelw check-conjure-backcompat --project=my-api
 ```
 
 **Accepting Backcompat Breaks:**
 ```bash
-# Accept breaks for all projects
 ./godelw conjure-accept-backcompat-breaks
-
-# Accept breaks for a specific project
-./godelw conjure-accept-backcompat-breaks --project=my-api
 ```
 
 ### Behavior

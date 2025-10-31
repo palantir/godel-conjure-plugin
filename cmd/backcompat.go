@@ -20,17 +20,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	projectFlag string
-)
-
 var backcompatCmd = &cobra.Command{
 	Use:   "check-backcompat",
 	Short: "Check backward compatibility of Conjure APIs",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackcompatOperation(
 			cmd.OutOrStdout(),
-			projectFlag,
 			func(asset *backcompatvalidator.BackCompatAsset, projectName string, param conjureplugin.ConjureProjectParam, projectDir string) error {
 				return asset.CheckBackCompat(projectName, param, projectDir)
 			},
@@ -39,6 +34,5 @@ var backcompatCmd = &cobra.Command{
 }
 
 func init() {
-	backcompatCmd.Flags().StringVar(&projectFlag, "project", "", "check backcompat for a specific project")
 	rootCmd.AddCommand(backcompatCmd)
 }

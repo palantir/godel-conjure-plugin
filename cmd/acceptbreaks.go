@@ -26,7 +26,6 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackcompatOperation(
 			cmd.OutOrStdout(),
-			projectFlag,
 			func(asset *backcompatvalidator.BackCompatAsset, projectName string, param conjureplugin.ConjureProjectParam, projectDir string) error {
 				return asset.AcceptBackCompatBreaks(projectName, param, projectDir)
 			},
@@ -35,6 +34,5 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 }
 
 func init() {
-	acceptBackcompatBreaksCmd.Flags().StringVar(&projectFlag, "project", "", "accept breaks for a specific project")
 	rootCmd.AddCommand(acceptBackcompatBreaksCmd)
 }

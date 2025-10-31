@@ -25,11 +25,10 @@ import (
 	pkgerrors "github.com/pkg/errors"
 )
 
-// runBackcompatOperation executes a backcompat operation (check or accept) on projects.
+// runBackcompatOperation executes a backcompat operation (check or accept) on all projects.
 // It collects all errors before returning, allowing all projects to be processed.
 func runBackcompatOperation(
 	stdout io.Writer,
-	projectFlag string,
 	operation func(asset *backcompatvalidator.BackCompatAsset, projectName string, param conjureplugin.ConjureProjectParam, projectDir string) error,
 ) error {
 	parsedConfigSet, err := toProjectParams(configFileFlag, stdout)
@@ -41,15 +40,6 @@ func runBackcompatOperation(
 	}
 
 	asset := backcompatvalidator.New(configFileFlag, assetsFlag)
-
-	if projectFlag != "" {
-		// Run operation for specific project
-		param, ok := parsedConfigSet.Params[projectFlag]
-		if !ok {
-			return pkgerrors.Errorf("project %s not found in configuration", projectFlag)
-		}
-		return operation(asset, projectFlag, param, projectDirFlag)
-	}
 
 	// Run operation for all projects, collecting errors
 	type projectError struct {
