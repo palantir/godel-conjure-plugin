@@ -48,7 +48,8 @@ func runBackcompatOperation(
 	}
 	var failures []projectError
 
-	for projectName, param := range parsedConfigSet.Params {
+	for _, projectName := range parsedConfigSet.SortedKeys {
+		param := parsedConfigSet.Params[projectName]
 		if opErr := operation(asset, projectName, param, projectDirFlag); opErr != nil {
 			failures = append(failures, projectError{
 				projectName: projectName,
