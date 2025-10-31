@@ -112,6 +112,10 @@ An asset for `godel-conjure-plugin` is an executable that communicates via JSON 
 - The asset should process this input and output a JSON object to stdout.
 - On error, the asset should return a non-zero exit code; on success, it should exit with code 0.
 
+3. **Argument Handling:**
+- The asset must **immediately fail** if invoked with anything other than one argument.
+- All information must be passed via the single JSON-encoded argument.
+
 ---
 
 ## Conjure IR Extensions Asset
