@@ -20,6 +20,7 @@ import (
 	"os/exec"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/backcompat"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/pkg/errors"
@@ -128,9 +129,9 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	var arg []byte
 	switch operationType {
 	case "checkBackCompat":
-		arg, err = json.Marshal(Input{
+		arg, err = json.Marshal(backcompat.Input{
 			Type: "checkBackCompat",
-			CheckBackCompat: &CheckBackCompatInput{
+			CheckBackCompat: &backcompat.CheckBackCompatInput{
 				CurrentIR:       irFile,
 				Project:         projectName,
 				GroupID:         param.GroupID,
@@ -139,9 +140,9 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 			},
 		})
 	case "acceptBackCompatBreaks":
-		arg, err = json.Marshal(Input{
+		arg, err = json.Marshal(backcompat.Input{
 			Type: "acceptBackCompatBreaks",
-			AcceptBackCompatBreaks: &AcceptBreaksInput{
+			AcceptBackCompatBreaks: &backcompat.AcceptBreaksInput{
 				CurrentIR:       irFile,
 				Project:         projectName,
 				GroupID:         param.GroupID,
@@ -198,31 +199,6 @@ func getProjectConfig(configFile string, projectName string) (map[string]any, er
 	}
 
 	return result, nil
-}
-
-// Input represents the JSON input sent to the backcompat asset.
-type Input struct {
-	Type                   string                `json:"type"`
-	CheckBackCompat        *CheckBackCompatInput `json:"checkBackCompat,omitempty"`
-	AcceptBackCompatBreaks *AcceptBreaksInput    `json:"acceptBackCompatBreaks,omitempty"`
-}
-
-// CheckBackCompatInput contains the inputs for checking backcompat.
-type CheckBackCompatInput struct {
-	CurrentIR       string         `json:"currentIR"`
-	Project         string         `json:"project"`
-	GroupID         string         `json:"groupId"`
-	ProjectConfig   map[string]any `json:"projectConfig"`
-	GodelProjectDir string         `json:"godelProjectDir"`
-}
-
-// AcceptBreaksInput contains the inputs for accepting backcompat breaks.
-type AcceptBreaksInput struct {
-	CurrentIR       string         `json:"currentIR"`
-	Project         string         `json:"project"`
-	GroupID         string         `json:"groupId"`
-	ProjectConfig   map[string]any `json:"projectConfig"`
-	GodelProjectDir string         `json:"godelProjectDir"`
 }
 
 type assetInfoResponse struct {
