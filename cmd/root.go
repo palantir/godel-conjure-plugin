@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompat-validator"
+	backcompatvalidator "github.com/palantir/godel-conjure-plugin/v6/internal/backcompat-validator"
 	"github.com/palantir/godel/v2/framework/pluginapi"
 	"github.com/palantir/pkg/cobracli"
 	"github.com/spf13/cobra"
