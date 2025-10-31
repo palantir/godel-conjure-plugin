@@ -52,17 +52,9 @@ func runBackcompatOperation(
 	}
 
 	// Run operation for all projects, collecting errors
-	var errs []error
-	for _, projectName := range parsedConfigSet.SortedKeys {
-		param := parsedConfigSet.Params[projectName]
-		if err := operation(asset, projectName, param, projectDirFlag); err != nil {
-			errs = append(errs, pkgerrors.Errorf("%s failed for project %s: %w", operationName, projectName, err))
-		}
+	for projectName, param := range parsedConfigSet.Params {
+		err = errors.Join(err, operation(asset, projectName, param, projectDirFlag))
 	}
 
-	if len(errs) > 0 {
-		return errors.Join(errs...)
-	}
-
-	return nil
+	return err
 }
