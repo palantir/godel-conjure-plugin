@@ -25,7 +25,7 @@ var (
 )
 
 var backcompatCmd = &cobra.Command{
-	Use:   "backcompat",
+	Use:   "check-backcompat",
 	Short: "Check backward compatibility of Conjure APIs",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackcompatOperation(
@@ -34,7 +34,6 @@ var backcompatCmd = &cobra.Command{
 			func(asset *backcompatvalidator.BackCompatAsset, projectName string, param conjureplugin.ConjureProjectParam, projectDir string) error {
 				return asset.CheckBackCompat(projectName, param, projectDir)
 			},
-			"backcompat check",
 		)
 	},
 }

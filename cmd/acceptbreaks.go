@@ -30,7 +30,6 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 			func(asset *backcompatvalidator.BackCompatAsset, projectName string, param conjureplugin.ConjureProjectParam, projectDir string) error {
 				return asset.AcceptBackCompatBreaks(projectName, param, projectDir)
 			},
-			"accept backcompat breaks",
 		)
 	},
 }

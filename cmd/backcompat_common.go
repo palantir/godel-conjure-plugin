@@ -15,9 +15,10 @@
 package cmd
 
 import (
-	"errors"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	backcompatvalidator "github.com/palantir/godel-conjure-plugin/v6/internal/backcompat-validator"
@@ -30,7 +31,6 @@ func runBackcompatOperation(
 	stdout io.Writer,
 	projectFlag string,
 	operation func(asset *backcompatvalidator.BackCompatAsset, projectName string, param conjureplugin.ConjureProjectParam, projectDir string) error,
-	operationName string,
 ) error {
 	parsedConfigSet, err := toProjectParams(configFileFlag, stdout)
 	if err != nil {
@@ -52,9 +52,36 @@ func runBackcompatOperation(
 	}
 
 	// Run operation for all projects, collecting errors
+	type projectError struct {
+		projectName string
+		err         error
+	}
+	var failures []projectError
+
 	for projectName, param := range parsedConfigSet.Params {
-		err = errors.Join(err, operation(asset, projectName, param, projectDirFlag))
+		if opErr := operation(asset, projectName, param, projectDirFlag); opErr != nil {
+			failures = append(failures, projectError{
+				projectName: projectName,
+				err:         opErr,
+			})
+		}
 	}
 
-	return err
+	if len(failures) == 0 {
+		return nil
+	}
+
+	// Format a clear error message showing all failed projects
+	var errMsg strings.Builder
+	if len(failures) == 1 {
+		errMsg.WriteString(fmt.Sprintf("operation failed for project %s:\n", failures[0].projectName))
+		errMsg.WriteString(fmt.Sprintf("  %v", failures[0].err))
+	} else {
+		errMsg.WriteString(fmt.Sprintf("operation failed for %d projects:\n", len(failures)))
+		for _, failure := range failures {
+			errMsg.WriteString(fmt.Sprintf("  - %s: %v\n", failure.projectName, failure.err))
+		}
+	}
+
+	return pkgerrors.New(errMsg.String())
 }

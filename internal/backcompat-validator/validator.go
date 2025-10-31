@@ -20,10 +20,8 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/backcompat"
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
 )
 
 // BackCompatAsset provides methods for performing backcompat validation and accepting breaks.
@@ -59,12 +57,9 @@ func (b *BackCompatAsset) AcceptBackCompatBreaks(projectName string, param conju
 }
 
 func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.ConjureProjectParam, godelProjectDir string, operationType string) error {
-	if param.GroupID == "" {
-		// Skip projects without group-id
-		return nil
-	}
-	if !param.Publish {
-		// Skip projects that don't publish
+	// Only check compatibility for IRs generated from YAML sources.
+	// The plugin only checks IRs that are actually defined in the project.
+	if !param.IRProvider.GeneratedFromYAML() {
 		return nil
 	}
 
@@ -78,10 +73,7 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 		return errors.Wrapf(err, "failed to write IR to temp file")
 	}
 
-	projectConfig, err := getProjectConfig(b.configFile, projectName)
-	if err != nil {
-		return errors.Wrapf(err, "failed to get project config")
-	}
+	projectConfig := paramToConfigMap(param)
 
 	// Discover backcompat assets
 	var backcompatAssets []string
@@ -158,28 +150,19 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	return nil
 }
 
-func getProjectConfig(configFile string, projectName string) (map[string]any, error) {
-	cfg, err := config.ReadConfigFromFile(configFile)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read config file")
+// paramToConfigMap converts a ConjureProjectParam into a map representation
+// suitable for passing to the backcompat asset.
+func paramToConfigMap(param conjureplugin.ConjureProjectParam) map[string]any {
+	result := make(map[string]any, 2)
+
+	if param.GroupID != "" {
+		result["group-id"] = param.GroupID
+	}
+	if param.Publish {
+		result["publish"] = param.Publish
 	}
 
-	projectCfg, ok := cfg.ProjectConfigs[projectName]
-	if !ok {
-		return nil, errors.Errorf("project %s not found in config", projectName)
-	}
-
-	yamlBytes, err := yaml.Marshal(projectCfg)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to marshal project config to YAML")
-	}
-
-	var result map[string]any
-	if err := yaml.Unmarshal(yamlBytes, &result); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal YAML to map")
-	}
-
-	return result, nil
+	return result
 }
 
 type assetInfoResponse struct {

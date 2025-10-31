@@ -47,9 +47,9 @@ var (
 			pluginapi.TaskInfoCommand("publish"),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			"conjure-backcompat",
+			"check-conjure-backcompat",
 			"Check Conjure API backward compatibility",
-			pluginapi.TaskInfoCommand("backcompat"),
+			pluginapi.TaskInfoCommand("check-backcompat"),
 			pluginapi.TaskInfoVerifyOptions(),
 		),
 		pluginapi.PluginInfoTaskInfo(
