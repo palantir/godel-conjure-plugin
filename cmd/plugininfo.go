@@ -50,6 +50,7 @@ var (
 			"conjure-backcompat",
 			"Check Conjure API backward compatibility",
 			pluginapi.TaskInfoCommand("backcompat"),
+			pluginapi.TaskInfoVerifyOptions(),
 		),
 		pluginapi.PluginInfoTaskInfo(
 			"conjure-accept-backcompat-breaks",
