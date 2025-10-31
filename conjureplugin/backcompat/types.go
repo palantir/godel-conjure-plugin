@@ -30,20 +30,18 @@ type Input struct {
 
 // CheckBackCompatInput contains the inputs for checking backcompat.
 type CheckBackCompatInput struct {
-	CurrentIR       string         `json:"currentIR"`
-	Project         string         `json:"project"`
-	GroupID         string         `json:"groupId"`
-	ProjectConfig   map[string]any `json:"projectConfig"`
-	GodelProjectDir string         `json:"godelProjectDir"`
+	CurrentIR       string `json:"currentIR"`
+	Project         string `json:"project"`
+	GroupID         string `json:"groupId"`
+	GodelProjectDir string `json:"godelProjectDir"`
 }
 
 // AcceptBreaksInput contains the inputs for accepting backcompat breaks.
 type AcceptBreaksInput struct {
-	CurrentIR       string         `json:"currentIR"`
-	Project         string         `json:"project"`
-	GroupID         string         `json:"groupId"`
-	ProjectConfig   map[string]any `json:"projectConfig"`
-	GodelProjectDir string         `json:"godelProjectDir"`
+	CurrentIR       string `json:"currentIR"`
+	Project         string `json:"project"`
+	GroupID         string `json:"groupId"`
+	GodelProjectDir string `json:"godelProjectDir"`
 }
 
 // AssetHandler defines the interface that backcompat assets should implement.

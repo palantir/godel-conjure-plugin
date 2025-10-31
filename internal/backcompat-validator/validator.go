@@ -73,8 +73,6 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 		return errors.Wrapf(err, "failed to write IR to temp file")
 	}
 
-	projectConfig := paramToConfigMap(param)
-
 	// Discover backcompat assets
 	var backcompatAssets []string
 	for _, asset := range b.assets {
@@ -119,7 +117,6 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 				CurrentIR:       irFile,
 				Project:         projectName,
 				GroupID:         param.GroupID,
-				ProjectConfig:   projectConfig,
 				GodelProjectDir: godelProjectDir,
 			},
 		})
@@ -130,7 +127,6 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 				CurrentIR:       irFile,
 				Project:         projectName,
 				GroupID:         param.GroupID,
-				ProjectConfig:   projectConfig,
 				GodelProjectDir: godelProjectDir,
 			},
 		})
@@ -173,21 +169,6 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 
 	// Exit code 0: Success
 	return nil
-}
-
-// paramToConfigMap converts a ConjureProjectParam into a map representation
-// suitable for passing to the backcompat asset.
-func paramToConfigMap(param conjureplugin.ConjureProjectParam) map[string]any {
-	result := make(map[string]any, 2)
-
-	if param.GroupID != "" {
-		result["group-id"] = param.GroupID
-	}
-	if param.Publish {
-		result["publish"] = param.Publish
-	}
-
-	return result
 }
 
 type assetInfoResponse struct {
