@@ -25,17 +25,37 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
+	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
+	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
 
-type ConjurePluginConfig v1.ConjurePluginConfig
+type v1Config = v1.ConjurePluginConfig
+type v2Config = v2.ConjurePluginConfig
 
-func ToConjurePluginConfig(in *ConjurePluginConfig) *v1.ConjurePluginConfig {
-	return (*v1.ConjurePluginConfig)(in)
+// ConjurePluginConfig is a union type that can hold either v1 or v2 configuration.
+type ConjurePluginConfig struct {
+	versionedconfig.ConfigWithVersion `yaml:",inline,omitempty"`
+	v1Config                          `yaml:",inline,omitempty"`
+	v2Config                          `yaml:",inline,omitempty"`
 }
 
 func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
+	// Delegate to version-specific implementation based on version field
+	switch c.Version {
+	case "1":
+		return toParamsV1(&c.v1Config, stdout)
+	case "2":
+		return toParamsV2(&c.v2Config, stdout)
+	default:
+		panic("unknown version")
+	}
+}
+
+// toParamsV1 converts a v1 config to ConjureProjectParams.
+// V1 behavior: use output-dir as-is, default to "." if empty, always skip cleanup.
+func toParamsV1(c *v1.ConjurePluginConfig, stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
 	var keys []string
 	for k := range c.ProjectConfigs {
 		keys = append(keys, k)
@@ -92,6 +112,13 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 		SortedKeys: keys,
 		Params:     params,
 	}, nil
+}
+
+// toParamsV2 converts a v2 config to ConjureProjectParams.
+// V2 behavior: default to internal/generated/conjure, append project name, enable cleanup by default.
+func toParamsV2(c *v2.ConjurePluginConfig, stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
+	// TODO: implement v2-specific parameter generation
+	return conjureplugin.ConjureProjectParams{}, errors.New("toParamsV2 not yet implemented")
 }
 
 type SingleConjureConfig v1.SingleConjureConfig
