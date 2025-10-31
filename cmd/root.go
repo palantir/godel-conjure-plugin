@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompat-validator"
 	"github.com/palantir/godel/v2/framework/pluginapi"
 	"github.com/palantir/pkg/cobracli"
 	"github.com/spf13/cobra"
@@ -27,11 +28,21 @@ var (
 	projectDirFlag string
 	configFileFlag string
 	assetsFlag     []string
+
+	// backcompatAsset is initialized once when the plugin starts
+	backcompatAsset *backcompatvalidator.BackCompatAsset
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "conjure-plugin",
 	Short: "Run conjure-go based on project configuration",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Discover and validate backcompat assets once when the plugin starts
+		// This ensures we fail fast if there are any issues with asset configuration
+		var err error
+		backcompatAsset, err = backcompatvalidator.New(configFileFlag, assetsFlag)
+		return err
+	},
 }
 
 func Execute() int {

@@ -39,7 +39,8 @@ func runBackcompatOperation(
 		return pkgerrors.Wrapf(err, "failed to set working directory")
 	}
 
-	asset := backcompatvalidator.New(configFileFlag, assetsFlag)
+	// Use the globally-initialized backcompat asset
+	// (initialized in root.go PersistentPreRunE)
 
 	// Run operation for all projects, collecting errors
 	type projectError struct {
@@ -50,7 +51,7 @@ func runBackcompatOperation(
 
 	for _, projectName := range parsedConfigSet.SortedKeys {
 		param := parsedConfigSet.Params[projectName]
-		if opErr := operation(asset, projectName, param, projectDirFlag); opErr != nil {
+		if opErr := operation(backcompatAsset, projectName, param, projectDirFlag); opErr != nil {
 			failures = append(failures, projectError{
 				projectName: projectName,
 				err:         opErr,
