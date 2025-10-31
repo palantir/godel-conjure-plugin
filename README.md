@@ -309,3 +309,13 @@ type AcceptBreaksInput struct {
 - **Multiple assets**: Only one backcompat asset is supported. If multiple backcompat assets are configured, the plugin will fail with an error.
 - **YAML sources only**: The plugin only checks compatibility for IRs generated from YAML sources defined in the project.
 - **Project filtering**: The asset is responsible for any additional filtering logic.
+
+### Error Handling
+
+**Success:**
+- The asset should output nothing to stdout and exit with code 0.
+
+**Failure:**
+- The asset should output an error message to stderr and exit with a non-zero code.
+- **Exit code 1**: Analysis succeeded but found incompatibilities (for `checkBackCompat` mode).
+- **Exit code 2+**: Actual error occurred during execution.
