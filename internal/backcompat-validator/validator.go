@@ -143,10 +143,35 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 
 	cmd := exec.Command(asset, string(arg))
 	output, err := cmd.CombinedOutput()
+
+	// Check exit code to determine success/failure
 	if err != nil {
-		return errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(output))
+		// Extract exit code from error
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			exitCode := exitErr.ExitCode()
+
+			// Exit code 1: Found incompatibilities (for checkBackCompat mode)
+			// Exit code 2+: Actual error occurred
+			if exitCode == 1 {
+				// Found incompatibilities - return error with the asset's output
+				if len(output) > 0 {
+					return errors.New(string(output))
+				}
+				return errors.New("compatibility check failed")
+			}
+
+			// Exit code 2+: actual error
+			if len(output) > 0 {
+				return errors.Errorf("asset execution failed (exit code %d):\n%s", exitCode, string(output))
+			}
+			return errors.Errorf("asset execution failed with exit code %d", exitCode)
+		}
+
+		// Non-exit error (e.g., command not found)
+		return errors.Wrapf(err, "failed to execute %v", cmd.Args)
 	}
 
+	// Exit code 0: Success
 	return nil
 }
 
