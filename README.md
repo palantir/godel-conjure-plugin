@@ -236,7 +236,7 @@ type Input struct {
 
 // CheckBackCompatInput contains the inputs for checking backcompat.
 type CheckBackCompatInput struct {
-    CurrentIR       string `json:"currentIR"`       // Path to a temporary file containing the current Conjure IR
+    CurrentIR       string `json:"currentIR"`       // Path to a file containing the current Conjure IR
     Project         string `json:"project"`         // The name of the Conjure project
     GroupID         string `json:"groupId"`         // The Maven group ID for the project
     GodelProjectDir string `json:"godelProjectDir"` // The root directory of the gödel project
