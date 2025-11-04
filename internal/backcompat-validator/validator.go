@@ -26,54 +26,7 @@ import (
 
 // BackCompatAsset provides methods for performing backcompat validation and accepting breaks.
 type BackCompatAsset struct {
-	asset string // path to the backcompat asset executable, empty if no asset configured
-}
-
-// New creates a new BackCompatAsset that discovers and validates backcompat assets.
-// It performs asset discovery and validation once at initialization time.
-//
-// Parameters:
-//   - configFile:  The path to the plugin configuration file (unused, kept for API compatibility).
-//   - assets:      A list of asset executable paths to be queried for backcompat validation.
-//
-// Returns:
-//   - *BackCompatAsset: An asset handler that provides methods for checking backcompat and accepting breaks.
-//   - error: An error if multiple backcompat assets are found or if asset discovery fails.
-func New(configFile string, assets []string) (*BackCompatAsset, error) {
-	// Discover backcompat assets
-	var backcompatAssets []string
-	for _, asset := range assets {
-		cmd := exec.Command(asset, "_assetInfo")
-		output, err := cmd.Output()
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(output))
-		}
-
-		var response assetInfoResponse
-		if err := json.Unmarshal(output, &response); err != nil {
-			return nil, errors.Wrapf(err, "failed to parse asset info response")
-		}
-
-		if response.Type == nil {
-			return nil, errors.Errorf(`invalid response from calling %v; wanted a JSON object with a "type" key; but got:\n%v`, cmd.Args, string(output))
-		}
-
-		if *response.Type == "backcompat" {
-			backcompatAssets = append(backcompatAssets, asset)
-		}
-	}
-
-	// Validate that at most one backcompat asset is present
-	if len(backcompatAssets) > 1 {
-		return nil, errors.Errorf("multiple backcompat assets detected (%d), but only one is supported. Please configure exactly one backcompat asset", len(backcompatAssets))
-	}
-
-	result := &BackCompatAsset{}
-	if len(backcompatAssets) == 1 {
-		result.asset = backcompatAssets[0]
-	}
-
-	return result, nil
+	Asset string // path to the backcompat asset executable, empty if no asset configured
 }
 
 // CheckBackCompat validates API compatibility between the current IR and the previously published IR.
@@ -89,7 +42,7 @@ func (b *BackCompatAsset) AcceptBackCompatBreaks(projectName string, param conju
 
 func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.ConjureProjectParam, godelProjectDir string, operationType string) error {
 	// If no backcompat asset is configured, skip silently
-	if b.asset == "" {
+	if b.Asset == "" {
 		return nil
 	}
 
@@ -139,7 +92,7 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 		return errors.Wrapf(err, "failed to marshal %s input", operationType)
 	}
 
-	cmd := exec.Command(b.asset, string(arg))
+	cmd := exec.Command(b.Asset, string(arg))
 	output, err := cmd.CombinedOutput()
 
 	// Check exit code to determine success/failure
@@ -171,8 +124,4 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 
 	// Exit code 0: Success
 	return nil
-}
-
-type assetInfoResponse struct {
-	Type *string `json:"type"`
 }

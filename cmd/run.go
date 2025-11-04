@@ -33,14 +33,14 @@ var runCmd = &cobra.Command{
 	Short: "Run conjure-go based on project configuration",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		stdout := cmd.OutOrStdout()
-		parsedConfigSet, err := toProjectParams(configFileFlag, stdout)
+		parsedConfigSet, err := toProjectParams(configFileFlagVal, stdout)
 		if err != nil {
 			return err
 		}
-		if err := os.Chdir(projectDirFlag); err != nil {
+		if err := os.Chdir(projectDirFlagVal); err != nil {
 			return errors.Wrapf(err, "failed to set working directory")
 		}
-		return conjureplugin.Run(parsedConfigSet, verifyFlag, projectDirFlag, stdout)
+		return conjureplugin.Run(parsedConfigSet, verifyFlag, projectDirFlagVal, stdout)
 	},
 }
 

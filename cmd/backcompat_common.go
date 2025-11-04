@@ -31,11 +31,21 @@ func runBackcompatOperation(
 	stdout io.Writer,
 	operation func(asset *backcompatvalidator.BackCompatAsset, projectName string, param conjureplugin.ConjureProjectParam, projectDir string) error,
 ) error {
-	parsedConfigSet, err := toProjectParams(configFileFlag, stdout)
+	if len(loadedAssets.BackCompatAssets) == 0 {
+		return nil
+	}
+	if len(loadedAssets.BackCompatAssets) > 1 {
+		return fmt.Errorf("todo(aradinsky): can only have a single backcompat asset (for now)")
+	}
+	asset := backcompatvalidator.BackCompatAsset{
+		Asset: loadedAssets.BackCompatAssets[0],
+	}
+
+	parsedConfigSet, err := toProjectParams(configFileFlagVal, stdout)
 	if err != nil {
 		return err
 	}
-	if err := os.Chdir(projectDirFlag); err != nil {
+	if err := os.Chdir(projectDirFlagVal); err != nil {
 		return pkgerrors.Wrapf(err, "failed to set working directory")
 	}
 
@@ -51,7 +61,7 @@ func runBackcompatOperation(
 
 	for _, projectName := range parsedConfigSet.SortedKeys {
 		param := parsedConfigSet.Params[projectName]
-		if opErr := operation(backcompatAsset, projectName, param, projectDirFlag); opErr != nil {
+		if opErr := operation(&asset, projectName, param, projectDirFlagVal); opErr != nil {
 			failures = append(failures, projectError{
 				projectName: projectName,
 				err:         opErr,

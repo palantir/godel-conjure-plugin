@@ -393,20 +393,6 @@ fi
 printf '%s\n' '{}'
 exit 0
 `
-		asset2 = `#!/bin/sh
-
-if [ "$#" -ne 1 ]; then
-    exit 1
-fi
-
-if [ "$1" = "_assetInfo" ]; then
-    printf '%s\n' '{ "type": "valid type that follows the spec but is not supported yet so it should just not be called again and everything will exit OK" }'
-    exit 0
-fi
-
-printf '%s\n' 'test failed: should be unreachable'
-exit 1
-`
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
@@ -430,14 +416,12 @@ exit 1
 	require.NoError(t, err)
 
 	asset1File := tempfilecreator.MustWriteBytesToTempFile([]byte(asset1))
-	asset2File := tempfilecreator.MustWriteBytesToTempFile([]byte(asset2))
 	require.NoError(t, os.Chmod(asset1File, 0700))
-	require.NoError(t, os.Chmod(asset2File, 0700))
 
 	outputBuf := &bytes.Buffer{}
 	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure-publish", []string{
 		"--dry-run",
-		"--assets=" + asset1File + "," + asset2File,
+		"--assets=" + asset1File,
 		"--group-id=com.palantir.test-group",
 		"--repository=test-repo",
 		"--url=" + ts.URL,
@@ -523,6 +507,20 @@ fi
 printf '%s\n' 'unreachable: something is wrong if the asset was called with more anything other than _assetInfo as the only arg'
 exit 1
 `
+		assetDoesNotHaveValidType = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "valid type that follows the spec but is not supported yet so it should just not be called again and everything will exit OK" }'
+    exit 0
+fi
+
+printf '%s\n' 'test failed: should be unreachable'
+exit 1
+`
 	)
 
 	pluginPath, err := products.Bin("conjure-plugin")
@@ -539,13 +537,14 @@ exit 1
 	err = os.WriteFile(path.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
 	require.NoError(t, err)
 
-	for _, assetString := range [...]string{
+	for _, assetFileContent := range []string{
 		assetDoesNotReturnValidJsonObject,
 		assetDoesNotReturnValidAssetInfoType,
 		assetDoesNotReturnValidAssetInfoJson,
 		assetDoesNotReturnValidAssetInfoJsonObject,
+		assetDoesNotHaveValidType,
 	} {
-		assetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(assetString))
+		assetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(assetFileContent))
 		require.NoError(t, os.Chmod(assetFile, 0700))
 
 		err = innerTestConjurePluginPublishAssetSpec(pluginapitester.NewPluginProvider(pluginPath), assetFile, projectDir)
