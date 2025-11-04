@@ -30,18 +30,18 @@ type Input struct {
 
 // CheckBackCompatInput contains the inputs for checking backcompat.
 type CheckBackCompatInput struct {
-	CurrentIR       string `json:"currentIR"`
-	Project         string `json:"project"`
-	GroupID         string `json:"groupId"`
-	GodelProjectDir string `json:"godelProjectDir"`
+	CurrentIR       string `json:"currentIR"`       // Path to a file containing the current Conjure IR to check
+	Project         string `json:"project"`         // Name of the Conjure project being validated
+	GroupID         string `json:"groupId"`         // Maven group ID for the project
+	GodelProjectDir string `json:"godelProjectDir"` // Root directory of the gödel project
 }
 
 // AcceptBreaksInput contains the inputs for accepting backcompat breaks.
 type AcceptBreaksInput struct {
-	CurrentIR       string `json:"currentIR"`
-	Project         string `json:"project"`
-	GroupID         string `json:"groupId"`
-	GodelProjectDir string `json:"godelProjectDir"`
+	CurrentIR       string `json:"currentIR"`       // Path to a file containing the current Conjure IR to accept breaks for
+	Project         string `json:"project"`         // Name of the Conjure project
+	GroupID         string `json:"groupId"`         // Maven group ID for the project
+	GodelProjectDir string `json:"godelProjectDir"` // Root directory of the gödel project
 }
 
 // AssetHandler defines the interface that backcompat assets should implement.

@@ -30,16 +30,20 @@ type BackCompatAsset struct {
 }
 
 // CheckBackCompat validates API compatibility between the current IR and the previously published IR.
-// It returns an error if validation fails.
+// Returns an error if validation fails or if incompatibilities are found.
 func (b *BackCompatAsset) CheckBackCompat(projectName string, param conjureplugin.ConjureProjectParam, godelProjectDir string) error {
 	return b.runOperation(projectName, param, godelProjectDir, "checkBackCompat")
 }
 
-// AcceptBackCompatBreaks accepts backcompat breaks for a given project by writing lockfile entries.
+// AcceptBackCompatBreaks accepts backcompat breaks for a given project by writing acknowledgment entries
+// (typically to a lockfile). This operation should be idempotent and is typically invoked after CheckBackCompat
+// has identified compatibility issues that the user wishes to accept.
 func (b *BackCompatAsset) AcceptBackCompatBreaks(projectName string, param conjureplugin.ConjureProjectParam, godelProjectDir string) error {
 	return b.runOperation(projectName, param, godelProjectDir, "acceptBackCompatBreaks")
 }
 
+// runOperation is the core implementation that executes either checkBackCompat or acceptBackCompatBreaks operations.
+// It handles asset invocation, error interpretation, and exit code handling according to the backcompat asset protocol.
 func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.ConjureProjectParam, godelProjectDir string, operationType string) error {
 	// If no backcompat asset is configured, skip silently
 	if b.Asset == "" {
@@ -47,7 +51,7 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	}
 
 	// Only check compatibility for IRs generated from YAML sources.
-	// The plugin only checks IRs that are actually defined in the project.
+	// Skip IRs that come from external sources (e.g., published artifacts from other projects).
 	if !param.IRProvider.GeneratedFromYAML() {
 		return nil
 	}
@@ -95,7 +99,10 @@ func (b *BackCompatAsset) runOperation(projectName string, param conjureplugin.C
 	cmd := exec.Command(b.Asset, string(arg))
 	output, err := cmd.CombinedOutput()
 
-	// Check exit code to determine success/failure
+	// Interpret the exit code according to the backcompat asset protocol:
+	// - Exit code 0: Success (no incompatibilities found or breaks accepted successfully)
+	// - Exit code 1: Incompatibilities found (for checkBackCompat mode)
+	// - Exit code 2+: Error occurred during execution
 	if err != nil {
 		// Extract exit code from error
 		if exitErr, ok := err.(*exec.ExitError); ok {

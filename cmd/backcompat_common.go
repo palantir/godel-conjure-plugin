@@ -35,7 +35,7 @@ func runBackcompatOperation(
 		return nil
 	}
 	if len(loadedAssets.BackCompatAssets) > 1 {
-		return fmt.Errorf("todo(aradinsky): can only have a single backcompat asset (for now)")
+		return fmt.Errorf("multiple backcompat assets are not supported: found %d assets, but only one backcompat asset is allowed per project", len(loadedAssets.BackCompatAssets))
 	}
 	asset := backcompatvalidator.BackCompatAsset{
 		Asset: loadedAssets.BackCompatAssets[0],
@@ -49,10 +49,8 @@ func runBackcompatOperation(
 		return pkgerrors.Wrapf(err, "failed to set working directory")
 	}
 
-	// Use the globally-initialized backcompat asset
-	// (initialized in root.go PersistentPreRunE)
-
-	// Run operation for all projects, collecting errors
+	// Run the backcompat operation for all projects, collecting errors for each failure.
+	// This allows us to process all projects and report all failures rather than stopping at the first error.
 	type projectError struct {
 		projectName string
 		err         error

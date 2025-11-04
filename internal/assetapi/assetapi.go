@@ -30,9 +30,11 @@ const (
 	ConjureIRExtensionsProvider AssetType = "conjure-ir-extensions-provider"
 )
 
+// LoadedAssets contains categorized lists of asset paths by type.
+// Assets are executable binaries that extend the plugin's functionality.
 type LoadedAssets struct {
-	BackCompatAssets                  []string
-	ConjureIRExtensionsProviderAssets []string
+	BackCompatAssets                  []string // Paths to backcompat validation assets
+	ConjureIRExtensionsProviderAssets []string // Paths to Conjure IR extension provider assets
 }
 
 // LoadAssets takes a list of asset paths and returns a LoadedAssets struct that contains the typed assets. Returns an
