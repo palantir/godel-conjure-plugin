@@ -16,7 +16,6 @@ package backcompat
 
 import (
 	"encoding/json"
-	"io"
 
 	"github.com/pkg/errors"
 )
@@ -104,12 +103,12 @@ func ParseInput(jsonArg string) (*Input, error) {
 //	    }
 //
 //	    handler := &MyBackCompatHandler{}
-//	    if err := backcompat.HandleInput(arg, handler, os.Stderr); err != nil {
+//	    if err := backcompat.HandleInput(arg, handler); err != nil {
 //	        fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 //	        os.Exit(2)
 //	    }
 //	}
-func HandleInput(jsonArg string, handler AssetHandler, errWriter io.Writer) error {
+func HandleInput(jsonArg string, handler AssetHandler) error {
 	input, err := ParseInput(jsonArg)
 	if err != nil {
 		return err
