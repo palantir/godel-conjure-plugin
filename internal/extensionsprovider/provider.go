@@ -25,17 +25,14 @@ import (
 
 type ExtensionsProvider func(irBytes []byte, groupID, conjureProject, version string) (map[string]any, error)
 
-// New returns an ExtensionsProvider that, when invoked, collects and merges
-// extension data from a set of external assets. Each asset is queried to determine if it is a
-// "conjure-ir-extensions-provider" and, if so, is executed with extensionsAssetArgs; arguments
-// describing the current IR, configuration, and project metadata.
-// The extensions returned by each asset are combined into a single map.
+// NewAssetsExtensionsProvider returns an ExtensionsProvider that, when invoked, collects and merges
+// extension data from the provided extensionsProviderAssets assets.
 //
 // Parameters:
-//   - config:      The configuration string to be passed to each asset.
-//   - assets:      A list of asset executable paths to be queried for extensions.
-//   - url:         The Conjure IR URL associated with the current project.
-//   - groupID:     The group ID of the current project.
+//   - extensionsProviderAssets: Paths to the extensions provider assets. Must be known to be valid ExtensionsProvider assets.
+//   - configFile:               The path to the godel-conjure-plugin YAML configuration file.
+//   - url:                      The base URL provided to the Conjure "publish" operation.
+//   - groupID:                  The group ID of the current project.
 //
 // Returns:
 //   - ExtensionsProvider: A function that, given the IR bytes, project name, and version, returns a merged
@@ -47,38 +44,21 @@ type ExtensionsProvider func(irBytes []byte, groupID, conjureProject, version st
 //   - If the asset is a provider, invoke it with the relevant arguments to retrieve extension data.
 //   - Merge all extension maps from the assets into a single result.
 //   - Return the combined extensions map or an error if any asset invocation or JSON parsing fails.
-func New(configFile string, assets []string, url string) ExtensionsProvider {
+func NewAssetsExtensionsProvider(extensionsProviderAssets []string, configFile string, url string) ExtensionsProvider {
 	return func(irBytes []byte, groupID, conjureProject, version string) (map[string]any, error) {
+		// return nil if there are no assets
+		if len(extensionsProviderAssets) == 0 {
+			return nil, nil
+		}
+
 		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
 			return nil, err
 		}
 
 		allExtensions := make(map[string]any)
-		for _, asset := range assets {
-			cmd := exec.Command(asset, "_assetInfo")
-			stdout, err := cmd.Output()
-			if err != nil {
-				if exitErr, ok := err.(*exec.ExitError); ok {
-					return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s\nstderr:\n%s", err, cmd.Args, string(stdout), string(exitErr.Stderr))
-				}
-				return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
-			}
-
-			var response assetInfoResponse
-			if err := safejson.Unmarshal(stdout, &response); err != nil {
-				return nil, err
-			}
-
-			if response.Type == nil {
-				return nil, fmt.Errorf("invalid response from calling %v; wanted a JSON object with a `type` key; but got:\n%v", cmd.Args, string(stdout))
-			}
-
-			if *response.Type != "conjure-ir-extensions-provider" {
-				continue
-			}
-
-			arg, err := safejson.Marshal(extensionsAssetArgs{
+		for _, asset := range extensionsProviderAssets {
+			additionalExtensions, err := getExtensionsFromExtensionProviderAsset(asset, extensionsAssetArgs{
 				PluginConfigFile: &configFile,
 				CurrentIRFile:    &irFile,
 				URL:              &url,
@@ -89,26 +69,37 @@ func New(configFile string, assets []string, url string) ExtensionsProvider {
 			if err != nil {
 				return nil, err
 			}
-
-			cmd = exec.Command(asset, string(arg))
-			stdout, err = cmd.Output()
-			if err != nil {
-				if exitErr, ok := err.(*exec.ExitError); ok {
-					return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s\nstderr:\n%s", err, cmd.Args, string(stdout), string(exitErr.Stderr))
-				}
-				return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
-			}
-
-			var additionalExtensions map[string]any
-			if err := safejson.Unmarshal(stdout, &additionalExtensions); err != nil {
-				return nil, err
-			}
-
 			maps.Copy(allExtensions, additionalExtensions)
 		}
 
 		return allExtensions, nil
 	}
+}
+
+// getExtensionsFromExtensionProviderAsset returns the extensions provided by the given extensions provider asset given
+// the provided extensionsAssetArgs argument. Invokes the asset with the JSON representation of the provided arg as the
+// argument and returns the result of unmarshalling the stdout output as JSON. Returns an error if there are any errors
+// with invoking the asset or if the stdout output cannot be parsed as JSON.
+func getExtensionsFromExtensionProviderAsset(asset string, arg extensionsAssetArgs) (map[string]any, error) {
+	argJSONBytes, err := safejson.Marshal(arg)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := exec.Command(asset, string(argJSONBytes))
+	stdout, err := cmd.Output()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s\nstderr:\n%s", err, cmd.Args, string(stdout), string(exitErr.Stderr))
+		}
+		return nil, fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
+	}
+
+	var additionalExtensions map[string]any
+	if err := safejson.Unmarshal(stdout, &additionalExtensions); err != nil {
+		return nil, err
+	}
+	return additionalExtensions, nil
 }
 
 type extensionsAssetArgs struct {
@@ -118,8 +109,4 @@ type extensionsAssetArgs struct {
 	GroupID          *string `json:"group-id,omitempty"`
 	ProjectName      *string `json:"project-name,omitempty"`
 	Version          *string `json:"version,omitempty"`
-}
-
-type assetInfoResponse struct {
-	Type *string `json:"type"`
 }
