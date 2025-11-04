@@ -46,6 +46,11 @@ type ExtensionsProvider func(irBytes []byte, groupID, conjureProject, version st
 //   - Return the combined extensions map or an error if any asset invocation or JSON parsing fails.
 func NewAssetsExtensionsProvider(extensionsProviderAssets []string, configFile string, url string) ExtensionsProvider {
 	return func(irBytes []byte, groupID, conjureProject, version string) (map[string]any, error) {
+		// return nil if there are no assets
+		if len(extensionsProviderAssets) == 0 {
+			return nil, nil
+		}
+
 		irFile, err := tempfilecreator.WriteBytesToTempFile(irBytes)
 		if err != nil {
 			return nil, err
