@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"github.com/palantir/godel-conjure-plugin/v6/internal/assetapi"
 	"github.com/palantir/godel/v2/framework/pluginapi"
 	"github.com/palantir/pkg/cobracli"
 	"github.com/spf13/cobra"
@@ -23,10 +24,12 @@ import (
 const VerifyFlagName = "verify"
 
 var (
-	debugFlagVal   bool
-	projectDirFlag string
-	configFileFlag string
-	assetsFlag     []string
+	debugFlagVal      bool
+	projectDirFlagVal string
+	configFileFlagVal string
+	assetsFlagVal     []string
+
+	loadedAssets assetapi.LoadedAssets
 )
 
 var rootCmd = &cobra.Command{
@@ -40,13 +43,23 @@ func Execute() int {
 
 func init() {
 	pluginapi.AddDebugPFlagPtr(rootCmd.PersistentFlags(), &debugFlagVal)
-	pluginapi.AddProjectDirPFlagPtr(rootCmd.PersistentFlags(), &projectDirFlag)
+	pluginapi.AddProjectDirPFlagPtr(rootCmd.PersistentFlags(), &projectDirFlagVal)
 	if err := rootCmd.MarkPersistentFlagRequired(pluginapi.ProjectDirFlagName); err != nil {
 		panic(err)
 	}
-	pluginapi.AddConfigPFlagPtr(rootCmd.PersistentFlags(), &configFileFlag)
+	pluginapi.AddConfigPFlagPtr(rootCmd.PersistentFlags(), &configFileFlagVal)
 	if err := rootCmd.MarkPersistentFlagRequired(pluginapi.ConfigFlagName); err != nil {
 		panic(err)
 	}
-	pluginapi.AddAssetsPFlagPtr(rootCmd.PersistentFlags(), &assetsFlag)
+	pluginapi.AddAssetsPFlagPtr(rootCmd.PersistentFlags(), &assetsFlagVal)
+
+	// load all assets before running any command
+	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		var err error
+		loadedAssets, err = assetapi.LoadAssets(assetsFlagVal)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 }

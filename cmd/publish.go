@@ -22,7 +22,7 @@ import (
 	"github.com/palantir/distgo/publisher/artifactory"
 	"github.com/palantir/distgo/publisher/maven"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	extensionsprovider "github.com/palantir/godel-conjure-plugin/v6/internal/extensions-provider"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/extensionsprovider"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -41,11 +41,11 @@ var publishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publish Conjure IR",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		projectParams, err := toProjectParams(configFileFlag, cmd.OutOrStdout())
+		projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}
-		if err := os.Chdir(projectDirFlag); err != nil {
+		if err := os.Chdir(projectDirFlagVal); err != nil {
 			return errors.Wrapf(err, "failed to set working directory")
 		}
 
@@ -67,8 +67,8 @@ var publishCmd = &cobra.Command{
 			flagVals[currFlag.Name] = val
 		}
 
-		return conjureplugin.Publish(projectParams, projectDirFlag, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.New(configFileFlag, assetsFlag, urlFlagVal),
+		return conjureplugin.Publish(projectParams, projectDirFlagVal, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
+			extensionsprovider.NewAssetsExtensionsProvider(loadedAssets.ConjureIRExtensionsProviders, configFileFlagVal, urlFlagVal),
 			groupIDFlagVal,
 		)
 	},
