@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"maps"
 
-	"github.com/palantir/godel-conjure-plugin/v6/internal/extensionsprovider"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/irextensionsprovider"
 	"github.com/palantir/pkg/safejson"
 )
 
@@ -45,7 +45,7 @@ import (
 // or if the extensionsProvider fails.
 func addExtensionsToIRBytes(
 	irBytes []byte,
-	extensionsProvider extensionsprovider.ExtensionsProvider,
+	extensionsProvider irextensionsprovider.ExtensionsProvider,
 	groupID, conjureProject, version string,
 ) ([]byte, error) {
 

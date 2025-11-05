@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package extensionsprovider_test
+package irextensionsprovider_test
 
 import (
 	"encoding/json"
@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/palantir/godel-conjure-plugin/v6/internal/extensionsprovider"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/irextensionsprovider"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,7 +44,7 @@ func TestPublish(t *testing.T) {
 		assets = append(assets, asset)
 	}
 
-	provider := extensionsprovider.NewAssetsExtensionsProvider(assets, "", "")
+	provider := irextensionsprovider.NewAssetsExtensionsProvider(assets, "", "")
 
 	got, err := provider([]byte{}, "", "", "")
 	require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestPublish(t *testing.T) {
 		t.Errorf("maps are not equal:\ngot: %v\nwant:%v", got, want)
 	}
 
-	empty, err := extensionsprovider.NewAssetsExtensionsProvider(nil, "", "")([]byte{}, "", "", "")
+	empty, err := irextensionsprovider.NewAssetsExtensionsProvider(nil, "", "")([]byte{}, "", "", "")
 	assert.NoError(t, err)
 	assert.Empty(t, empty)
 }

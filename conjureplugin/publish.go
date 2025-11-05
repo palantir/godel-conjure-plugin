@@ -23,12 +23,12 @@ import (
 	"github.com/palantir/distgo/distgo"
 	gitversioner "github.com/palantir/distgo/projectversioner/git"
 	"github.com/palantir/distgo/publisher/artifactory"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/extensionsprovider"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/irextensionsprovider"
 	"github.com/pkg/errors"
 )
 
 func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{},
-	dryRun bool, stdout io.Writer, extensionsProvider extensionsprovider.ExtensionsProvider,
+	dryRun bool, stdout io.Writer, extensionsProvider irextensionsprovider.ExtensionsProvider,
 	cliGroupID string) error {
 	var paramsToPublishKeys []string
 	var paramsToPublish []ConjureProjectParam

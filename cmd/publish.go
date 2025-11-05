@@ -22,7 +22,7 @@ import (
 	"github.com/palantir/distgo/publisher/artifactory"
 	"github.com/palantir/distgo/publisher/maven"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/extensionsprovider"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/irextensionsprovider"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -68,7 +68,7 @@ var publishCmd = &cobra.Command{
 		}
 
 		return conjureplugin.Publish(projectParams, projectDirFlagVal, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.NewAssetsExtensionsProvider(loadedAssets.ConjureIRExtensionsProviders, configFileFlagVal, urlFlagVal),
+			irextensionsprovider.NewAssetsExtensionsProvider(loadedAssets.ConjureIRExtensionsProviders, configFileFlagVal, urlFlagVal),
 			groupIDFlagVal,
 		)
 	},
