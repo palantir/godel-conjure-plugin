@@ -20,7 +20,7 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
-	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
+	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
@@ -39,11 +39,11 @@ projects:
     ir-locator: local/yaml-dir
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
 					},
@@ -59,11 +59,11 @@ projects:
    publish: false
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
 						Publish: toPtr(false),
@@ -81,11 +81,11 @@ projects:
      locator: explicit/yaml-dir
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeYAML,
 							Locator: "explicit/yaml-dir",
 						},
 					},
@@ -100,11 +100,11 @@ projects:
    ir-locator: http://foo.com/ir.json
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "http://foo.com/ir.json",
 						},
 					},
@@ -120,11 +120,11 @@ projects:
    publish: true
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "http://foo.com/ir.json",
 						},
 						Publish: toPtr(true),
@@ -142,11 +142,11 @@ projects:
      locator: localhost:8080/ir.json
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeRemote,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeRemote,
 							Locator: "localhost:8080/ir.json",
 						},
 					},
@@ -161,11 +161,11 @@ projects:
    ir-locator: local/nonexistent-ir-file.json
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/nonexistent-ir-file.json",
 						},
 					},
@@ -182,11 +182,11 @@ projects:
      locator: local/nonexistent-ir-file.json
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeIRFile,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeIRFile,
 							Locator: "local/nonexistent-ir-file.json",
 						},
 					},
@@ -205,11 +205,11 @@ projects:
    cli: true
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeRemote,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeRemote,
 							Locator: "localhost:8080/ir.json",
 						},
 						Server: true,
@@ -229,11 +229,11 @@ projects:
    accept-funcs: true
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeRemote,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeRemote,
 							Locator: "localhost:8080/ir.json",
 						},
 						Server:      false,
@@ -260,11 +260,11 @@ projects:
        key: value
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeRemote,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeRemote,
 							Locator: "localhost:8080/ir.json",
 						},
 						Server:      false,
@@ -293,11 +293,11 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 	}{
 		{
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
 					},
@@ -309,7 +309,7 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:   "outputDir",
+						OutputDir:   "outputDir/project-1",
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
 						Publish:     true,
 						AcceptFuncs: true,
@@ -319,11 +319,11 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 		},
 		{
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "input.yml",
 						},
 					},
@@ -335,7 +335,7 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:   "outputDir",
+						OutputDir:   "outputDir/project-1",
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input.yml"),
 						Publish:     true,
 						AcceptFuncs: true,
@@ -345,11 +345,11 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 		},
 		{
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "input.json",
 						},
 						AcceptFuncs: toPtr(true),
@@ -362,7 +362,7 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:   "outputDir",
+						OutputDir:   "outputDir/project-1",
 						IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
 						AcceptFuncs: true,
 					},
@@ -371,11 +371,11 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 		},
 		{
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "input.json",
 						},
 					},
@@ -387,7 +387,7 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:   "outputDir",
+						OutputDir:   "outputDir/project-1",
 						IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
 						AcceptFuncs: true,
 					},
@@ -418,11 +418,11 @@ projects:
 `,
 			want: config.ConjurePluginConfig{
 				GroupID: "com.palantir.signals",
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
 					},
@@ -439,11 +439,11 @@ projects:
     group-id: com.palantir.project
 `,
 			want: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
 						GroupID: "com.palantir.project",
@@ -466,18 +466,18 @@ projects:
 `,
 			want: config.ConjurePluginConfig{
 				GroupID: "com.palantir.default",
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir1",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir1",
 						},
 					},
 					"project-2": {
 						OutputDir: "outputDir2",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir2",
 						},
 						GroupID: "com.palantir.override",
@@ -503,11 +503,11 @@ func TestGroupIDToParams(t *testing.T) {
 			name: "top-level group-id is inherited by project",
 			in: config.ConjurePluginConfig{
 				GroupID: "com.palantir.signals",
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
 					},
@@ -519,7 +519,7 @@ func TestGroupIDToParams(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:   "outputDir",
+						OutputDir:   "outputDir/project-1",
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
 						Publish:     true,
 						AcceptFuncs: true,
@@ -532,11 +532,11 @@ func TestGroupIDToParams(t *testing.T) {
 			name: "per-project group-id overrides top-level",
 			in: config.ConjurePluginConfig{
 				GroupID: "com.palantir.default",
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
 						GroupID: "com.palantir.override",
@@ -549,7 +549,7 @@ func TestGroupIDToParams(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:   "outputDir",
+						OutputDir:   "outputDir/project-1",
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
 						Publish:     true,
 						AcceptFuncs: true,
@@ -561,11 +561,11 @@ func TestGroupIDToParams(t *testing.T) {
 		{
 			name: "no group-id specified",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
 					},
@@ -577,7 +577,7 @@ func TestGroupIDToParams(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:   "outputDir",
+						OutputDir:   "outputDir/project-1",
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
 						Publish:     true,
 						AcceptFuncs: true,
@@ -590,18 +590,18 @@ func TestGroupIDToParams(t *testing.T) {
 			name: "multiple projects with different group-ids",
 			in: config.ConjurePluginConfig{
 				GroupID: "com.palantir.default",
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir1",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "input1.yml",
 						},
 					},
 					"project-2": {
 						OutputDir: "outputDir2",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "input2.yml",
 						},
 						GroupID: "com.palantir.custom",
@@ -615,14 +615,14 @@ func TestGroupIDToParams(t *testing.T) {
 				},
 				Params: map[string]conjureplugin.ConjureProjectParam{
 					"project-1": {
-						OutputDir:   "outputDir1",
+						OutputDir:   "outputDir1/project-1",
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input1.yml"),
 						Publish:     true,
 						AcceptFuncs: true,
 						GroupID:     "com.palantir.default",
 					},
 					"project-2": {
-						OutputDir:   "outputDir2",
+						OutputDir:   "outputDir2/project-2",
 						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input2.yml"),
 						Publish:     true,
 						AcceptFuncs: true,

@@ -41,4 +41,7 @@ type ConjureProjectParam struct {
 	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
+	// SkipDeleteGeneratedFiles, when true, skips cleanup of old generated files before regeneration.
+	// This is used for v2 config with the skip-delete-generated-files escape valve.
+	SkipDeleteGeneratedFiles bool
 }

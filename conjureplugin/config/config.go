@@ -20,19 +20,20 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
+	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
 
-type ConjurePluginConfig v1.ConjurePluginConfig
+type ConjurePluginConfig v2.ConjurePluginConfig
 
-func ToConjurePluginConfig(in *ConjurePluginConfig) *v1.ConjurePluginConfig {
-	return (*v1.ConjurePluginConfig)(in)
+func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
+	return (*v2.ConjurePluginConfig)(in)
 }
 
 func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
@@ -45,8 +46,6 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 	seenDirs := make(map[string][]string)
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	for key, currConfig := range c.ProjectConfigs {
-		seenDirs[currConfig.OutputDir] = append(seenDirs[currConfig.OutputDir], key)
-
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
 		if err != nil {
 			return conjureplugin.ConjureProjectParams{}, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
@@ -66,25 +65,52 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+
+		// V2: Apply default output directory if not specified
+		outputDir := currConfig.OutputDir
+		if outputDir == "" {
+			outputDir = "internal/generated/conjure"
+		}
+
+		// V2: Unless omit-top-level-project-dir is true, append project name subdirectory
+		if !currConfig.OmitTopLevelProjectDir {
+			outputDir = filepath.Join(outputDir, key)
+		}
+
+		// Track final output directories for conflict detection
+		seenDirs[outputDir] = append(seenDirs[outputDir], key)
+
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:   currConfig.OutputDir,
-			IRProvider:  irProvider,
-			AcceptFuncs: acceptFuncsFlag,
-			Server:      currConfig.Server,
-			CLI:         currConfig.CLI,
-			Publish:     publishVal,
-			GroupID:     groupID,
+			OutputDir:                outputDir,
+			IRProvider:               irProvider,
+			AcceptFuncs:              acceptFuncsFlag,
+			Server:                   currConfig.Server,
+			CLI:                      currConfig.CLI,
+			Publish:                  publishVal,
+			GroupID:                  groupID,
+			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
 		}
 	}
 
+	// V2: Check for conflicting output directories
 	for outputDir, projects := range seenDirs {
 		if len(projects) > 1 {
-			_, _ = fmt.Fprintf(stdout,
-				"[WARNING] Duplicate outputDir detected in Conjure config (godel/config/conjure-plugin.yml): '%s'\n"+
+			message := fmt.Sprintf(
+				"Duplicate outputDir detected in Conjure config (godel/config/conjure-plugin.yml): '%s'\n"+
 					"  Conflicting projects: %v\n"+
 					"  [NOTE] Multiple projects sharing the same outputDir can cause code generation to overwrite itself, which may result in 'conjure --verify' failures or other unexpected issues.\n",
 				outputDir, projects,
 			)
+
+			if c.AllowConflictingOutputDirs {
+				// Downgrade to warning
+				_, _ = fmt.Fprintf(stdout, "[WARNING] %s", message)
+			} else {
+				// Error by default in v2
+				return conjureplugin.ConjureProjectParams{}, errors.Errorf(
+					"conflicting output directories not allowed in v2 config. "+
+						"Set 'allow-conflicting-output-dirs: true' at the top level to downgrade to a warning.\n%s", message)
+			}
 		}
 	}
 
@@ -94,18 +120,18 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 	}, nil
 }
 
-type SingleConjureConfig v1.SingleConjureConfig
+type SingleConjureConfig v2.SingleConjureConfig
 
-func ToSingleConjureConfig(in *SingleConjureConfig) *v1.SingleConjureConfig {
-	return (*v1.SingleConjureConfig)(in)
+func ToSingleConjureConfig(in *SingleConjureConfig) *v2.SingleConjureConfig {
+	return (*v2.SingleConjureConfig)(in)
 }
 
-type LocatorType v1.LocatorType
+type LocatorType v2.LocatorType
 
-type IRLocatorConfig v1.IRLocatorConfig
+type IRLocatorConfig v2.IRLocatorConfig
 
-func ToIRLocatorConfig(in *IRLocatorConfig) *v1.IRLocatorConfig {
-	return (*v1.IRLocatorConfig)(in)
+func ToIRLocatorConfig(in *IRLocatorConfig) *v2.IRLocatorConfig {
+	return (*v2.IRLocatorConfig)(in)
 }
 
 func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
@@ -114,35 +140,35 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 	}
 
 	locatorType := cfg.Type
-	if locatorType == "" || locatorType == v1.LocatorTypeAuto {
+	if locatorType == "" || locatorType == v2.LocatorTypeAuto {
 		if parsedURL, err := url.Parse(cfg.Locator); err == nil && parsedURL.Scheme != "" {
 			// if locator can be parsed as a URL and it has a scheme explicitly specified, assume it is remote
-			locatorType = v1.LocatorTypeRemote
+			locatorType = v2.LocatorTypeRemote
 		} else {
 			// treat as local: determine if path should be used as file or directory
 			switch lowercaseLocator := strings.ToLower(cfg.Locator); {
 			case strings.HasSuffix(lowercaseLocator, ".yml") || strings.HasSuffix(lowercaseLocator, ".yaml"):
-				locatorType = v1.LocatorTypeYAML
+				locatorType = v2.LocatorTypeYAML
 			case strings.HasSuffix(lowercaseLocator, ".json"):
-				locatorType = v1.LocatorTypeIRFile
+				locatorType = v2.LocatorTypeIRFile
 			default:
 				// assume path is to local YAML directory
-				locatorType = v1.LocatorTypeYAML
+				locatorType = v2.LocatorTypeYAML
 
 				// if path exists and is a file, treat path as an IR file
 				if fi, err := os.Stat(cfg.Locator); err == nil && !fi.IsDir() {
-					locatorType = v1.LocatorTypeIRFile
+					locatorType = v2.LocatorTypeIRFile
 				}
 			}
 		}
 	}
 
 	switch locatorType {
-	case v1.LocatorTypeRemote:
+	case v2.LocatorTypeRemote:
 		return conjureplugin.NewHTTPIRProvider(cfg.Locator), nil
-	case v1.LocatorTypeYAML:
+	case v2.LocatorTypeYAML:
 		return conjureplugin.NewLocalYAMLIRProvider(cfg.Locator), nil
-	case v1.LocatorTypeIRFile:
+	case v2.LocatorTypeIRFile:
 		return conjureplugin.NewLocalFileIRProvider(cfg.Locator), nil
 	default:
 		return nil, errors.Errorf("unknown locator type: %s", locatorType)
