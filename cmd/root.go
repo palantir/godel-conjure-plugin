@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/palantir/godel-conjure-plugin/v6/internal/assetapi"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/assetloader"
 	"github.com/palantir/godel/v2/framework/pluginapi"
 	"github.com/palantir/pkg/cobracli"
 	"github.com/spf13/cobra"
@@ -29,7 +29,7 @@ var (
 	configFileFlagVal string
 	assetsFlagVal     []string
 
-	loadedAssets assetapi.LoadedAssets
+	loadedAssets assetloader.LoadedAssets
 )
 
 var rootCmd = &cobra.Command{
@@ -56,7 +56,7 @@ func init() {
 	// load all assets before running any command
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		var err error
-		loadedAssets, err = assetapi.LoadAssets(assetsFlagVal)
+		loadedAssets, err = assetloader.LoadAssets(assetsFlagVal)
 		if err != nil {
 			return err
 		}

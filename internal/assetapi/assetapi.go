@@ -15,79 +15,59 @@
 package assetapi
 
 import (
-	"fmt"
-	"os/exec"
+	"encoding/json"
 
-	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/godel-conjure-plugin/v6/assetapi"
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
-type AssetType string
+// Deprecated: assets of this type are deprecated and no longer recommended. The plugin will continue to support
+// them for backwards compatibility, but new projects should use an equivalent ConjureExtensionsProvider asset
+// instead.
+//
+// New asset types should be declared as exported constants in the assetapi package. However, because this asset type is
+// deprecated and does not use the assetapi interface, its declaration is in the internal assetapi package.
+const ConjureIRExtensionsProvider assetapi.AssetType = "conjure-ir-extensions-provider"
 
-const (
-	ConjureIRExtensionsProvider AssetType = "conjure-ir-extensions-provider"
-)
-
-type LoadedAssets struct {
-	ConjureIRExtensionsProviders []string
+// AllAssetsTypes returns a slice of all supported asset types.
+func AllAssetsTypes() []assetapi.AssetType {
+	return []assetapi.AssetType{
+		ConjureIRExtensionsProvider,
+	}
 }
 
-// LoadAssets takes a list of asset paths and returns a LoadedAssets struct that contains the typed assets. Returns an
-// error if any of the provided assets are not valid according to the plugin asset specification.
-func LoadAssets(assets []string) (LoadedAssets, error) {
-	loadedAssets, err := loadAssets(assets)
-	if err != nil {
-		return LoadedAssets{}, err
+// NewAssetRootCmd returns a new cobra.Command for the asset of the specified type. The provided name and description
+// are used to set the name and description for the CLI, but are not directly used as part of the asset API. The
+// returned root command has the AssetTypeCommand subcommand registered. When called, this command prints the JSON
+// string representation of the assetType, which satisfied the asset discovery API.
+//
+// Asset types should generally define an exported function of their own that returns a new *cobra.Command that is
+// derived from this one and adds the asset-specific commands that are expected.
+func NewAssetRootCmd(assetType assetapi.AssetType, name, description string) *cobra.Command {
+	rootCmd := &cobra.Command{
+		Use:   name,
+		Short: description,
 	}
-	return LoadedAssets{
-		ConjureIRExtensionsProviders: loadedAssets[ConjureIRExtensionsProvider],
-	}, nil
+
+	rootCmd.AddCommand(newAssetTypeCmd(assetType))
+
+	return rootCmd
 }
 
-// loadAssets takes a list of asset paths, determines their types, and returns a map from AssetType to the list of
-// assets of that type. Returns an error if any asset cannot be executed to determine its type, or if any asset is of an
-// unsupported type.
-func loadAssets(assets []string) (map[AssetType][]string, error) {
-	assetMap := make(map[AssetType][]string)
-	for _, asset := range assets {
-		assetType, err := getAssetTypeForAsset(asset)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get asset type for asset %s", asset)
-		}
+const AssetTypeCommand = "conjure-plugin-asset-type"
 
-		if assetType != ConjureIRExtensionsProvider {
-			return nil, fmt.Errorf("unsupported asset type %s for asset %s: only asset type that is supported is %q", assetType, asset, ConjureIRExtensionsProvider)
-		}
-		assetMap[assetType] = append(assetMap[assetType], asset)
+func newAssetTypeCmd(assetType assetapi.AssetType) *cobra.Command {
+	return &cobra.Command{
+		Use:   AssetTypeCommand,
+		Short: "Prints the JSON representation of the asset type",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			jsonOutput, err := json.Marshal(assetType)
+			if err != nil {
+				return errors.Wrapf(err, "failed to marshal JSON")
+			}
+			cmd.Print(string(jsonOutput))
+			return nil
+		},
 	}
-	return assetMap, nil
-}
-
-// getAssetTypeForAsset returns the AssetType for the provided asset by executing the asset with the _assetInfo command,
-// parsing the output printed to stdout as JSON, and returning the value of the "type" field. Returns an error if the
-// asset cannot be executed, if the response cannot be parsed as JSON, or if the "type" field is missing.
-func getAssetTypeForAsset(asset string) (AssetType, error) {
-	cmd := exec.Command(asset, "_assetInfo")
-	stdout, err := cmd.Output()
-	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			return "", errors.Wrapf(err, "failed to execute %v\nstdout:\n%s\nstderr:\n%s", cmd.Args, string(stdout), string(exitErr.Stderr))
-		}
-		return "", fmt.Errorf("%w: failed to execute %v\nstdout:\n%s", err, cmd.Args, string(stdout))
-	}
-
-	var response assetInfoResponse
-	if err := safejson.Unmarshal(stdout, &response); err != nil {
-		return "", errors.Wrapf(err, "failed to unmarshal asset info")
-	}
-
-	if response.Type == nil {
-		return "", fmt.Errorf("invalid response from calling %v; wanted a JSON object with a `type` key; but got:\n%v", cmd.Args, string(stdout))
-	}
-
-	return AssetType(*response.Type), nil
-}
-
-type assetInfoResponse struct {
-	Type *string `json:"type"`
 }

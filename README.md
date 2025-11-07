@@ -86,39 +86,13 @@ The `--dry-run` flag can be added to print the operation that would be performed
 
 Assets
 ======
-
-`godel-conjure-plugin` supports external executables—called [assets](https://github.com/palantir/godel/wiki/Plugins#assets)—to extend its functionality through a simple, well-defined protocol.
-
-## `godel-conjure-plugin` Asset Specification
-
-An asset for `godel-conjure-plugin` is an executable that communicates via JSON through standard output and receives input through command-line arguments. The contract is as follows:
-
-1. **Asset Discovery (`_assetInfo` Probe):**
-- When invoked with a single argument `_assetInfo`, the asset must output a JSON object to stdout.
-- This JSON object **must include at least** a `type` key, whose value determines how the asset will be used by `godel-conjure-plugin`.
-- Example:
-```json
-{ "type": "conjure-ir-extensions-provider" }
-```
-> _Note: `conjure-ir-extensions-provider` is currently the only supported type._
-
-- If the asset does not output a valid JSON object with a `type` field, `godel-conjure-plugin` will fail.
-- If the asset outputs a valid JSON object where the `type` key maps to an unknown value, `godel-conjure-plugin` will ignore that asset and continure execution.
-
-2. **Asset Invocation:**
-- For its primary operation, the asset is invoked with a **single argument**: a JSON-encoded object containing contextual information (the schema depends on the asset type).
-- The asset should process this input and output a JSON object to stdout.
-- On error, the asset should return a non-zero exit code; on success, it should exit with code 0.
-
-3. **Argument Handling:**
-- The asset must **immediately fail** if invoked with anything other than one argument.
-- All information must be passed via the single JSON-encoded argument.
-
----
+`godel-conjure-plugin` supports the use of [assets](https://github.com/palantir/godel/wiki/Plugins#assets) to extend its
+functionality in defined a defined manner.
 
 ## Conjure IR Extensions Asset
-
-The only `asset type` currently supported by `godel-conjure-plugin` is `"conjure-ir-extensions-provider"`. This `asset type` allows you to add key-value pairs to the [`extensions`](https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions) block of the Conjure IR **during publishing**.
+The only `asset type` currently supported by `godel-conjure-plugin` is `"conjure-ir-extensions-provider"`. This
+`asset type` allows key-value pairs to be added to the [`extensions`](https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions) block of the Conjure IR **as part of the
+`publish` command (the `conjure-publish` godel task)**.
 
 ### Requirements
 
