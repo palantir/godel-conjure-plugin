@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1
+package v2
 
 import (
-	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -24,19 +23,25 @@ import (
 type ConjurePluginConfig struct {
 	versionedconfig.ConfigWithVersion `yaml:",inline,omitempty"`
 	// GroupID is the default group ID for all projects. Individual projects can override this.
-	GroupID        string                         `yaml:"group-id,omitempty"`
-	ProjectConfigs map[string]SingleConjureConfig `yaml:"projects"`
+	GroupID string `yaml:"group-id,omitempty"`
+	// AllowConflictingOutputDirs downgrades output directory conflicts from errors to warnings.
+	// Defaults to false (conflicts are errors).
+	AllowConflictingOutputDirs bool                           `yaml:"allow-conflicting-output-dirs,omitempty"`
+	ProjectConfigs             map[string]SingleConjureConfig `yaml:"projects"`
 }
 
 type SingleConjureConfig struct {
-	OutputDir string          `yaml:"output-dir"`
+	// OutputDir specifies the base output directory for generated code.
+	// Defaults to "internal/generated/conjure" if not specified.
+	// By default, code is generated into {OutputDir}/{ProjectName}/ unless OmitTopLevelProjectDir is true.
+	OutputDir string          `yaml:"output-dir,omitempty"`
 	IRLocator IRLocatorConfig `yaml:"ir-locator"`
 	// GroupID is the group ID for this project. If not specified, the top-level group-id is used.
 	GroupID string `yaml:"group-id,omitempty"`
 	// Publish specifies whether or not the IR specified by this project should be included in the publish operation.
 	// If this value is not explicitly specified in configuration, it is treated as "true" for YAML sources of IR and
 	// "false" for all other sources.
-	Publish *bool `yaml:"publish"`
+	Publish *bool `yaml:"publish,omitempty"`
 	// Server indicates if we will generate server code. Currently this is behind a feature flag and is subject to change.
 	Server bool `yaml:"server,omitempty"`
 	// CLI indicates if we will generate cobra CLI bindings. Currently this is behind a feature flag and is subject to change.
@@ -46,6 +51,14 @@ type SingleConjureConfig struct {
 	AcceptFuncs *bool `yaml:"accept-funcs,omitempty"`
 	// Extensions contain metadata for consumption by assets of type `conjure-ir-extensions-provider`.
 	Extensions map[string]any `yaml:"extensions,omitempty"`
+	// OmitTopLevelProjectDir skips creating the {ProjectName} subdirectory.
+	// When false (default), generates into {OutputDir}/{ProjectName}/.
+	// When true, generates directly into {OutputDir}/.
+	OmitTopLevelProjectDir bool `yaml:"omit-top-level-project-dir,omitempty"`
+	// SkipDeleteGeneratedFiles skips cleanup of old generated files before regeneration.
+	// When false (default), deletes all Conjure-generated files in the output directory before regenerating.
+	// When true, preserves v1 behavior (no cleanup).
+	SkipDeleteGeneratedFiles bool `yaml:"skip-delete-generated-files,omitempty"`
 }
 
 type LocatorType string
@@ -57,9 +70,6 @@ const (
 	LocatorTypeIRFile = LocatorType("ir-file")
 )
 
-// IRLocatorConfig is configuration that specifies a locator. It can be specified as a YAML string or as a full YAML
-// object. If it is specified as a YAML string, then the string is used as the value of "Locator" and LocatorTypeAuto is
-// used as the value of the type.
 type IRLocatorConfig struct {
 	Type    LocatorType `yaml:"type"`
 	Locator string      `yaml:"locator"`
@@ -68,7 +78,6 @@ type IRLocatorConfig struct {
 func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var strInput string
 	if err := unmarshal(&strInput); err == nil && strInput != "" {
-		// input was specified as a string: use string as value of locator with "auto" type
 		cfg.Type = LocatorTypeAuto
 		cfg.Locator = strInput
 		return nil
@@ -83,54 +92,12 @@ func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) err
 	return nil
 }
 
-// ToV2Config converts a v1 config to v2 config with escape valves enabled to preserve v1 behavior.
-func (v1cfg *ConjurePluginConfig) ToV2Config() v2.ConjurePluginConfig {
-	v2cfg := v2.ConjurePluginConfig{
-		GroupID:                    v1cfg.GroupID,
-		AllowConflictingOutputDirs: true, // In v1, conflicts were warnings not errors
-		ProjectConfigs:             make(map[string]v2.SingleConjureConfig),
-	}
-
-	for name, v1proj := range v1cfg.ProjectConfigs {
-		v2proj := v2.SingleConjureConfig{
-			OutputDir: v1proj.OutputDir,
-			IRLocator: v2.IRLocatorConfig{
-				Type:    v2.LocatorType(v1proj.IRLocator.Type),
-				Locator: v1proj.IRLocator.Locator,
-			},
-			GroupID:     v1proj.GroupID,
-			Publish:     v1proj.Publish,
-			Server:      v1proj.Server,
-			CLI:         v1proj.CLI,
-			AcceptFuncs: v1proj.AcceptFuncs,
-			Extensions:  v1proj.Extensions,
-			// Enable escape valves to preserve exact v1 behavior
-			OmitTopLevelProjectDir:   true, // v1 didn't append project name
-			SkipDeleteGeneratedFiles: true, // v1 didn't clean up old files
-		}
-		v2cfg.ProjectConfigs[name] = v2proj
-	}
-
-	return v2cfg
-}
-
-// UpgradeConfig upgrades v1 configuration to v2 by unmarshaling, converting, and remarshaling.
 func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
-	// Unmarshal as v1 config
-	var v1cfg ConjurePluginConfig
-	if err := yaml.UnmarshalStrict(cfgBytes, &v1cfg); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal conjure-plugin v1 configuration")
+	var cfg ConjurePluginConfig
+	if err := yaml.UnmarshalStrict(cfgBytes, &cfg); err != nil {
+		return nil, errors.Wrapf(err, "failed to unmarshal conjure-plugin v2 configuration")
 	}
-
-	// Convert to v2 config
-	v2cfg := v1cfg.ToV2Config()
-	v2cfg.Version = "2"
-
-	// Marshal back to bytes
-	v2bytes, err := yaml.Marshal(v2cfg)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to marshal v2 configuration")
-	}
-
-	return v2bytes, nil
+	return cfgBytes, nil
 }
+
+const DefaultOutputDir = "internal/generated/conjure"

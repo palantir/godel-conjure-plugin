@@ -633,7 +633,7 @@ conjure-projects:
 				WantOutput: "",
 			},
 			{
-				Name: "current config is unmodified",
+				Name: "v1 config is upgraded to v2",
 				ConfigFiles: map[string]string{
 					"godel/config/conjure-plugin.yml": `
 version: 1
@@ -644,15 +644,18 @@ projects:
     ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
 `,
 				},
-				WantOutput: "",
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
 				WantFiles: map[string]string{
-					"godel/config/conjure-plugin.yml": `
-version: 1
+					"godel/config/conjure-plugin.yml": `version: "2"
+allow-conflicting-output-dirs: true
 projects:
   sls-health-api:
-    # comment
     output-dir: conjure
-    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+    ir-locator:
+      type: auto
+      locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
 `,
 				},
 			},
