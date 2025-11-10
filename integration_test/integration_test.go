@@ -633,10 +633,9 @@ conjure-projects:
 				WantOutput: "",
 			},
 			{
-				Name: "v1 config is upgraded to v2",
+				Name: "v1 config is validated but not upgraded to v2",
 				ConfigFiles: map[string]string{
-					"godel/config/conjure-plugin.yml": `
-version: 1
+					"godel/config/conjure-plugin.yml": `version: 1
 projects:
   sls-health-api:
     # comment
@@ -644,18 +643,36 @@ projects:
     ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
 `,
 				},
-				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantOutput: "",
 				WantFiles: map[string]string{
-					"godel/config/conjure-plugin.yml": `version: "2"
-allow-conflicting-output-dirs: true
+					"godel/config/conjure-plugin.yml": `version: 1
 projects:
   sls-health-api:
+    # comment
     output-dir: conjure
-    ir-locator:
-      type: auto
-      locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
-    omit-top-level-project-dir: true
-    skip-delete-generated-files: true
+    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+`,
+				},
+			},
+			{
+				Name: "v2 config is validated and unchanged",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 2
+projects:
+  sls-health-api:
+    # comment
+    output-dir: internal/generated/conjure
+    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+`,
+				},
+				WantOutput: "",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 2
+projects:
+  sls-health-api:
+    # comment
+    output-dir: internal/generated/conjure
+    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
 `,
 				},
 			},

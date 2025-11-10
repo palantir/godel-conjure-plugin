@@ -84,6 +84,7 @@ func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) err
 }
 
 // ToV2Config converts a v1 config to v2 config with escape valves enabled to preserve v1 behavior.
+// This is used for runtime translation to enable forward compatibility.
 func (v1cfg *ConjurePluginConfig) ToV2Config() v2.ConjurePluginConfig {
 	v2cfg := v2.ConjurePluginConfig{
 		GroupID:                    v1cfg.GroupID,
@@ -114,8 +115,10 @@ func (v1cfg *ConjurePluginConfig) ToV2Config() v2.ConjurePluginConfig {
 	return v2cfg
 }
 
-// UpgradeConfig upgrades v1 configuration to v2 by unmarshaling, converting, and remarshaling.
-func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
+// TranslateToV2 translates v1 configuration to v2 for runtime use (enabling forward compatibility).
+// This is separate from UpgradeConfig, which is used by the upgrade-config command and intentionally
+// does NOT upgrade v1 configs. See UpgradeConfig for rationale.
+func TranslateToV2(cfgBytes []byte) ([]byte, error) {
 	// Unmarshal as v1 config
 	var v1cfg ConjurePluginConfig
 	if err := yaml.UnmarshalStrict(cfgBytes, &v1cfg); err != nil {
@@ -124,7 +127,8 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 
 	// Convert to v2 config
 	v2cfg := v1cfg.ToV2Config()
-	v2cfg.Version = "2"
+	// Note: We intentionally do NOT set v2cfg.Version = "2" here, as this is a runtime translation
+	// and the original config should remain as v1 from the user's perspective.
 
 	// Marshal back to bytes
 	v2bytes, err := yaml.Marshal(v2cfg)
@@ -133,4 +137,42 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 	}
 
 	return v2bytes, nil
+}
+
+// UpgradeConfig validates v1 configuration and returns it unchanged.
+//
+// IMPORTANT: This function intentionally does NOT upgrade v1 configs to v2.
+//
+// Rationale:
+// The upgrade-config command is automatically run during ./godelw update, which is frequently
+// triggered by automated tools like Excavator. We do NOT want to automatically upgrade all
+// v1 configs to v2 because:
+//
+// 1. A mechanical v1→v2 translation with all escape valves enabled (omit-top-level-project-dir: true
+//    and skip-delete-generated-files: true) doesn't solve any of the problems that v2 was designed
+//    to address (orphaned files, output directory conflicts, non-standard placement).
+//
+// 2. Keeping a config as v1 preserves a valuable signal that "this project hasn't been deliberately
+//    migrated to v2 standards yet." A mechanically translated v2 config with escape valves looks
+//    like it has been migrated but actually hasn't, hiding the need for a proper migration.
+//
+// 3. Projects should remain on v1 config until they are ready to adopt v2 standards properly,
+//    either by following the standard conventions or by making a conscious decision to use
+//    escape valves for legitimate reasons.
+//
+// Projects can manually upgrade to v2 when they are ready by either:
+// - Adopting v2 standards (internal/generated/conjure/{ProjectName}/, with cleanup enabled)
+// - Explicitly using escape valves if needed for their specific use case
+//
+// The ToV2Config() method remains available for use by the config loading logic to translate
+// v1 configs to v2 at runtime (enabling forward compatibility), but this upgrade path should
+// not be triggered by the upgrade-config command.
+func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
+	// Validate by attempting to unmarshal
+	var v1cfg ConjurePluginConfig
+	if err := yaml.UnmarshalStrict(cfgBytes, &v1cfg); err != nil {
+		return nil, errors.Wrapf(err, "failed to unmarshal conjure-plugin v1 configuration")
+	}
+	// Return the original bytes unchanged (validated but not upgraded)
+	return cfgBytes, nil
 }

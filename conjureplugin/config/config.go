@@ -194,10 +194,13 @@ func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
 	var v2Bytes []byte
 	switch version {
 	case "", "1":
-		// v1 config (or unversioned, which we treat as v1): translate to v2
-		v2Bytes, err = v1.UpgradeConfig(inputBytes)
+		// v1 config (or unversioned, which we treat as v1): translate to v2 for runtime use
+		// Note: We use TranslateToV2 (not UpgradeConfig) because we want runtime translation
+		// for forward compatibility, but UpgradeConfig intentionally does NOT upgrade v1→v2
+		// to prevent automated tools from blindly upgrading configs.
+		v2Bytes, err = v1.TranslateToV2(inputBytes)
 		if err != nil {
-			return ConjurePluginConfig{}, errors.Wrapf(err, "failed to upgrade v1 config to v2")
+			return ConjurePluginConfig{}, errors.Wrapf(err, "failed to translate v1 config to v2")
 		}
 	case "2":
 		// Already v2, use as-is
