@@ -84,13 +84,14 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:   outputDir,
-			IRProvider:  irProvider,
-			AcceptFuncs: acceptFuncsFlag,
-			Server:      currConfig.Server,
-			CLI:         currConfig.CLI,
-			Publish:     publishVal,
-			GroupID:     groupID,
+			OutputDir:                outputDir,
+			IRProvider:               irProvider,
+			AcceptFuncs:              acceptFuncsFlag,
+			Server:                   currConfig.Server,
+			CLI:                      currConfig.CLI,
+			Publish:                  publishVal,
+			GroupID:                  groupID,
+			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
 		}
 	}
 
