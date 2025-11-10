@@ -148,17 +148,17 @@ func TranslateToV2(cfgBytes []byte) ([]byte, error) {
 // triggered by automated tools like Excavator. We do NOT want to automatically upgrade all
 // v1 configs to v2 because:
 //
-// 1. A mechanical v1→v2 translation with all escape valves enabled (omit-top-level-project-dir: true
-//    and skip-delete-generated-files: true) doesn't solve any of the problems that v2 was designed
-//    to address (orphaned files, output directory conflicts, non-standard placement).
+//  1. A mechanical v1→v2 translation with all escape valves enabled (omit-top-level-project-dir: true
+//     and skip-delete-generated-files: true) doesn't solve any of the problems that v2 was designed
+//     to address (orphaned files, output directory conflicts, non-standard placement).
 //
-// 2. Keeping a config as v1 preserves a valuable signal that "this project hasn't been deliberately
-//    migrated to v2 standards yet." A mechanically translated v2 config with escape valves looks
-//    like it has been migrated but actually hasn't, hiding the need for a proper migration.
+//  2. Keeping a config as v1 preserves a valuable signal that "this project hasn't been deliberately
+//     migrated to v2 standards yet." A mechanically translated v2 config with escape valves looks
+//     like it has been migrated but actually hasn't, hiding the need for a proper migration.
 //
-// 3. Projects should remain on v1 config until they are ready to adopt v2 standards properly,
-//    either by following the standard conventions or by making a conscious decision to use
-//    escape valves for legitimate reasons.
+//  3. Projects should remain on v1 config until they are ready to adopt v2 standards properly,
+//     either by following the standard conventions or by making a conscious decision to use
+//     escape valves for legitimate reasons.
 //
 // Projects can manually upgrade to v2 when they are ready by either:
 // - Adopting v2 standards (internal/generated/conjure/{ProjectName}/, with cleanup enabled)
