@@ -20,6 +20,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const DefaultOutputDir = "internal/generated/conjure"
+
 type ConjurePluginConfig struct {
 	versionedconfig.ConfigWithVersion `yaml:",inline,omitempty"`
 	// GroupID is the default group ID for all projects. Individual projects can override this.
@@ -99,5 +101,3 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 	}
 	return cfgBytes, nil
 }
-
-const DefaultOutputDir = "internal/generated/conjure"
