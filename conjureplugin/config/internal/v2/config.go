@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ type SingleConjureConfig struct {
 	// When true, generates directly into {OutputDir}/.
 	OmitTopLevelProjectDir bool `yaml:"omit-top-level-project-dir,omitempty"`
 	// SkipDeleteGeneratedFiles skips cleanup of old generated files before regeneration.
-	// When false (default), deletes all Conjure-generated files in the output directory before regenerating.
+	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
 	// When true, preserves v1 behavior (no cleanup).
 	SkipDeleteGeneratedFiles bool `yaml:"skip-delete-generated-files,omitempty"`
 }

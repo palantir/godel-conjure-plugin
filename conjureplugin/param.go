@@ -42,7 +42,7 @@ type ConjureProjectParam struct {
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
 	// SkipDeleteGeneratedFiles skips cleanup of old generated files before regeneration.
-	// When false (default), deletes all Conjure-generated files in the output directory before regenerating.
+	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
 	// When true, preserves v1 behavior (no cleanup).
 	SkipDeleteGeneratedFiles bool
 }

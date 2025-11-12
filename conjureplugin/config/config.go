@@ -56,7 +56,7 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 			outputDir = v2.DefaultOutputDir
 		}
 		if !currConfig.OmitTopLevelProjectDir {
-			outputDir = path.Join(outputDir, key)
+			outputDir = filepath.Join(outputDir, key)
 		}
 
 		seenDirs[outputDir] = append(seenDirs[outputDir], key)
@@ -99,7 +99,7 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 	for outputDir, projects := range seenDirs {
 		if len(projects) > 1 {
 			message := fmt.Sprintf(
-				"Duplicate outputDir detected in Conjure config (godel/config/conjure-plugin.yml): '%s'\n"+
+				"Duplicate outputDir detected in Conjure config: '%s'\n"+
 					"  Conflicting projects: %v\n"+
 					"  [NOTE] Multiple projects sharing the same outputDir can cause code generation to overwrite itself, which may result in 'conjure --verify' failures or other unexpected issues.\n",
 				outputDir, projects,
