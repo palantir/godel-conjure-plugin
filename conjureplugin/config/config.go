@@ -51,9 +51,10 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
 func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, err error) {
 	sortedKeys := slices.Sorted(maps.Keys(c.ProjectConfigs))
 
-	seenDirs := make(map[string][]string)
+	var outputDirs []string
 	params := make(map[string]conjureplugin.ConjureProjectParam)
-	for key, currConfig := range c.ProjectConfigs {
+	for _, key := range sortedKeys {
+		currConfig := c.ProjectConfigs[key]
 		// Calculate the actual output directory
 		outputDir := currConfig.OutputDir
 		if outputDir == "" {
@@ -63,9 +64,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			outputDir = filepath.Join(outputDir, key)
 		}
 
-		// normalize outputDir
-		outputDir = filepath.Clean(outputDir)
-		seenDirs[outputDir] = append(seenDirs[outputDir], key)
+		outputDirs = append(outputDirs, outputDir)
 
 		irLocatorConfig := IRLocatorConfig(currConfig.IRLocator)
 		irProvider, err := (&irLocatorConfig).ToIRProvider()
@@ -101,13 +100,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	for _, outputDir := range slices.Sorted(maps.Keys(seenDirs)) {
-		projects := seenDirs[outputDir]
-		if len(projects) <= 1 {
-			continue
-		}
-		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
-	}
+	warnings = checkDirConflicts(outputDirs)
 
 	return conjureplugin.ConjureProjectParams{
 		SortedKeys: sortedKeys,
@@ -210,4 +203,51 @@ func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
 		return ConjurePluginConfig{}, errors.WithStack(err)
 	}
 	return cfg, nil
+}
+
+// checkDirConflicts checks for directory conflicts including exact duplicates and parent-child relationships.
+// Returns a slice of errors describing all conflicts found.
+// Note: This implementation uses filepath.Clean for normalization but does not resolve to absolute paths.
+// A more complete implementation would use filepath.Abs and resolve symlinks to catch all cases,
+// but we assume users are well-intentioned and this catches the common cases.
+func checkDirConflicts(dirs []string) []error {
+	var conflicts []error
+
+	slices.Sort(dirs)
+
+	for i, dir1 := range dirs {
+		for _, dir2 := range dirs[i+1:] {
+			if dirsConflict(dir1, dir2) {
+				conflicts = append(conflicts, errors.Errorf(
+					"OutputDir %q and OutputDir %q have conflicting output directories (same directory or parent-child relationship), which may cause conflicts when generating Conjure output",
+					dir1, dir2))
+			}
+		}
+	}
+
+	return conflicts
+}
+
+// dirsConflict checks if two directories conflict (are equal or have a parent-child relationship).
+func dirsConflict(dir1, dir2 string) bool {
+	// Normalize paths
+	dir1 = filepath.Clean(dir1)
+	dir2 = filepath.Clean(dir2)
+
+	// Check for exact match
+	if dir1 == dir2 {
+		return true
+	}
+
+	// Check if either is a child of the other
+	return isChild(dir1, dir2) || isChild(dir2, dir1)
+}
+
+// isChild checks if child is a subdirectory of parent.
+// Paths are normalized with filepath.Clean before comparison.
+func isChild(parent, child string) bool {
+	parent = filepath.Clean(parent)
+	child = filepath.Clean(child)
+	rel, err := filepath.Rel(parent, child)
+	return err == nil && !strings.HasPrefix(rel, "..") && rel != "."
 }
