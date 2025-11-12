@@ -56,20 +56,19 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 	for _, key := range sortedKeys {
 		currConfig := c.ProjectConfigs[key]
 		// Calculate the actual output directory
-		outputDir := currConfig.OutputDir
-		if outputDir == "" {
-			outputDir = v2.DefaultOutputDir
+		rawOutputDir := currConfig.OutputDir
+		if rawOutputDir == "" {
+			rawOutputDir = v2.DefaultOutputDir
 		}
 		if !currConfig.OmitTopLevelProjectDir {
-			outputDir = filepath.Join(outputDir, key)
+			rawOutputDir = filepath.Join(rawOutputDir, key)
 		}
 
 		// normalize outputDir
-		outputDir = filepath.Clean(currConfig.OutputDir)
+		outputDir := filepath.Clean(rawOutputDir)
 		seenDirs[outputDir] = append(seenDirs[outputDir], key)
 
-		irLocatorConfig := IRLocatorConfig(currConfig.IRLocator)
-		irProvider, err := (&irLocatorConfig).ToIRProvider()
+		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
 		if err != nil {
 			return conjureplugin.ConjureProjectParams{}, nil, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
 		}
@@ -91,7 +90,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:                outputDir,
+			OutputDir:                rawOutputDir,
 			IRProvider:               irProvider,
 			AcceptFuncs:              acceptFuncsFlag,
 			Server:                   currConfig.Server,
