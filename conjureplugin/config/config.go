@@ -223,44 +223,6 @@ func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
 	return cfg, nil
 }
 
-// checkDirConflicts checks for directory conflicts including exact duplicates and parent-child relationships.
-// Returns a slice of errors describing all conflicts found.
-// Note: This implementation uses filepath.Clean for normalization but does not resolve to absolute paths.
-// A more complete implementation would use filepath.Abs and resolve symlinks to catch all cases,
-// but we assume users are well-intentioned and this catches the common cases.
-func checkDirConflicts(dirs []string) []error {
-	var conflicts []error
-
-	slices.Sort(dirs)
-
-	for i, dir1 := range dirs {
-		for _, dir2 := range dirs[i+1:] {
-			if dirsConflict(dir1, dir2) {
-				conflicts = append(conflicts, errors.Errorf(
-					"OutputDir %q and OutputDir %q have conflicting output directories (same directory or parent-child relationship), which may cause conflicts when generating Conjure output",
-					dir1, dir2))
-			}
-		}
-	}
-
-	return conflicts
-}
-
-// dirsConflict checks if two directories conflict (are equal or have a parent-child relationship).
-func dirsConflict(dir1, dir2 string) bool {
-	// Normalize paths
-	dir1 = filepath.Clean(dir1)
-	dir2 = filepath.Clean(dir2)
-
-	// Check for exact match
-	if dir1 == dir2 {
-		return true
-	}
-
-	// Check if either is a child of the other
-	return isChild(dir1, dir2) || isChild(dir2, dir1)
-}
-
 // isChild checks if child is a subdirectory of parent.
 // Paths are normalized with filepath.Clean before comparison.
 func isChild(parent, child string) bool {
