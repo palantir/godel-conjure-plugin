@@ -16,9 +16,7 @@ package conjureplugin_test
 
 import (
 	"bytes"
-	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -39,7 +37,7 @@ func TestPublish(t *testing.T) {
 	require.NoError(t, err)
 	tmpDir, err := os.MkdirTemp(cwd, "TestPublishConjure_")
 	require.NoError(t, err)
-	ymlDir := path.Join(tmpDir, "yml_dir")
+	ymlDir := filepath.Join(tmpDir, "yml_dir")
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
 	defer func() {
@@ -69,7 +67,7 @@ projects:
 
 	var cfg config.ConjurePluginConfig
 	require.NoError(t, yaml.Unmarshal(pluginConfigYML, &cfg))
-	params, err := cfg.ToParams(io.Discard)
+	params, _, err := cfg.ToParams()
 	require.NoError(t, err, "failed to parse config set")
 
 	outputBuf := &bytes.Buffer{}

@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -50,9 +51,19 @@ func init() {
 }
 
 func toProjectParams(cfgFile string, stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
-	config, err := config.ReadConfigFromFile(cfgFile)
+	cfg, err := config.ReadConfigFromFile(cfgFile)
 	if err != nil {
 		return conjureplugin.ConjureProjectParams{}, err
 	}
-	return config.ToParams(stdout)
+	params, warnings, err := cfg.ToParams()
+	if err != nil {
+		return conjureplugin.ConjureProjectParams{}, err
+	}
+
+	// print any warnings to stdout
+	for _, warning := range warnings {
+		_, _ = fmt.Fprintf(stdout, "[WARNING]: %s\n", warning)
+	}
+
+	return params, nil
 }

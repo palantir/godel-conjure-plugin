@@ -15,7 +15,6 @@
 package config_test
 
 import (
-	"io"
 	"testing"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -395,9 +394,261 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 			},
 		},
 	} {
-		got, err := tc.in.ToParams(io.Discard)
+		got, _, err := tc.in.ToParams()
 		require.NoError(t, err, "Case %d", i)
 		assert.Equal(t, tc.want, got, "Case %d", i)
+	}
+}
+
+func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
+	for i, tc := range []struct {
+		name         string
+		in           config.ConjurePluginConfig
+		want         conjureplugin.ConjureProjectParams
+		wantWarnings []string
+	}{
+		{
+			name: "No warnings for single project",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+				},
+			},
+			wantWarnings: nil,
+		},
+		{
+			name: "No warnings for multiple projects with different output directories",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+					},
+					"project-2": {
+						OutputDir: "outputDir-2",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+					"project-2",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+					"project-2": {
+						OutputDir:   "outputDir-2",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+				},
+			},
+			wantWarnings: nil,
+		},
+		{
+			name: "Warning for multiple projects with the same output directory",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+					},
+					"project-2": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+					"project-2",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+					"project-2": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+				},
+			},
+			wantWarnings: []string{
+				"Projects [project-1 project-2] are configured with the same outputDir \"outputDir\", which may cause conflicts when generating Conjure output",
+			},
+		},
+		{
+			name: "Warning for multiple projects with the same output directory after normalization",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+					},
+					"project-2": {
+						OutputDir: "./outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+					"project-2",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+					"project-2": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+				},
+			},
+			wantWarnings: []string{
+				"Projects [project-1 project-2] are configured with the same outputDir \"outputDir\", which may cause conflicts when generating Conjure output",
+			},
+		},
+		{
+			name: "Multiple warnings for multiple projects with the same output directory after normalization",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+					},
+					"project-2": {
+						OutputDir: "./outputDir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+					},
+					"project-3": {
+						OutputDir: "outputDir-other",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local-3/yaml-dir",
+						},
+					},
+					"project-4": {
+						OutputDir: "outputDir-other/",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeAuto,
+							Locator: "local-4/yaml-dir",
+						},
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+					"project-2",
+					"project-3",
+					"project-4",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+					"project-2": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+					"project-3": {
+						OutputDir:   "outputDir-other",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-3/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+					"project-4": {
+						OutputDir:   "outputDir-other",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-4/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+				},
+			},
+			wantWarnings: []string{
+				"Projects [project-1 project-2] are configured with the same outputDir \"outputDir\", which may cause conflicts when generating Conjure output",
+				"Projects [project-3 project-4] are configured with the same outputDir \"outputDir-other\", which may cause conflicts when generating Conjure output",
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, gotWarnings, err := tc.in.ToParams()
+			require.NoError(t, err, "Case %d", i)
+			assert.Equal(t, tc.want, got, "Case %d", i)
+
+			assert.Equal(t, len(tc.wantWarnings), len(gotWarnings), "Case %d", i)
+			for i := range tc.wantWarnings {
+				assert.EqualError(t, gotWarnings[i], tc.wantWarnings[i], "Case %d", i)
+			}
+		})
 	}
 }
 
@@ -632,7 +883,7 @@ func TestGroupIDToParams(t *testing.T) {
 			},
 		},
 	} {
-		got, err := tc.in.ToParams(io.Discard)
+		got, _, err := tc.in.ToParams()
 		require.NoError(t, err, "Case %d: %s", i, tc.name)
 		assert.Equal(t, tc.want, got, "Case %d: %s", i, tc.name)
 	}

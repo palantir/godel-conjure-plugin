@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"runtime"
 
@@ -49,7 +48,7 @@ func YAMLtoIRWithParams(in []byte, params ...Param) (rBytes []byte, rErr error) 
 		}
 	}()
 
-	inPath := path.Join(tmpDir, "in.yml")
+	inPath := filepath.Join(tmpDir, "in.yml")
 	if err := os.WriteFile(inPath, in, 0644); err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -71,7 +70,7 @@ func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rEr
 		}
 	}()
 
-	outPath := path.Join(tmpDir, "out.json")
+	outPath := filepath.Join(tmpDir, "out.json")
 	if err := RunWithParams(inPath, outPath, params...); err != nil {
 		return nil, err
 	}
@@ -155,16 +154,16 @@ func RunWithParams(inPath, outPath string, params ...Param) error {
 }
 
 // cliUnpackDir is the directory into which the tarball is unpacked
-var cliUnpackDir = path.Join(os.TempDir(), "_conjureircli")
+var cliUnpackDir = filepath.Join(os.TempDir(), "_conjureircli")
 
 // cliArchiveDir is the top-level directory of the unpacked archive
-var cliArchiveDir = path.Join(cliUnpackDir, fmt.Sprintf("conjure-%v", internal.Version))
+var cliArchiveDir = filepath.Join(cliUnpackDir, fmt.Sprintf("conjure-%v", internal.Version))
 
 // cliCmdPath is the path to the conjure compiler executable
 func cliCmdPath() (string, error) {
 	switch runtime.GOOS {
 	case "darwin", "linux":
-		return path.Join(cliArchiveDir, "bin", "conjure"), nil
+		return filepath.Join(cliArchiveDir, "bin", "conjure"), nil
 	default:
 		return "", errors.Errorf("OS %s not supported", runtime.GOOS)
 	}

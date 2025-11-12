@@ -15,11 +15,11 @@
 package config
 
 import (
-	"fmt"
-	"io"
+	"maps"
 	"net/url"
 	"os"
-	"sort"
+	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -34,21 +34,31 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v1.ConjurePluginConfig {
 	return (*v1.ConjurePluginConfig)(in)
 }
 
-func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureProjectParams, error) {
-	var keys []string
-	for k := range c.ProjectConfigs {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
+// ToParams returns the conjureplugin.ConjureProjectParams representation of the receiver. This function performs
+// semantic validation of the configuration.
+//
+// Semantic issues with configuration are classified as either warnings or errors. Warnings are considered issues that
+// the caller may want to be alerted or warned about, but for which the configuration is still legal/valid. Errors are
+// issues that cause the configuration to be considered invalid.
+//
+// Currently, if multiple Conjure projects have the same output directory (after normalization using filepath.Clean),
+// this is considered to be warning. The returned warning is an error created using errors.Join that contains one error
+// per output path shared by multiple projects.
+func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, err error) {
+	sortedKeys := slices.Sorted(maps.Keys(c.ProjectConfigs))
 
 	seenDirs := make(map[string][]string)
 	params := make(map[string]conjureplugin.ConjureProjectParam)
-	for key, currConfig := range c.ProjectConfigs {
-		seenDirs[currConfig.OutputDir] = append(seenDirs[currConfig.OutputDir], key)
+	for _, key := range sortedKeys {
+		currConfig := c.ProjectConfigs[key]
+
+		// normalize outputDir
+		outputDir := filepath.Clean(currConfig.OutputDir)
+		seenDirs[outputDir] = append(seenDirs[outputDir], key)
 
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
 		if err != nil {
-			return conjureplugin.ConjureProjectParams{}, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
+			return conjureplugin.ConjureProjectParams{}, nil, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
 		}
 
 		groupID := c.GroupID
@@ -66,7 +76,7 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:   currConfig.OutputDir,
+			OutputDir:   outputDir,
 			IRProvider:  irProvider,
 			AcceptFuncs: acceptFuncsFlag,
 			Server:      currConfig.Server,
@@ -76,21 +86,18 @@ func (c *ConjurePluginConfig) ToParams(stdout io.Writer) (conjureplugin.ConjureP
 		}
 	}
 
-	for outputDir, projects := range seenDirs {
-		if len(projects) > 1 {
-			_, _ = fmt.Fprintf(stdout,
-				"[WARNING] Duplicate outputDir detected in Conjure config (godel/config/conjure-plugin.yml): '%s'\n"+
-					"  Conflicting projects: %v\n"+
-					"  [NOTE] Multiple projects sharing the same outputDir can cause code generation to overwrite itself, which may result in 'conjure --verify' failures or other unexpected issues.\n",
-				outputDir, projects,
-			)
+	for _, outputDir := range slices.Sorted(maps.Keys(seenDirs)) {
+		projects := seenDirs[outputDir]
+		if len(projects) <= 1 {
+			continue
 		}
+		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
 	}
 
 	return conjureplugin.ConjureProjectParams{
-		SortedKeys: keys,
+		SortedKeys: sortedKeys,
 		Params:     params,
-	}, nil
+	}, warnings, nil
 }
 
 type SingleConjureConfig v1.SingleConjureConfig
