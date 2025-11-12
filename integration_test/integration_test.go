@@ -696,16 +696,16 @@ projects:
 
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
-	ymlDir := path.Join(projectDir, yamlDir)
+	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
 	defer cleanup()
-	err = os.MkdirAll(path.Join(projectDir, "godel", "config"), 0755)
+	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
-	err = ioutil.WriteFile(path.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+	err = ioutil.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
 	require.NoError(t, err)
 
-	err = ioutil.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	err = ioutil.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
 	require.NoError(t, err)
 
 	outputBuf := &bytes.Buffer{}
