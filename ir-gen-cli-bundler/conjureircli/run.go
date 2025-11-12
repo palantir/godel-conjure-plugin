@@ -17,7 +17,6 @@ package conjureircli
 import (
 	_ "embed" // required for go:embed directive
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -39,7 +38,7 @@ func YAMLtoIR(in []byte) (rBytes []byte, rErr error) {
 }
 
 func YAMLtoIRWithParams(in []byte, params ...Param) (rBytes []byte, rErr error) {
-	tmpDir, err := ioutil.TempDir("", "")
+	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create temporary directory")
 	}
@@ -50,7 +49,7 @@ func YAMLtoIRWithParams(in []byte, params ...Param) (rBytes []byte, rErr error) 
 	}()
 
 	inPath := filepath.Join(tmpDir, "in.yml")
-	if err := ioutil.WriteFile(inPath, in, 0644); err != nil {
+	if err := os.WriteFile(inPath, in, 0644); err != nil {
 		return nil, errors.WithStack(err)
 	}
 	return InputPathToIRWithParams(inPath, params...)
@@ -61,7 +60,7 @@ func InputPathToIR(inPath string) (rBytes []byte, rErr error) {
 }
 
 func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rErr error) {
-	tmpDir, err := ioutil.TempDir("", "")
+	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create temporary directory")
 	}
@@ -75,7 +74,7 @@ func InputPathToIRWithParams(inPath string, params ...Param) (rBytes []byte, rEr
 	if err := RunWithParams(inPath, outPath, params...); err != nil {
 		return nil, err
 	}
-	irBytes, err := ioutil.ReadFile(outPath)
+	irBytes, err := os.ReadFile(outPath)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

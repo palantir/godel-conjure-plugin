@@ -16,7 +16,6 @@ package conjureplugin_test
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -36,7 +35,7 @@ import (
 func TestPublish(t *testing.T) {
 	cwd, err := os.Getwd()
 	require.NoError(t, err)
-	tmpDir, err := ioutil.TempDir(cwd, "TestPublishConjure_")
+	tmpDir, err := os.MkdirTemp(cwd, "TestPublishConjure_")
 	require.NoError(t, err)
 	ymlDir := filepath.Join(tmpDir, "yml_dir")
 	err = os.Mkdir(ymlDir, 0755)
@@ -63,7 +62,7 @@ projects:
 `)
 
 	conjureFile := filepath.Join(ymlDir, "api.yml")
-	err = ioutil.WriteFile(conjureFile, conjureConfigYML, 0644)
+	err = os.WriteFile(conjureFile, conjureConfigYML, 0644)
 	require.NoError(t, err, "failed to write api file")
 
 	var cfg config.ConjurePluginConfig
