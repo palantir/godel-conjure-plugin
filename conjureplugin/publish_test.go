@@ -16,7 +16,6 @@ package conjureplugin_test
 
 import (
 	"bytes"
-	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -70,7 +69,7 @@ projects:
 
 	var cfg config.ConjurePluginConfig
 	require.NoError(t, yaml.Unmarshal(pluginConfigYML, &cfg))
-	params, err := cfg.ToParams(io.Discard)
+	params, _, err := cfg.ToParams()
 	require.NoError(t, err, "failed to parse config set")
 
 	outputBuf := &bytes.Buffer{}

@@ -659,3 +659,62 @@ projects:
 		},
 	)
 }
+
+func TestConfigWarning(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.conjure.test.api
+    objects:
+      TestCase:
+        fields:
+          name: string
+      TestUnion:
+        union:
+          testCase: TestCase
+`
+		yamlDir    = "yamlDir"
+		conjureYML = `
+projects:
+  project-1:
+    output-dir: conjure-output
+    ir-locator: ` + yamlDir + `
+  project-2:
+    output-dir: conjure-output
+    ir-locator: ` + yamlDir + `
+  project-3:
+    output-dir: conjure-output-2
+    ir-locator: ` + yamlDir + `
+  project-4:
+    output-dir: conjure-output-2
+    ir-locator: ` + yamlDir + `
+`
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	ymlDir := path.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+	defer cleanup()
+	err = os.MkdirAll(path.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+	err = ioutil.WriteFile(path.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+	require.NoError(t, err)
+
+	err = ioutil.WriteFile(path.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	require.NoError(t, err)
+
+	outputBuf := &bytes.Buffer{}
+	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+	defer runPluginCleanup()
+	require.NoError(t, err, outputBuf.String())
+
+	assert.Equal(t, `[WARNING]: Projects [project-1 project-2] are configured with the same outputDir "conjure-output", which may cause conflicts when generating Conjure output
+[WARNING]: Projects [project-3 project-4] are configured with the same outputDir "conjure-output-2", which may cause conflicts when generating Conjure output
+`, outputBuf.String())
+}
