@@ -14,6 +14,10 @@
 
 package conjureplugin
 
+import (
+	"errors"
+)
+
 type ConjureProjectParams struct {
 	SortedKeys []string
 	Params     map[string]ConjureProjectParam
@@ -41,4 +45,17 @@ type ConjureProjectParam struct {
 	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
+}
+
+// ForEach iterates over all project parameters in the order specified by SortedKeys,
+// invoking the provided function for each project name and its associated parameter.
+// It accumulates and returns any errors produced by the function calls using errors.Join.
+func (p *ConjureProjectParams) ForEach(fn func(project string, param ConjureProjectParam) error) error {
+	var err error
+
+	for _, project := range p.SortedKeys {
+		err = errors.Join(err, fn(project, p.Params[project]))
+	}
+
+	return err
 }

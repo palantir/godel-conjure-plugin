@@ -26,18 +26,33 @@ import (
 )
 
 type LoadedAssets struct {
+	ConjureBackcompat            string
 	ConjureIRExtensionsProviders []string
 }
 
 // LoadAssets takes a list of asset paths and returns a LoadedAssets struct that contains the typed assets. Returns an
 // error if any of the provided assets are not valid according to the plugin asset specification.
+// In addition to general validation, this function performs the following additional checks:
+//   - Ensures that at most one "backcompat" asset is configured; returns an error if more than one is provided.
 func LoadAssets(assets []string) (LoadedAssets, error) {
 	assetTypeToAssetsMap, err := createAssetTypeToAssetsMap(assets)
 	if err != nil {
 		return LoadedAssets{}, err
 	}
 
+	var conjureBackCompat string
+	backcompatAssets := assetTypeToAssetsMap[assetapi.ConjureBackcompat]
+	switch len(backcompatAssets) {
+	case 0:
+		// Do nothing
+	case 1:
+		conjureBackCompat = backcompatAssets[0]
+	default:
+		return LoadedAssets{}, pkgerrors.Errorf(`only 0 or 1 "backcompat" can be configured, detected %d: %v`, len(backcompatAssets), backcompatAssets)
+	}
+
 	return LoadedAssets{
+		ConjureBackcompat:            conjureBackCompat,
 		ConjureIRExtensionsProviders: assetTypeToAssetsMap[assetapiinternal.ConjureIRExtensionsProvider],
 	}, nil
 }

@@ -33,6 +33,7 @@ const ConjureIRExtensionsProvider assetapi.AssetType = "conjure-ir-extensions-pr
 // AllAssetsTypes returns a slice of all supported asset types.
 func AllAssetsTypes() []assetapi.AssetType {
 	return []assetapi.AssetType{
+		assetapi.ConjureBackcompat,
 		ConjureIRExtensionsProvider,
 	}
 }
