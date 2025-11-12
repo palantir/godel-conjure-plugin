@@ -101,7 +101,13 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	warnings = checkDirConflicts(outputDirs)
+	for _, outputDir := range slices.Sorted(maps.Keys(seenDirs)) {
+		projects := seenDirs[outputDir]
+		if len(projects) <= 1 {
+			continue
+		}
+		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
+	}
 
 	return conjureplugin.ConjureProjectParams{
 		SortedKeys: sortedKeys,
