@@ -487,6 +487,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "Warning for multiple projects with the same output directory",
 			in: config.ConjurePluginConfig{
+				AllowConflictingOutputDirs: true,
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
@@ -533,6 +534,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "Warning for multiple projects with the same output directory after normalization",
 			in: config.ConjurePluginConfig{
+				AllowConflictingOutputDirs: true,
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
@@ -579,6 +581,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "Multiple warnings for multiple projects with the same output directory after normalization",
 			in: config.ConjurePluginConfig{
+				AllowConflictingOutputDirs: true,
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
@@ -656,6 +659,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "Warning for parent-child directory relationship",
 			in: config.ConjurePluginConfig{
+				AllowConflictingOutputDirs: true,
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
@@ -702,6 +706,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "Warning for parent-child directory relationship with normalization",
 			in: config.ConjurePluginConfig{
+				AllowConflictingOutputDirs: true,
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "base/dir",
@@ -755,6 +760,73 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 			for i := range tc.wantWarnings {
 				assert.EqualError(t, gotWarnings[i], tc.wantWarnings[i], "Case %d", i)
 			}
+		})
+	}
+}
+
+func TestConjurePluginConfigToParam_Errors(t *testing.T) {
+	for i, tc := range []struct {
+		name      string
+		in        config.ConjurePluginConfig
+		wantError string
+	}{
+		{
+			name: "Error for same output directory when conflicts not allowed",
+			in: config.ConjurePluginConfig{
+				AllowConflictingOutputDirs: false,
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+					"project-2": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+				},
+			},
+			wantError: "Projects [project-1 project-2] are configured with the same outputDir \"outputDir\", which may cause conflicts when generating Conjure output",
+		},
+		{
+			name: "Error for parent-child directory relationship when conflicts not allowed",
+			in: config.ConjurePluginConfig{
+				AllowConflictingOutputDirs: false,
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "base/dir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+					"project-2": {
+						OutputDir: "base/dir/nested",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+				},
+			},
+			wantError: "Projects [project-1] (outputDir \"base/dir\") and [project-2] (outputDir \"base/dir/nested\") have a parent-child directory relationship, which may cause conflicts when generating Conjure output",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, gotWarnings, err := tc.in.ToParams()
+			require.Error(t, err, "Case %d", i)
+			assert.EqualError(t, err, tc.wantError, "Case %d", i)
+			assert.Empty(t, gotWarnings, "Case %d", i)
+			assert.Empty(t, got.Params, "Case %d", i)
 		})
 	}
 }

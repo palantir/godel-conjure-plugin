@@ -15,6 +15,7 @@
 package config
 
 import (
+	stderrors "errors"
 	"maps"
 	"net/url"
 	"os"
@@ -118,6 +119,10 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 				warnings = append(warnings, errors.Errorf("Projects %v (outputDir %q) and %v (outputDir %q) have a parent-child directory relationship, which may cause conflicts when generating Conjure output", projects1, dir1, projects2, dir2))
 			}
 		}
+	}
+
+	if !c.AllowConflictingOutputDirs && len(warnings) > 0 {
+		return conjureplugin.ConjureProjectParams{}, nil, stderrors.Join(warnings...)
 	}
 
 	return conjureplugin.ConjureProjectParams{
