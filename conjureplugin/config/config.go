@@ -78,7 +78,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			groupID = currConfig.GroupID
 		}
 
-		publishVal := false
+		var publishVal bool
 		// if value for "publish" is not specified, treat as "true" only if provider generates IR from YAML
 		if currConfig.Publish == nil {
 			publishVal = irProvider.GeneratedFromYAML()
