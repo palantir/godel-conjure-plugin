@@ -414,13 +414,14 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "No warnings for single project",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
@@ -442,20 +443,22 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "No warnings for multiple projects with different output directories",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 					"project-2": {
 						OutputDir: "outputDir-2",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local-2/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
@@ -484,20 +487,22 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "Warning for multiple projects with the same output directory",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 					"project-2": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local-2/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
@@ -528,20 +533,22 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "Warning for multiple projects with the same output directory after normalization",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 					"project-2": {
 						OutputDir: "./outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local-2/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
@@ -572,34 +579,38 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "Multiple warnings for multiple projects with the same output directory after normalization",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"project-1": {
 						OutputDir: "outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 					"project-2": {
 						OutputDir: "./outputDir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local-2/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 					"project-3": {
 						OutputDir: "outputDir-other",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local-3/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 					"project-4": {
 						OutputDir: "outputDir-other/",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeAuto,
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
 							Locator: "local-4/yaml-dir",
 						},
+						OmitTopLevelProjectDir: true,
 					},
 				},
 			},

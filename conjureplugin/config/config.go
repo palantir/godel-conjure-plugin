@@ -64,7 +64,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 
 		// normalize outputDir
-		outputDir = filepath.Clean(currConfig.OutputDir)
+		outputDir = filepath.Clean(outputDir)
 		seenDirs[outputDir] = append(seenDirs[outputDir], key)
 
 		irLocatorConfig := IRLocatorConfig(currConfig.IRLocator)
