@@ -51,7 +51,7 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
 func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, err error) {
 	sortedKeys := slices.Sorted(maps.Keys(c.ProjectConfigs))
 
-	var outputDirs []string
+	seenDirs := make(map[string][]string)
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	for _, key := range sortedKeys {
 		currConfig := c.ProjectConfigs[key]
@@ -64,7 +64,9 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			outputDir = filepath.Join(outputDir, key)
 		}
 
-		outputDirs = append(outputDirs, outputDir)
+		// normalize outputDir
+		outputDir = filepath.Clean(currConfig.OutputDir)
+		seenDirs[outputDir] = append(seenDirs[outputDir], key)
 
 		irLocatorConfig := IRLocatorConfig(currConfig.IRLocator)
 		irProvider, err := (&irLocatorConfig).ToIRProvider()
