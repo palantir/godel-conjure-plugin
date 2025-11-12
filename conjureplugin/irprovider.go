@@ -15,8 +15,9 @@
 package conjureplugin
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
 	"github.com/palantir/pkg/safehttp"
@@ -75,7 +76,7 @@ func (p *urlIRProvider) IRBytes() ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.Errorf("expected response status 200 when fetching IR from remote source %s, but got %d", p.irURL, resp.StatusCode)
 	}
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }
 
 func (p *urlIRProvider) GeneratedFromYAML() bool {
@@ -96,7 +97,7 @@ func NewLocalFileIRProvider(path string) IRProvider {
 }
 
 func (p *localFileIRProvider) IRBytes() ([]byte, error) {
-	return ioutil.ReadFile(p.path)
+	return os.ReadFile(p.path)
 }
 
 func (p *localFileIRProvider) GeneratedFromYAML() bool {

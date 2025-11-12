@@ -17,7 +17,6 @@ package config
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"sort"
@@ -150,7 +149,7 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 }
 
 func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
-	bytes, err := ioutil.ReadFile(f)
+	bytes, err := os.ReadFile(f)
 	if err != nil {
 		return ConjurePluginConfig{}, errors.WithStack(err)
 	}
