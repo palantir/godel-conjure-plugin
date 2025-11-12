@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/palantir/distgo/distgo"
 	gitversioner "github.com/palantir/distgo/projectversioner/git"
@@ -63,7 +63,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 
 	for i, param := range paramsToPublish {
 		key := paramsToPublishKeys[i]
-		currDir := path.Join(tmpDir, fmt.Sprintf("conjure-%s", key))
+		currDir := filepath.Join(tmpDir, fmt.Sprintf("conjure-%s", key))
 		irFileName := fmt.Sprintf("%s-%s.conjure.json", key, version)
 		keyAsDistID := distgo.DistID(key)
 		if err := os.Mkdir(currDir, 0755); err != nil {
@@ -118,7 +118,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		irFilePath := path.Join(directoryPath, irFileName)
+		irFilePath := filepath.Join(directoryPath, irFileName)
 		if err := os.WriteFile(irFilePath, irBytes, 0644); err != nil {
 			return errors.WithStack(err)
 		}
