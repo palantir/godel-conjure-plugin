@@ -653,6 +653,98 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 				"Projects [project-3 project-4] are configured with the same outputDir \"outputDir-other\", which may cause conflicts when generating Conjure output",
 			},
 		},
+		{
+			name: "Warning for parent-child directory relationship",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+					"project-2": {
+						OutputDir: "outputDir/subdir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+					"project-2",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "outputDir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+					"project-2": {
+						OutputDir:   "outputDir/subdir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+				},
+			},
+			wantWarnings: []string{
+				"Projects [project-1] (outputDir \"outputDir\") and [project-2] (outputDir \"outputDir/subdir\") have a parent-child directory relationship, which may cause conflicts when generating Conjure output",
+			},
+		},
+		{
+			name: "Warning for parent-child directory relationship with normalization",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "base/dir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+					"project-2": {
+						OutputDir: "./base/dir/../dir/nested",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+				},
+			},
+			want: conjureplugin.ConjureProjectParams{
+				SortedKeys: []string{
+					"project-1",
+					"project-2",
+				},
+				Params: map[string]conjureplugin.ConjureProjectParam{
+					"project-1": {
+						OutputDir:   "base/dir",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+					"project-2": {
+						OutputDir:   "base/dir/nested",
+						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+						Publish:     true,
+						AcceptFuncs: true,
+					},
+				},
+			},
+			wantWarnings: []string{
+				"Projects [project-1] (outputDir \"base/dir\") and [project-2] (outputDir \"base/dir/nested\") have a parent-child directory relationship, which may cause conflicts when generating Conjure output",
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			got, gotWarnings, err := tc.in.ToParams()

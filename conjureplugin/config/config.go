@@ -56,16 +56,16 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 	for _, key := range sortedKeys {
 		currConfig := c.ProjectConfigs[key]
 		// Calculate the actual output directory
-		rawOutputDir := currConfig.OutputDir
-		if rawOutputDir == "" {
-			rawOutputDir = v2.DefaultOutputDir
+		outputDir := currConfig.OutputDir
+		if outputDir == "" {
+			outputDir = v2.DefaultOutputDir
 		}
 		if !currConfig.OmitTopLevelProjectDir {
-			rawOutputDir = filepath.Join(rawOutputDir, key)
+			outputDir = filepath.Join(outputDir, key)
 		}
 
 		// normalize outputDir
-		outputDir := filepath.Clean(rawOutputDir)
+		outputDir = filepath.Clean(outputDir)
 		seenDirs[outputDir] = append(seenDirs[outputDir], key)
 
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
@@ -90,7 +90,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:                rawOutputDir,
+			OutputDir:                outputDir,
 			IRProvider:               irProvider,
 			AcceptFuncs:              acceptFuncsFlag,
 			Server:                   currConfig.Server,
@@ -101,12 +101,23 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	for _, outputDir := range slices.Sorted(maps.Keys(seenDirs)) {
+	sortedSeenDirs := slices.Sorted(maps.Keys(seenDirs))
+	for _, outputDir := range sortedSeenDirs {
 		projects := seenDirs[outputDir]
 		if len(projects) <= 1 {
 			continue
 		}
 		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
+	}
+
+	for i, dir1 := range sortedSeenDirs {
+		for _, dir2 := range sortedSeenDirs[i+1:] {
+			if isChild(dir1, dir2) || isChild(dir2, dir1) {
+				projects1 := seenDirs[dir1]
+				projects2 := seenDirs[dir2]
+				warnings = append(warnings, errors.Errorf("Projects %v (outputDir %q) and %v (outputDir %q) have a parent-child directory relationship, which may cause conflicts when generating Conjure output", projects1, dir1, projects2, dir2))
+			}
+		}
 	}
 
 	return conjureplugin.ConjureProjectParams{
