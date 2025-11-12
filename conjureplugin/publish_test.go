@@ -19,7 +19,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -40,7 +39,7 @@ func TestPublish(t *testing.T) {
 	require.NoError(t, err)
 	tmpDir, err := ioutil.TempDir(cwd, "TestPublishConjure_")
 	require.NoError(t, err)
-	ymlDir := path.Join(tmpDir, "yml_dir")
+	ymlDir := filepath.Join(tmpDir, "yml_dir")
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
 	defer func() {

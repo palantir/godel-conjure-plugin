@@ -17,7 +17,7 @@ package conjureplugin
 import (
 	"fmt"
 	"io"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/palantir/conjure-go/v6/conjure"
@@ -44,7 +44,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		}
 
 		outputConf := conjure.OutputConfiguration{
-			OutputDir:            path.Join(projectDir, outputDir),
+			OutputDir:            filepath.Join(projectDir, outputDir),
 			GenerateServer:       currParam.Server,
 			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
