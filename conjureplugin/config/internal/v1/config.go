@@ -171,9 +171,9 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 }
 
 func GetConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
-	var warnings []error
+	var errors []error
 
-	sortedOutputDir := slices.Sorted(maps.Keys(outputDirToProjects))
+	sortedOutputDirs := slices.Sorted(maps.Keys(outputDirToProjects))
 	for _, outputDir := range sortedOutputDir {
 		projects := outputDirToProjects[outputDir]
 		if len(projects) <= 1 {
@@ -182,22 +182,36 @@ func GetConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
 		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
 	}
 
-	for i, dir1 := range sortedOutputDir {
-		for _, dir2 := range sortedOutputDir[i+1:] {
-			if isChild(dir1, dir2) || isChild(dir2, dir1) {
-				projects1 := outputDirToProjects[dir1]
-				projects2 := outputDirToProjects[dir2]
-				warnings = append(warnings, errors.Errorf("Projects %v (outputDir %q) and %v (outputDir %q) have a parent-child directory relationship, which may cause conflicts when generating Conjure output", projects1, dir1, projects2, dir2))
+			var parentDir string
+			var subdir string
+			if isChild(dir1, dir2) {
+				parentDir = dir1
+				subdir = dir2
+			} else if isChild(dir2, dir1) {
+				parentDir = dir2
+				subdir = dir1
+			} else {
+				// no subdirectory issues
+				continue
 			}
-		}
-	}
+			warnings = append(warnings, 
+				errors.Errorf(
+					"Projects %v are configured with outputDir %q, which is a subidrectory of the outputDir %q configured for projects %v, which may cause conflicts when generating Conjure output", 
+					outputDirToProjects[subdir],
+					subdir,
+					parentDir,
+					outputDirToProjects[parentDir],
+				),
+			)
 
 	return warnings
 }
 
-// isChild checks if child is a subdirectory of parent.
-// Paths are normalized with filepath.Clean before comparison.
-func isChild(parent, child string) bool {
+// isSubdirectory returns true if potentialSubDir is a subdirectory of parent, false otherwise.
+// This determination is made by normalizing both paths using filepath.Clean and using filepath.Rel to determine if one path
+// is a subdirectory of the other. Returns false if filepath.Rel returns an error (for example, if one path is
+// absolute and the other is relative). Does not resolve symlinks.
+func isSubdirectory(parent, potentialSubDir string) bool {
 	parent = filepath.Clean(parent)
 	child = filepath.Clean(child)
 	rel, err := filepath.Rel(parent, child)

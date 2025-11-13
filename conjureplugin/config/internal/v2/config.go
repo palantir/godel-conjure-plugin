@@ -70,7 +70,7 @@ type SingleConjureConfig struct {
 // 1. Uses OutputDir if specified, otherwise defaults to DefaultOutputDir ("internal/generated/conjure")
 // 2. Appends the projectName subdirectory unless OmitTopLevelProjectDir is true
 // 3. Normalizes the path with filepath.Clean
-func (s SingleConjureConfig) ResolvedOutputDir(projectName string) string {
+func (s *SingleConjureConfig) ResolvedOutputDir(projectName string) string {
 	actualOutputDir := s.OutputDir
 	if actualOutputDir == "" {
 		actualOutputDir = DefaultOutputDir
