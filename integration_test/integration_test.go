@@ -673,6 +673,7 @@ projects:
     ir-locator:
       type: auto
       locator: https://example.com/ir.json
+    skip-delete-generated-files: true
 `,
 				},
 			},

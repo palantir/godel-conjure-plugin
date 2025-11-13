@@ -133,43 +133,14 @@ func (v1proj *SingleConjureConfig) ToV2(projectName string) v2.SingleConjureConf
 	return v2proj
 }
 
-func (v1cfg *ConjurePluginConfig) ToV2Config() v2.ConjurePluginConfig {
-	v2cfg := v2.ConjurePluginConfig{
-		GroupID:                    v1cfg.GroupID,
-		AllowConflictingOutputDirs: true, // In v1, conflicts were warnings not errors
-		ProjectConfigs:             make(map[string]v2.SingleConjureConfig),
-	}
-
-	for name, v1proj := range v1cfg.ProjectConfigs {
-		v2proj := v2.SingleConjureConfig{
-			OutputDir: v1proj.OutputDir,
-			IRLocator: v2.IRLocatorConfig{
-				Type:    v2.LocatorType(v1proj.IRLocator.Type),
-				Locator: v1proj.IRLocator.Locator,
-			},
-			GroupID:     v1proj.GroupID,
-			Publish:     v1proj.Publish,
-			Server:      v1proj.Server,
-			CLI:         v1proj.CLI,
-			AcceptFuncs: v1proj.AcceptFuncs,
-			Extensions:  v1proj.Extensions,
-			// Enable escape valves to preserve exact v1 behavior
-			OmitTopLevelProjectDir:   true, // v1 didn't append project name
-			SkipDeleteGeneratedFiles: true, // v1 didn't clean up old files
-		}
-		v2cfg.ProjectConfigs[name] = v2proj
-	}
-
-	return v2cfg
-}
-
 // ToV2 intelligently converts a v1 config to v2, attempting to use v2 defaults when possible.
 // This is the conversion logic used by UpgradeConfig.
 func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
 	// Create v2 config with intelligent field mapping
 	v2cfg := v2.ConjurePluginConfig{
-		GroupID:        v1cfg.GroupID,
-		ProjectConfigs: make(map[string]v2.SingleConjureConfig),
+		ConfigWithVersion: versionedconfig.ConfigWithVersion{Version: "2"},
+		GroupID:           v1cfg.GroupID,
+		ProjectConfigs:    make(map[string]v2.SingleConjureConfig),
 	}
 
 	// Convert each project using the per-project conversion logic
@@ -231,30 +202,6 @@ func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
 	return v2cfg
 }
 
-// TranslateToV2 translates v1 configuration to v2 for runtime use (enabling forward compatibility).
-// This is separate from UpgradeConfig, which is used by the upgrade-config command and intentionally
-// does NOT upgrade v1 configs. See UpgradeConfig for rationale.
-func TranslateToV2(cfgBytes []byte) ([]byte, error) {
-	// Unmarshal as v1 config
-	var v1cfg ConjurePluginConfig
-	if err := yaml.UnmarshalStrict(cfgBytes, &v1cfg); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal conjure-plugin v1 configuration")
-	}
-
-	// Convert to v2 config
-	v2cfg := v1cfg.ToV2Config()
-	// Note: We intentionally do NOT set v2cfg.Version = "2" here, as this is a runtime translation
-	// and the original config should remain as v1 from the user's perspective.
-
-	// Marshal back to bytes
-	v2bytes, err := yaml.Marshal(v2cfg)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to marshal v2 configuration")
-	}
-
-	return v2bytes, nil
-}
-
 func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 	var v1cfg ConjurePluginConfig
 	if err := yaml.UnmarshalStrict(cfgBytes, &v1cfg); err != nil {
@@ -263,7 +210,9 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 
 	v2cfg := v1cfg.ToV2()
 
-	v2cfg.Version = "2"
+	if v2cfg.Version != "2" {
+		panic("aradinsky, fix this")
+	}
 
 	v2bytes, err := yaml.Marshal(v2cfg)
 	if err != nil {

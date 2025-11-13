@@ -19,6 +19,7 @@ import (
 
 	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
+	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
@@ -195,7 +196,8 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 				},
 			},
 			want: v2.ConjurePluginConfig{
-				GroupID: "com.palantir.test",
+				ConfigWithVersion: versionedconfig.ConfigWithVersion{Version: "2"},
+				GroupID:           "com.palantir.test",
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"api": {
 						IRLocator: v2.IRLocatorConfig{
@@ -230,6 +232,7 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 				},
 			},
 			want: v2.ConjurePluginConfig{
+				ConfigWithVersion:          versionedconfig.ConfigWithVersion{Version: "2"},
 				AllowConflictingOutputDirs: true, // Conflict detected
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"api-v1": {
@@ -274,6 +277,7 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 				},
 			},
 			want: v2.ConjurePluginConfig{
+				ConfigWithVersion: versionedconfig.ConfigWithVersion{Version: "2"},
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"api": {
 						IRLocator: v2.IRLocatorConfig{
@@ -316,6 +320,7 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 				},
 			},
 			want: v2.ConjurePluginConfig{
+				ConfigWithVersion:          versionedconfig.ConfigWithVersion{Version: "2"},
 				AllowConflictingOutputDirs: true, // Parent-child conflict detected
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
 					"parent": {
