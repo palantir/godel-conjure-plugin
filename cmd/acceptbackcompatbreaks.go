@@ -27,7 +27,7 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 	Use:   "accept-backcompat-breaks",
 	Short: "Accept current backward compatibility breaks",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if loadedAssets.ConjureBackcompat != nil {
+		if loadedAssets.ConjureBackcompat == nil {
 			return nil
 		}
 
