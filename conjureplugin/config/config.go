@@ -102,33 +102,43 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	sortedSeenDirs := slices.Sorted(maps.Keys(seenDirs))
-	for _, outputDir := range sortedSeenDirs {
-		projects := seenDirs[outputDir]
-		if len(projects) <= 1 {
-			continue
-		}
-		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
-	}
+	conflicts := getConflictingOutputDirs(seenDirs)
 
-	for i, dir1 := range sortedSeenDirs {
-		for _, dir2 := range sortedSeenDirs[i+1:] {
-			if isChild(dir1, dir2) || isChild(dir2, dir1) {
-				projects1 := seenDirs[dir1]
-				projects2 := seenDirs[dir2]
-				warnings = append(warnings, errors.Errorf("Projects %v (outputDir %q) and %v (outputDir %q) have a parent-child directory relationship, which may cause conflicts when generating Conjure output", projects1, dir1, projects2, dir2))
-			}
-		}
-	}
-
-	if !c.AllowConflictingOutputDirs && len(warnings) > 0 {
-		return conjureplugin.ConjureProjectParams{}, nil, stderrors.Join(warnings...)
+	if !c.AllowConflictingOutputDirs && len(conflicts) > 0 {
+		return conjureplugin.ConjureProjectParams{}, nil, stderrors.Join(conflicts...)
+	} else {
+		warnings = append(warnings, conflicts...)
 	}
 
 	return conjureplugin.ConjureProjectParams{
 		SortedKeys: sortedKeys,
 		Params:     params,
 	}, warnings, nil
+}
+
+func getConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
+	var warnings []error
+
+	sortedOutputDir := slices.Sorted(maps.Keys(outputDirToProjects))
+	for _, outputDir := range sortedOutputDir {
+		projects := outputDirToProjects[outputDir]
+		if len(projects) <= 1 {
+			continue
+		}
+		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
+	}
+
+	for i, dir1 := range sortedOutputDir {
+		for _, dir2 := range sortedOutputDir[i+1:] {
+			if isChild(dir1, dir2) || isChild(dir2, dir1) {
+				projects1 := outputDirToProjects[dir1]
+				projects2 := outputDirToProjects[dir2]
+				warnings = append(warnings, errors.Errorf("Projects %v (outputDir %q) and %v (outputDir %q) have a parent-child directory relationship, which may cause conflicts when generating Conjure output", projects1, dir1, projects2, dir2))
+			}
+		}
+	}
+
+	return warnings
 }
 
 type SingleConjureConfig v2.SingleConjureConfig

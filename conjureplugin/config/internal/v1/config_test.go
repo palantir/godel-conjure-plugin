@@ -47,7 +47,8 @@ func TestSingleConjureConfigToV2(t *testing.T) {
 					Type:    v2.LocatorTypeYAML,
 					Locator: "./conjure/api.yml",
 				},
-				// No escape valves
+				// Always skip delete when converting from v1 to preserve v1 behavior
+				SkipDeleteGeneratedFiles: true,
 			},
 		},
 		{
@@ -161,6 +162,8 @@ func TestSingleConjureConfigToV2(t *testing.T) {
 				Extensions: map[string]any{
 					"foo": "bar",
 				},
+				// Always skip delete when converting from v1 to preserve v1 behavior
+				SkipDeleteGeneratedFiles: true,
 			},
 		},
 	} {
@@ -199,6 +202,8 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 							Type:    v2.LocatorTypeYAML,
 							Locator: "./api.yml",
 						},
+						// Always skip delete when converting from v1 to preserve v1 behavior
+						SkipDeleteGeneratedFiles: true,
 					},
 				},
 				// No AllowConflictingOutputDirs (no conflicts)
@@ -275,12 +280,16 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 							Type:    v2.LocatorTypeYAML,
 							Locator: "./api.yml",
 						},
+						// Always skip delete when converting from v1 to preserve v1 behavior
+						SkipDeleteGeneratedFiles: true,
 					},
 					"backend": {
 						IRLocator: v2.IRLocatorConfig{
 							Type:    v2.LocatorTypeYAML,
 							Locator: "./backend.yml",
 						},
+						// Always skip delete when converting from v1 to preserve v1 behavior
+						SkipDeleteGeneratedFiles: true,
 					},
 				},
 				// No AllowConflictingOutputDirs (no conflicts)
@@ -383,7 +392,8 @@ projects:
 							Type:    v2.LocatorTypeAuto,
 							Locator: "./conjure/api.yml",
 						},
-						// No escape valves
+						// Always skip delete when converting from v1 to preserve v1 behavior
+						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -544,6 +554,8 @@ projects:
 						Extensions: map[string]any{
 							"foo": "bar",
 						},
+						// Always skip delete when converting from v1 to preserve v1 behavior
+						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
