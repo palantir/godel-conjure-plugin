@@ -21,12 +21,13 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v6/assetapi"
 	assetapiinternal "github.com/palantir/godel-conjure-plugin/v6/internal/assetapi"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompatasset"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/cmdutils"
 	pkgerrors "github.com/pkg/errors"
 )
 
 type LoadedAssets struct {
-	ConjureBackcompat            string
+	ConjureBackcompat            backcompatasset.BackCompatChecker
 	ConjureIRExtensionsProviders []string
 }
 
@@ -40,13 +41,13 @@ func LoadAssets(assets []string) (LoadedAssets, error) {
 		return LoadedAssets{}, err
 	}
 
-	var conjureBackCompat string
+	var conjureBackCompat backcompatasset.BackCompatChecker
 	backcompatAssets := assetTypeToAssetsMap[assetapi.ConjureBackcompat]
 	switch len(backcompatAssets) {
 	case 0:
 		// Do nothing
 	case 1:
-		conjureBackCompat = backcompatAssets[0]
+		conjureBackCompat = backcompatasset.New(backcompatAssets[0])
 	default:
 		return LoadedAssets{}, pkgerrors.Errorf(`only 0 or 1 "backcompat" can be configured, detected %d: %v`, len(backcompatAssets), backcompatAssets)
 	}

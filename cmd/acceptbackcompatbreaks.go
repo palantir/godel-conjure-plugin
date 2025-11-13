@@ -19,7 +19,6 @@ import (
 	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompatasset"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -29,10 +28,9 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 	Use:   "accept-backcompat-breaks",
 	Short: "Accept current backward compatibility breaks",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if loadedAssets.ConjureBackcompat == "" {
+		if loadedAssets.ConjureBackcompat != nil {
 			return nil
 		}
-		asset := backcompatasset.New(loadedAssets.ConjureBackcompat)
 
 		projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
 		if err != nil {
@@ -57,7 +55,7 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 				return err
 			}
 
-			return asset.AcceptBackCompatBreaks(param.GroupID, project, file, projectDirFlagVal)
+			return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, file, projectDirFlagVal)
 		}); err != nil {
 			return fmt.Errorf("failed to accept conjure breaks: %w", err)
 		}

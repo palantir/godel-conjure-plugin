@@ -18,7 +18,6 @@ import (
 	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompatasset"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -28,10 +27,9 @@ var backcompatCmd = &cobra.Command{
 	Use:   "backcompat",
 	Short: "Check backward compatibility of Conjure definitions",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if loadedAssets.ConjureBackcompat == "" {
+		if loadedAssets.ConjureBackcompat != nil {
 			return nil
 		}
-		asset := backcompatasset.New(loadedAssets.ConjureBackcompat)
 
 		projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
 		if err != nil {
@@ -56,7 +54,7 @@ var backcompatCmd = &cobra.Command{
 				return err
 			}
 
-			return asset.CheckBackCompat(param.GroupID, project, file, projectDirFlagVal)
+			return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, file, projectDirFlagVal)
 		})
 	},
 }
