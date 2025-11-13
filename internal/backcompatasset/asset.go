@@ -30,9 +30,9 @@ type BackCompatChecker interface {
 	// Any other execution errors are wrapped and returned.
 	CheckBackCompat(groupID, project string, currentIR string, godelProjectDir string) error
 
-	// AcceptBackCompatBreaks runs the asset's backcompat check for the specified project,
-	// but only returns an error if the command fails to execute, not if backcompat breaks are found.
-	// This is used to accept and record the presence of backcompat breaks.
+	// AcceptBackCompatBreaks runs the asset's accept operation for the specified project.
+	// This records/accepts the current state as the baseline for future backcompat checks.
+	// Returns an error only if the operation fails to execute, not based on the presence of breaks.
 	AcceptBackCompatBreaks(groupID, project string, currentIR string, godelProjectDir string) error
 }
 

@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -38,11 +39,15 @@ var backcompatCmd = &cobra.Command{
 			return errors.Wrapf(err, "failed to set working directory")
 		}
 
-		return projectParams.ForEachBackCompatProject(
+		if err := projectParams.ForEachBackCompatProject(
 			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
 				return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal)
 			},
-		)
+		); err != nil {
+			return fmt.Errorf(`failed to check conjure backcompat: %w\nto accept breaks run "./godelw conjure-accept-backcompat-breaks"`, err)
+		}
+
+		return nil
 	},
 }
 
