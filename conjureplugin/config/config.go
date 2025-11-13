@@ -168,31 +168,27 @@ func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
 }
 
 func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
-	// Detect config version
 	version, err := versionedconfig.ConfigVersion(inputBytes)
 	if err != nil {
 		return ConjurePluginConfig{}, errors.WithStack(err)
 	}
 
-	// Handle version-specific loading
-	var v2Bytes []byte
 	switch version {
 	case "", "1":
-		v2Bytes, err = v1.UpgradeConfig(inputBytes)
-		if err != nil {
-			return ConjurePluginConfig{}, errors.Wrapf(err, "failed to translate v1 config to v2")
+		var cfg v1.ConjurePluginConfig
+		if err := yaml.UnmarshalStrict(inputBytes, &cfg); err != nil {
+			return ConjurePluginConfig{}, errors.WithStack(err)
 		}
+
+		return ConjurePluginConfig(cfg.ToV2()), nil
 	case "2":
-		// Already v2, use as-is
-		v2Bytes = inputBytes
+		var cfg v2.ConjurePluginConfig
+		if err := yaml.UnmarshalStrict(inputBytes, &cfg); err != nil {
+			return ConjurePluginConfig{}, errors.WithStack(err)
+		}
+
+		return ConjurePluginConfig(cfg), nil
 	default:
 		return ConjurePluginConfig{}, errors.Errorf("unsupported configuration version: %s", version)
 	}
-
-	// Unmarshal as v2 config
-	var cfg ConjurePluginConfig
-	if err := yaml.UnmarshalStrict(v2Bytes, &cfg); err != nil {
-		return ConjurePluginConfig{}, errors.WithStack(err)
-	}
-	return cfg, nil
 }
