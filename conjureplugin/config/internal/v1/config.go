@@ -92,12 +92,13 @@ func (v1proj *SingleConjureConfig) ToV2(projectName string) v2.SingleConjureConf
 			Type:    v2.LocatorType(v1proj.IRLocator.Type),
 			Locator: v1proj.IRLocator.Locator,
 		},
-		GroupID:     v1proj.GroupID,
-		Publish:     v1proj.Publish,
-		Server:      v1proj.Server,
-		CLI:         v1proj.CLI,
-		AcceptFuncs: v1proj.AcceptFuncs,
-		Extensions:  v1proj.Extensions,
+		GroupID:                  v1proj.GroupID,
+		Publish:                  v1proj.Publish,
+		Server:                   v1proj.Server,
+		CLI:                      v1proj.CLI,
+		AcceptFuncs:              v1proj.AcceptFuncs,
+		Extensions:               v1proj.Extensions,
+		SkipDeleteGeneratedFiles: true,
 	}
 
 	outputDir := v1proj.OutputDir
@@ -116,26 +117,17 @@ func (v1proj *SingleConjureConfig) ToV2(projectName string) v2.SingleConjureConf
 		// we omit output-dir (so it defaults to v2.DefaultOutputDir) and use BOTH escape valves.
 		// (v2proj.OutputDir remains empty)
 		v2proj.OmitTopLevelProjectDir = true
-		v2proj.SkipDeleteGeneratedFiles = true
 	} else if normalizedOutput == filepath.Clean(projectName) {
 		// Case: output-dir matches project name (e.g., "mag-api" for project "mag-api")
 		// Optimization: set output-dir to "." and let v2 append project name
 		// This gives us `./{ProjectName}` which is equivalent to v1 behavior.
 		// We still need skip-delete to be safe, but can enable project name appending.
 		v2proj.OutputDir = "."
-		v2proj.SkipDeleteGeneratedFiles = true
 	} else {
 		// Case: custom output directory (including empty or ".") needs escape valves
 		// to preserve v1 behavior
-		if outputDir == "" || normalizedOutput == "." {
-			// Empty or "." both mean top-level in v1
-			v2proj.OutputDir = "."
-		} else {
-			// Any other custom path
-			v2proj.OutputDir = outputDir
-		}
+		v2proj.OutputDir = normalizedOutput
 		v2proj.OmitTopLevelProjectDir = true
-		v2proj.SkipDeleteGeneratedFiles = true
 	}
 
 	return v2proj
