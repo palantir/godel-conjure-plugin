@@ -44,11 +44,11 @@ func (b BackCompatAsset) CheckBackCompat(
 	godelProjectDir string,
 ) error {
 	cmd := exec.Command(b.asset,
+		"check-backcompat",
 		"--group-id", groupID,
 		"--project", project,
 		"--current-ir", currentIR,
 		"--godel-project-dir", godelProjectDir,
-		"--check-backcompat",
 	)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -74,11 +74,11 @@ func (b BackCompatAsset) AcceptBackCompatBreaks(
 	godelProjectDir string,
 ) error {
 	cmd := exec.Command(b.asset,
+		"accept-backcompat-breaks",
 		"--group-id", groupID,
 		"--project", project,
 		"--current-ir", currentIR,
 		"--godel-project-dir", godelProjectDir,
-		"--check-backcompat",
 	)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
