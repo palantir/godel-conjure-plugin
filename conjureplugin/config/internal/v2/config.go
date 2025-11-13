@@ -65,6 +65,11 @@ type SingleConjureConfig struct {
 	SkipDeleteGeneratedFiles bool `yaml:"skip-delete-generated-files,omitempty"`
 }
 
+// ResolvedOutputDir returns the final output directory path where generated code will be written.
+// It applies the following logic:
+// 1. Uses OutputDir if specified, otherwise defaults to DefaultOutputDir ("internal/generated/conjure")
+// 2. Appends the projectName subdirectory unless OmitTopLevelProjectDir is true
+// 3. Normalizes the path with filepath.Clean
 func (proj SingleConjureConfig) ResolvedOutputDir(projectName string) string {
 	actualOutputDir := proj.OutputDir
 	if actualOutputDir == "" {
