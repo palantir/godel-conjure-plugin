@@ -93,7 +93,7 @@ functionality in defined a defined manner.
 
 ### Conjure Backcompat Asset
 The `"backcompat"` asset type enables backward compatibility checking for Conjure definitions.
-This asset is invoked by the `conjure-backcompat` task (integrated into `./godelw verify`) to verify that Conjure API changes maintain compatibility with publish versions.
+This asset is invoked by the `conjure-backcompat` task (integrated into `./godelw verify`) to verify that Conjure API changes maintain backward compatibility for projects that generate IR from YAML definitions.
 
 See [internal/backcompatasset/asset.go](internal/backcompatasset/asset.go) for the asset invocation specification and wrapper implementation.
 
