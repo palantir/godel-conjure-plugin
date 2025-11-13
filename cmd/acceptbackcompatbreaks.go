@@ -57,7 +57,7 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 
 			return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, file, projectDirFlagVal)
 		}); err != nil {
-			return fmt.Errorf("failed to accept conjure breaks: %w", err)
+			return fmt.Errorf(`failed to accept conjure breaks: %w\nto accept breaks run "./godelw conjure-accept-backcompat-breaks"`, err)
 		}
 
 		return nil

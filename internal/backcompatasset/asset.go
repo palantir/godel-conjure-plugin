@@ -67,7 +67,7 @@ func (b *backCompatCheckerImpl) CheckBackCompat(
 	}
 
 	if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
-		return fmt.Errorf(`conjure breaks found in project %s\nto accept breaks run "./godelw conjure-accept-backcompat-breaks"`, project)
+		return fmt.Errorf(`conjure breaks found in project %s"`, project)
 	}
 
 	return errors.Wrapf(err, "failed to execute check conjure backcompat on project %q", project)
