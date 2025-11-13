@@ -18,7 +18,6 @@ import (
 	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -39,26 +38,11 @@ var backcompatCmd = &cobra.Command{
 			return errors.Wrapf(err, "failed to set working directory")
 		}
 
-		return projectParams.ForEach(func(project string, param conjureplugin.ConjureProjectParam) error {
-			if param.SkipConjureBackcompat {
-				return nil
-			}
-			if !param.IRProvider.GeneratedFromYAML() {
-				return nil
-			}
-
-			bytes, err := param.IRProvider.IRBytes()
-			if err != nil {
-				return err
-			}
-
-			file, err := tempfilecreator.WriteBytesToTempFile(bytes)
-			if err != nil {
-				return err
-			}
-
-			return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, file, projectDirFlagVal)
-		})
+		return projectParams.ForEachBackCompatProject(
+			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
+				return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal)
+			},
+		)
 	},
 }
 

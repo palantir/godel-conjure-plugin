@@ -19,7 +19,6 @@ import (
 	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -40,26 +39,11 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 			return errors.Wrapf(err, "failed to set working directory")
 		}
 
-		if err := projectParams.ForEach(func(project string, param conjureplugin.ConjureProjectParam) error {
-			if param.SkipConjureBackcompat {
-				return nil
-			}
-			if !param.IRProvider.GeneratedFromYAML() {
-				return nil
-			}
-
-			bytes, err := param.IRProvider.IRBytes()
-			if err != nil {
-				return err
-			}
-
-			file, err := tempfilecreator.WriteBytesToTempFile(bytes)
-			if err != nil {
-				return err
-			}
-
-			return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, file, projectDirFlagVal)
-		}); err != nil {
+		if err := projectParams.ForEachBackCompatProject(
+			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
+				return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, irFile, projectDirFlagVal)
+			},
+		); err != nil {
 			return fmt.Errorf(`failed to accept conjure breaks: %w\nto accept breaks run "./godelw conjure-accept-backcompat-breaks"`, err)
 		}
 
