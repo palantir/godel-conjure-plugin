@@ -22,14 +22,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// UpgradeConfig validates and optionally upgrades configuration files.
-//
-// IMPORTANT: v1 configs are validated but NOT automatically upgraded to v2.
-// See v1.UpgradeConfig() for detailed rationale.
-//
-// This behavior is intentional to prevent automated tools (like Excavator running
-// ./godelw update) from blindly converting v1 configs to v2 with escape valves,
-// which would hide the fact that projects haven't truly migrated to v2 standards.
 func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 	if versionedconfig.IsLegacyConfig(cfgBytes) {
 		v0Bytes, err := legacy.UpgradeConfig(cfgBytes)

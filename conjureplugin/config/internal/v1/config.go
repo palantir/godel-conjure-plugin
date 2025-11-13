@@ -15,6 +15,9 @@
 package v1
 
 import (
+	"path/filepath"
+	"strings"
+
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
@@ -83,8 +86,61 @@ func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) err
 	return nil
 }
 
-// ToV2Config converts a v1 config to v2 config with escape valves enabled to preserve v1 behavior.
-// This is used for runtime translation to enable forward compatibility.
+func (v1proj *SingleConjureConfig) ToV2(projectName string) v2.SingleConjureConfig {
+	v2proj := v2.SingleConjureConfig{
+		IRLocator: v2.IRLocatorConfig{
+			Type:    v2.LocatorType(v1proj.IRLocator.Type),
+			Locator: v1proj.IRLocator.Locator,
+		},
+		GroupID:     v1proj.GroupID,
+		Publish:     v1proj.Publish,
+		Server:      v1proj.Server,
+		CLI:         v1proj.CLI,
+		AcceptFuncs: v1proj.AcceptFuncs,
+		Extensions:  v1proj.Extensions,
+	}
+
+	outputDir := v1proj.OutputDir
+
+	normalizedOutput := filepath.Clean(outputDir)
+	v2Default := filepath.Clean(filepath.Join(v2.DefaultOutputDir, projectName))
+
+	if normalizedOutput == v2Default {
+		// Case: output-dir is "internal/generated/conjure/{ProjectName}"
+		// This matches v2 defaults exactly, so omit output-dir entirely
+		// (v2proj.OutputDir remains empty, which defaults to v2.DefaultOutputDir)
+		// No escape valves needed
+	} else if normalizedOutput == filepath.Clean(v2.DefaultOutputDir) {
+		// Case: output-dir is "internal/generated/conjure" (base directory without project name)
+		// In v1 this generated directly to that directory. To preserve this behavior,
+		// we omit output-dir (so it defaults to v2.DefaultOutputDir) and use BOTH escape valves.
+		// (v2proj.OutputDir remains empty)
+		v2proj.OmitTopLevelProjectDir = true
+		v2proj.SkipDeleteGeneratedFiles = true
+	} else if normalizedOutput == filepath.Clean(projectName) {
+		// Case: output-dir matches project name (e.g., "mag-api" for project "mag-api")
+		// Optimization: set output-dir to "." and let v2 append project name
+		// This gives us `./{ProjectName}` which is equivalent to v1 behavior.
+		// We still need skip-delete to be safe, but can enable project name appending.
+		v2proj.OutputDir = "."
+		v2proj.SkipDeleteGeneratedFiles = true
+	} else {
+		// Case: custom output directory (including empty or ".") needs escape valves
+		// to preserve v1 behavior
+		if outputDir == "" || normalizedOutput == "." {
+			// Empty or "." both mean top-level in v1
+			v2proj.OutputDir = "."
+		} else {
+			// Any other custom path
+			v2proj.OutputDir = outputDir
+		}
+		v2proj.OmitTopLevelProjectDir = true
+		v2proj.SkipDeleteGeneratedFiles = true
+	}
+
+	return v2proj
+}
+
 func (v1cfg *ConjurePluginConfig) ToV2Config() v2.ConjurePluginConfig {
 	v2cfg := v2.ConjurePluginConfig{
 		GroupID:                    v1cfg.GroupID,
@@ -115,6 +171,74 @@ func (v1cfg *ConjurePluginConfig) ToV2Config() v2.ConjurePluginConfig {
 	return v2cfg
 }
 
+// ToV2 intelligently converts a v1 config to v2, attempting to use v2 defaults when possible.
+// This is the conversion logic used by UpgradeConfig.
+func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
+	// Create v2 config with intelligent field mapping
+	v2cfg := v2.ConjurePluginConfig{
+		GroupID:        v1cfg.GroupID,
+		ProjectConfigs: make(map[string]v2.SingleConjureConfig),
+	}
+
+	// Convert each project using the per-project conversion logic
+	for projectName, v1proj := range v1cfg.ProjectConfigs {
+		v2cfg.ProjectConfigs[projectName] = v1proj.ToV2(projectName)
+	}
+
+	// Check if we need to allow conflicting output directories.
+	// We detect conflicts the same way ToParams does: exact same directory AND parent-child relationships.
+	// Calculate the actual output directories for each project
+	outputDirs := make(map[string][]string)
+	for projectName, proj := range v2cfg.ProjectConfigs {
+		actualOutputDir := proj.OutputDir
+		if actualOutputDir == "" {
+			actualOutputDir = v2.DefaultOutputDir
+		}
+		if !proj.OmitTopLevelProjectDir {
+			actualOutputDir = filepath.Join(actualOutputDir, projectName)
+		}
+		actualOutputDir = filepath.Clean(actualOutputDir)
+		outputDirs[actualOutputDir] = append(outputDirs[actualOutputDir], projectName)
+	}
+
+	// Check for conflicts: exact same directory or parent-child relationships
+	// (matching v1 behavior where conflicts were warnings, not errors)
+	needsConflictAllowance := false
+
+	// Check for exact same directory
+	for _, projects := range outputDirs {
+		if len(projects) > 1 {
+			needsConflictAllowance = true
+			break
+		}
+	}
+
+	// Check for parent-child directory relationships
+	if !needsConflictAllowance {
+		sortedDirs := make([]string, 0, len(outputDirs))
+		for dir := range outputDirs {
+			sortedDirs = append(sortedDirs, dir)
+		}
+		for i, dir1 := range sortedDirs {
+			for _, dir2 := range sortedDirs[i+1:] {
+				if isChild(dir1, dir2) || isChild(dir2, dir1) {
+					needsConflictAllowance = true
+					break
+				}
+			}
+			if needsConflictAllowance {
+				break
+			}
+		}
+	}
+
+	if needsConflictAllowance {
+		v2cfg.AllowConflictingOutputDirs = true
+	}
+
+	return v2cfg
+}
+
 // TranslateToV2 translates v1 configuration to v2 for runtime use (enabling forward compatibility).
 // This is separate from UpgradeConfig, which is used by the upgrade-config command and intentionally
 // does NOT upgrade v1 configs. See UpgradeConfig for rationale.
@@ -139,40 +263,30 @@ func TranslateToV2(cfgBytes []byte) ([]byte, error) {
 	return v2bytes, nil
 }
 
-// UpgradeConfig validates v1 configuration and returns it unchanged.
-//
-// IMPORTANT: This function intentionally does NOT upgrade v1 configs to v2.
-//
-// Rationale:
-// The upgrade-config command is automatically run during ./godelw update, which is frequently
-// triggered by automated tools like Excavator. We do NOT want to automatically upgrade all
-// v1 configs to v2 because:
-//
-//  1. A mechanical v1→v2 translation with all escape valves enabled (omit-top-level-project-dir: true
-//     and skip-delete-generated-files: true) doesn't solve any of the problems that v2 was designed
-//     to address (orphaned files, output directory conflicts, non-standard placement).
-//
-//  2. Keeping a config as v1 preserves a valuable signal that "this project hasn't been deliberately
-//     migrated to v2 standards yet." A mechanically translated v2 config with escape valves looks
-//     like it has been migrated but actually hasn't, hiding the need for a proper migration.
-//
-//  3. Projects should remain on v1 config until they are ready to adopt v2 standards properly,
-//     either by following the standard conventions or by making a conscious decision to use
-//     escape valves for legitimate reasons.
-//
-// Projects can manually upgrade to v2 when they are ready by either:
-// - Adopting v2 standards (internal/generated/conjure/{ProjectName}/, with cleanup enabled)
-// - Explicitly using escape valves if needed for their specific use case
-//
-// The ToV2Config() method remains available for use by the config loading logic to translate
-// v1 configs to v2 at runtime (enabling forward compatibility), but this upgrade path should
-// not be triggered by the upgrade-config command.
 func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
-	// Validate by attempting to unmarshal
 	var v1cfg ConjurePluginConfig
 	if err := yaml.UnmarshalStrict(cfgBytes, &v1cfg); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal conjure-plugin v1 configuration")
 	}
-	// Return the original bytes unchanged (validated but not upgraded)
-	return cfgBytes, nil
+
+	v2cfg := v1cfg.ToV2()
+
+	v2cfg.Version = "2"
+
+	v2bytes, err := yaml.Marshal(v2cfg)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to marshal upgraded v2 configuration")
+	}
+
+	return v2bytes, nil
+}
+
+// isChild checks if child is a subdirectory of parent.
+// Paths are normalized with filepath.Clean before comparison.
+// todo(aradinsky); depend on the public one
+func isChild(parent, child string) bool {
+	parent = filepath.Clean(parent)
+	child = filepath.Clean(child)
+	rel, err := filepath.Rel(parent, child)
+	return err == nil && !strings.HasPrefix(rel, "..") && rel != "."
 }

@@ -632,24 +632,93 @@ conjure-projects:
 				WantOutput: "",
 			},
 			{
-				Name: "v1 config is validated but not upgraded to v2",
+				Name: "v1 config with custom output-dir upgrades to v2 with escape valves",
 				ConfigFiles: map[string]string{
 					"godel/config/conjure-plugin.yml": `version: 1
 projects:
   sls-health-api:
-    # comment
     output-dir: conjure
     ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
 `,
 				},
-				WantOutput: "",
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
 				WantFiles: map[string]string{
-					"godel/config/conjure-plugin.yml": `version: 1
+					"godel/config/conjure-plugin.yml": `version: "2"
 projects:
   sls-health-api:
-    # comment
     output-dir: conjure
-    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+    ir-locator:
+      type: auto
+      locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config matching v2 defaults upgrades to clean v2",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  myproject:
+    output-dir: internal/generated/conjure/myproject
+    ir-locator: https://example.com/ir.json
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+projects:
+  myproject:
+    ir-locator:
+      type: auto
+      locator: https://example.com/ir.json
+`,
+				},
+			},
+			{
+				Name: "v1 config with base internal/generated/conjure upgrades with escape valves",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  api:
+    output-dir: internal/generated/conjure
+    ir-locator: ./conjure/api.yml
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+projects:
+  api:
+    ir-locator:
+      type: auto
+      locator: ./conjure/api.yml
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config where output-dir matches project name upgrades cleanly",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  mag-api:
+    output-dir: mag-api
+    ir-locator: ./conjure/mag-api.yml
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+projects:
+  mag-api:
+    output-dir: .
+    ir-locator:
+      type: auto
+      locator: ./conjure/mag-api.yml
+    skip-delete-generated-files: true
 `,
 				},
 			},
