@@ -352,6 +352,101 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 	}
 }
 
+func TestConjurePluginConfigToV2_AllowConflictingOutputDirs(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		v1cfg v1.ConjurePluginConfig
+		want  bool // want AllowConflictingOutputDirs value
+	}{
+		{
+			name: "single project - no conflicts, defaults to false",
+			v1cfg: v1.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"api": {
+						OutputDir: "internal/generated/conjure/api",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeYAML,
+							Locator: "./api.yml",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "multiple projects with different output dirs - no conflicts, defaults to false",
+			v1cfg: v1.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"api": {
+						OutputDir: "internal/generated/conjure/api",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeYAML,
+							Locator: "./api.yml",
+						},
+					},
+					"backend": {
+						OutputDir: "internal/generated/conjure/backend",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeYAML,
+							Locator: "./backend.yml",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "multiple projects with same output dir - has conflicts, sets to true",
+			v1cfg: v1.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"api-v1": {
+						OutputDir: "shared",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeYAML,
+							Locator: "./api-v1.yml",
+						},
+					},
+					"api-v2": {
+						OutputDir: "shared",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeYAML,
+							Locator: "./api-v2.yml",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "multiple projects with parent-child dirs - has conflicts, sets to true",
+			v1cfg: v1.ConjurePluginConfig{
+				ProjectConfigs: map[string]v1.SingleConjureConfig{
+					"parent": {
+						OutputDir: "generated",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeYAML,
+							Locator: "./parent.yml",
+						},
+					},
+					"child": {
+						OutputDir: "generated/subdir",
+						IRLocator: v1.IRLocatorConfig{
+							Type:    v1.LocatorTypeYAML,
+							Locator: "./child.yml",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got := tc.v1cfg.ToV2()
+			assert.Equal(t, tc.want, got.AllowConflictingOutputDirs, "AllowConflictingOutputDirs should be %v", tc.want)
+		})
+	}
+}
+
 func TestUpgradeConfig(t *testing.T) {
 	for _, tc := range []struct {
 		name     string
