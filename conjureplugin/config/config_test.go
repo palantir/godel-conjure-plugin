@@ -820,6 +820,70 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 			},
 			wantError: "Projects [project-2] are configured with outputDir \"base/dir/nested\", which is a subdirectory of the outputDir \"base/dir\" configured for projects [project-1], which may cause conflicts when generating Conjure output",
 		},
+		{
+			name: "Error for invalid project name with forward slash",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project/invalid": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+				},
+			},
+			wantError: `project name "project/invalid" cannot contain path separators (/ or \)`,
+		},
+		{
+			name: "Error for invalid project name with backslash",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project\\invalid": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+				},
+			},
+			wantError: `project name "project\\invalid" cannot contain path separators (/ or \)`,
+		},
+		{
+			name: "Error for project name that is dot",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					".": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+				},
+			},
+			wantError: `project name cannot be "."`,
+		},
+		{
+			name: "Error for project name that is double dot",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"..": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir: true,
+					},
+				},
+			},
+			wantError: `project name cannot be ".."`,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			got, gotWarnings, err := tc.in.ToParams()

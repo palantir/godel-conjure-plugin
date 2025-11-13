@@ -78,3 +78,17 @@ func isSubdirectory(parent, potentialSubDir string) bool {
 	rel, err := filepath.Rel(parent, potentialSubDir)
 	return err == nil && !strings.HasPrefix(rel, "..") && rel != "."
 }
+
+// ValidateProjectName validates that a project name is safe to use as part of a file path.
+// Returns an error if:
+// - The name contains forward slashes (/) or backslashes (\)
+// - The name is "." or ".."
+func ValidateProjectName(projectName string) error {
+	if strings.Contains(projectName, "/") || strings.Contains(projectName, "\\") {
+		return errors.Errorf("project name %q cannot contain path separators (/ or \\)", projectName)
+	}
+	if projectName == "." || projectName == ".." {
+		return errors.Errorf("project name cannot be %q", projectName)
+	}
+	return nil
+}

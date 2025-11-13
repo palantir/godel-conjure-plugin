@@ -53,6 +53,10 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 	seenDirs := make(map[string][]string)
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	for _, key := range sortedKeys {
+		if err := validate.ValidateProjectName(key); err != nil {
+			return conjureplugin.ConjureProjectParams{}, nil, err
+		}
+
 		currConfig := c.ProjectConfigs[key]
 
 		outputDir := currConfig.ResolvedOutputDir(key)

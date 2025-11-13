@@ -811,3 +811,168 @@ projects:
 [WARNING]: Projects [project-3 project-4] are configured with the same outputDir "conjure-output-2", which may cause conflicts when generating Conjure output
 `, outputBuf.String())
 }
+
+func TestSkipDeleteGeneratedFiles(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.conjure.test.api
+    objects:
+      TestCase:
+        fields:
+          name: string
+`
+		yamlDir = "yamlDir"
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	defer cleanup()
+
+	ymlDir := filepath.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+
+	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	require.NoError(t, err)
+
+	t.Run("skip-delete-generated-files=false deletes old generated files", func(t *testing.T) {
+		// Create config with skip-delete-generated-files: false (explicit)
+		conjureYML := `version: 2
+projects:
+  test-project:
+    output-dir: conjure-output
+    omit-top-level-project-dir: true
+    ir-locator: ` + yamlDir + `
+    skip-delete-generated-files: false
+`
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+		require.NoError(t, err)
+
+		// First generation
+		outputBuf := &bytes.Buffer{}
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify file was generated
+		generatedFilePath := filepath.Join(projectDir, "conjure-output", "conjure", "test", "api", "structs.conjure.go")
+		originalContent, err := os.ReadFile(generatedFilePath)
+		require.NoError(t, err)
+		require.Contains(t, string(originalContent), "type TestCase struct")
+
+		// Create an additional conjure file that should be deleted
+		oldFilePath := filepath.Join(projectDir, "conjure-output", "conjure", "test", "api", "oldfile.conjure.go")
+		err = os.WriteFile(oldFilePath, []byte("// This is an old generated file\npackage api"), 0644)
+		require.NoError(t, err)
+
+		// Modify the generated file to verify it gets regenerated
+		err = os.WriteFile(generatedFilePath, []byte("// MODIFIED CONTENT"), 0644)
+		require.NoError(t, err)
+
+		// Second generation - should delete old files and regenerate
+		outputBuf = &bytes.Buffer{}
+		runPluginCleanup, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify the old file was deleted
+		_, err = os.Stat(oldFilePath)
+		assert.True(t, os.IsNotExist(err), "expected old conjure file to be deleted")
+
+		// Verify the modified file was regenerated (not preserved)
+		newContent, err := os.ReadFile(generatedFilePath)
+		require.NoError(t, err)
+		assert.NotEqual(t, "// MODIFIED CONTENT", string(newContent), "expected file to be regenerated, not preserved")
+		assert.Contains(t, string(newContent), "type TestCase struct", "expected regenerated file to contain correct content")
+	})
+
+	t.Run("skip-delete-generated-files=true preserves existing generated files", func(t *testing.T) {
+		// Create config with skip-delete-generated-files: true
+		conjureYML := `version: 2
+projects:
+  test-project:
+    output-dir: conjure-output2
+    omit-top-level-project-dir: true
+    ir-locator: ` + yamlDir + `
+    skip-delete-generated-files: true
+`
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+		require.NoError(t, err)
+
+		// First generation
+		outputBuf := &bytes.Buffer{}
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify file was generated
+		generatedFilePath := filepath.Join(projectDir, "conjure-output2", "conjure", "test", "api", "structs.conjure.go")
+		originalContent, err := os.ReadFile(generatedFilePath)
+		require.NoError(t, err)
+		require.Contains(t, string(originalContent), "type TestCase struct")
+
+		// Create an additional conjure file that should NOT be deleted
+		oldFilePath := filepath.Join(projectDir, "conjure-output2", "conjure", "test", "api", "oldfile.conjure.go")
+		oldFileContent := "// This is an old generated file\npackage api"
+		err = os.WriteFile(oldFilePath, []byte(oldFileContent), 0644)
+		require.NoError(t, err)
+
+		// Second generation - should NOT delete old files (v1 behavior)
+		outputBuf = &bytes.Buffer{}
+		runPluginCleanup, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify the old file was NOT deleted (preserved)
+		preservedContent, err := os.ReadFile(oldFilePath)
+		require.NoError(t, err, "expected old conjure file to be preserved")
+		assert.Equal(t, oldFileContent, string(preservedContent), "expected old file content to be unchanged")
+
+		// Verify the main file was still regenerated
+		newContent, err := os.ReadFile(generatedFilePath)
+		require.NoError(t, err)
+		assert.Contains(t, string(newContent), "type TestCase struct", "expected main file to be regenerated")
+	})
+
+	t.Run("default behavior (omitted) deletes old generated files", func(t *testing.T) {
+		// Create config WITHOUT skip-delete-generated-files (should default to false)
+		conjureYML := `version: 2
+projects:
+  test-project:
+    output-dir: conjure-output3
+    omit-top-level-project-dir: true
+    ir-locator: ` + yamlDir + `
+`
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+		require.NoError(t, err)
+
+		// First generation
+		outputBuf := &bytes.Buffer{}
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Create an old file that should be deleted by default
+		oldFilePath := filepath.Join(projectDir, "conjure-output3", "conjure", "test", "api", "oldfile.conjure.go")
+		err = os.WriteFile(oldFilePath, []byte("// This is an old generated file\npackage api"), 0644)
+		require.NoError(t, err)
+
+		// Second generation - should delete old files (default behavior)
+		outputBuf = &bytes.Buffer{}
+		runPluginCleanup, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify the old file was deleted (default is false)
+		_, err = os.Stat(oldFilePath)
+		assert.True(t, os.IsNotExist(err), "expected old conjure file to be deleted by default")
+	})
+}
