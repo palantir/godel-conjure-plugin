@@ -20,7 +20,6 @@ import (
 	"slices"
 	"strings"
 
-	// "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
@@ -104,31 +103,23 @@ func (v1proj *SingleConjureConfig) ToV2(projectName string) v2.SingleConjureConf
 		SkipDeleteGeneratedFiles: true,
 	}
 
-	outputDir := v1proj.OutputDir
-
-	normalizedOutput := filepath.Clean(outputDir)
+	normalizedOutput := filepath.Clean(v1proj.OutputDir)
 	v2Default := filepath.Clean(filepath.Join(v2.DefaultOutputDir, projectName))
 
 	if normalizedOutput == v2Default {
-		// Case: output-dir is "internal/generated/conjure/{ProjectName}"
-		// This matches v2 defaults exactly, so omit output-dir entirely
-		// (v2proj.OutputDir remains empty, which defaults to v2.DefaultOutputDir)
-		// No escape valves needed
+		// v1 output matches v2 default (internal/generated/conjure/{projectName}).
+		// Leave OutputDir empty to use v2's default, with OmitTopLevelProjectDir=false.
 	} else if normalizedOutput == filepath.Clean(v2.DefaultOutputDir) {
-		// Case: output-dir is "internal/generated/conjure" (base directory without project name)
-		// In v1 this generated directly to that directory. To preserve this behavior,
-		// we omit output-dir (so it defaults to v2.DefaultOutputDir) and use BOTH escape valves.
-		// (v2proj.OutputDir remains empty)
+		// v1 output is internal/generated/conjure (no project subdirectory).
+		// Leave OutputDir empty to use v2's default, but set OmitTopLevelProjectDir=true.
 		v2proj.OmitTopLevelProjectDir = true
 	} else if normalizedOutput == filepath.Clean(projectName) {
-		// Case: output-dir matches project name (e.g., "mag-api" for project "mag-api")
-		// Optimization: set output-dir to "." and let v2 append project name
-		// This gives us `./{ProjectName}` which is equivalent to v1 behavior.
-		// We still need skip-delete to be safe, but can enable project name appending.
+		// v1 output is just the project name as a directory.
+		// Set OutputDir to "." and don't omit project dir to get ./{projectName}.
 		v2proj.OutputDir = "."
 	} else {
-		// Case: custom output directory (including empty or ".") needs escape valves
-		// to preserve v1 behavior
+		// v1 output is a custom path that doesn't match any v2 convention.
+		// Set OutputDir to the custom path and omit the project subdirectory.
 		v2proj.OutputDir = normalizedOutput
 		v2proj.OmitTopLevelProjectDir = true
 	}
@@ -166,23 +157,17 @@ func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
 }
 
 func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
-	var v1cfg ConjurePluginConfig
-	if err := yaml.UnmarshalStrict(cfgBytes, &v1cfg); err != nil {
+	var cfg ConjurePluginConfig
+	if err := yaml.UnmarshalStrict(cfgBytes, &cfg); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal conjure-plugin v1 configuration")
 	}
 
-	v2cfg := v1cfg.ToV2()
-
-	if v2cfg.Version != "2" {
-		panic("aradinsky, fix this")
-	}
-
-	v2bytes, err := yaml.Marshal(v2cfg)
+	cfgBytes, err := yaml.Marshal(cfg.ToV2())
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to marshal upgraded v2 configuration")
 	}
 
-	return v2bytes, nil
+	return cfgBytes, nil
 }
 
 func GetConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
