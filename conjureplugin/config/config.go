@@ -19,7 +19,6 @@ import (
 	"maps"
 	"net/url"
 	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 
@@ -56,17 +55,8 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	for _, key := range sortedKeys {
 		currConfig := c.ProjectConfigs[key]
-		// Calculate the actual output directory
-		outputDir := currConfig.OutputDir
-		if outputDir == "" {
-			outputDir = v2.DefaultOutputDir
-		}
-		if !currConfig.OmitTopLevelProjectDir {
-			outputDir = filepath.Join(outputDir, key)
-		}
 
-		// normalize outputDir
-		outputDir = filepath.Clean(outputDir)
+		outputDir := currConfig.ResolvedOutputDir(key)
 		seenDirs[outputDir] = append(seenDirs[outputDir], key)
 
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
@@ -102,7 +92,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	conflicts := getConflictingOutputDirs(seenDirs)
+	conflicts := v1.GetConflictingOutputDirs(seenDirs)
 
 	if !c.AllowConflictingOutputDirs && len(conflicts) > 0 {
 		return conjureplugin.ConjureProjectParams{}, nil, stderrors.Join(conflicts...)
@@ -114,31 +104,6 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		SortedKeys: sortedKeys,
 		Params:     params,
 	}, warnings, nil
-}
-
-func getConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
-	var warnings []error
-
-	sortedOutputDir := slices.Sorted(maps.Keys(outputDirToProjects))
-	for _, outputDir := range sortedOutputDir {
-		projects := outputDirToProjects[outputDir]
-		if len(projects) <= 1 {
-			continue
-		}
-		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
-	}
-
-	for i, dir1 := range sortedOutputDir {
-		for _, dir2 := range sortedOutputDir[i+1:] {
-			if isChild(dir1, dir2) || isChild(dir2, dir1) {
-				projects1 := outputDirToProjects[dir1]
-				projects2 := outputDirToProjects[dir2]
-				warnings = append(warnings, errors.Errorf("Projects %v (outputDir %q) and %v (outputDir %q) have a parent-child directory relationship, which may cause conflicts when generating Conjure output", projects1, dir1, projects2, dir2))
-			}
-		}
-	}
-
-	return warnings
 }
 
 type SingleConjureConfig v2.SingleConjureConfig
@@ -232,13 +197,4 @@ func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
 		return ConjurePluginConfig{}, errors.WithStack(err)
 	}
 	return cfg, nil
-}
-
-// isChild checks if child is a subdirectory of parent.
-// Paths are normalized with filepath.Clean before comparison.
-func isChild(parent, child string) bool {
-	parent = filepath.Clean(parent)
-	child = filepath.Clean(child)
-	rel, err := filepath.Rel(parent, child)
-	return err == nil && !strings.HasPrefix(rel, "..") && rel != "."
 }

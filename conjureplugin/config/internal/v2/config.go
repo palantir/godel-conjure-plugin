@@ -15,6 +15,8 @@
 package v2
 
 import (
+	"path/filepath"
+
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -61,6 +63,17 @@ type SingleConjureConfig struct {
 	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
 	// When true, preserves v1 behavior (no cleanup).
 	SkipDeleteGeneratedFiles bool `yaml:"skip-delete-generated-files,omitempty"`
+}
+
+func (proj SingleConjureConfig) ResolvedOutputDir(projectName string) string {
+	actualOutputDir := proj.OutputDir
+	if actualOutputDir == "" {
+		actualOutputDir = DefaultOutputDir
+	}
+	if !proj.OmitTopLevelProjectDir {
+		actualOutputDir = filepath.Join(actualOutputDir, projectName)
+	}
+	return filepath.Clean(actualOutputDir)
 }
 
 type LocatorType string

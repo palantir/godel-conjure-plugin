@@ -15,9 +15,12 @@
 package v1
 
 import (
+	"maps"
 	"path/filepath"
+	"slices"
 	"strings"
 
+	// "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
@@ -153,51 +156,11 @@ func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
 	// Calculate the actual output directories for each project
 	outputDirs := make(map[string][]string)
 	for projectName, proj := range v2cfg.ProjectConfigs {
-		actualOutputDir := proj.OutputDir
-		if actualOutputDir == "" {
-			actualOutputDir = v2.DefaultOutputDir
-		}
-		if !proj.OmitTopLevelProjectDir {
-			actualOutputDir = filepath.Join(actualOutputDir, projectName)
-		}
-		actualOutputDir = filepath.Clean(actualOutputDir)
-		outputDirs[actualOutputDir] = append(outputDirs[actualOutputDir], projectName)
+		resolvedOutputDir := proj.ResolvedOutputDir(projectName)
+		outputDirs[resolvedOutputDir] = append(outputDirs[resolvedOutputDir], projectName)
 	}
 
-	// Check for conflicts: exact same directory or parent-child relationships
-	// (matching v1 behavior where conflicts were warnings, not errors)
-	needsConflictAllowance := false
-
-	// Check for exact same directory
-	for _, projects := range outputDirs {
-		if len(projects) > 1 {
-			needsConflictAllowance = true
-			break
-		}
-	}
-
-	// Check for parent-child directory relationships
-	if !needsConflictAllowance {
-		sortedDirs := make([]string, 0, len(outputDirs))
-		for dir := range outputDirs {
-			sortedDirs = append(sortedDirs, dir)
-		}
-		for i, dir1 := range sortedDirs {
-			for _, dir2 := range sortedDirs[i+1:] {
-				if isChild(dir1, dir2) || isChild(dir2, dir1) {
-					needsConflictAllowance = true
-					break
-				}
-			}
-			if needsConflictAllowance {
-				break
-			}
-		}
-	}
-
-	if needsConflictAllowance {
-		v2cfg.AllowConflictingOutputDirs = true
-	}
+	v2cfg.AllowConflictingOutputDirs = len(GetConflictingOutputDirs(outputDirs)) > 0
 
 	return v2cfg
 }
@@ -222,9 +185,33 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 	return v2bytes, nil
 }
 
+func GetConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
+	var warnings []error
+
+	sortedOutputDir := slices.Sorted(maps.Keys(outputDirToProjects))
+	for _, outputDir := range sortedOutputDir {
+		projects := outputDirToProjects[outputDir]
+		if len(projects) <= 1 {
+			continue
+		}
+		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
+	}
+
+	for i, dir1 := range sortedOutputDir {
+		for _, dir2 := range sortedOutputDir[i+1:] {
+			if isChild(dir1, dir2) || isChild(dir2, dir1) {
+				projects1 := outputDirToProjects[dir1]
+				projects2 := outputDirToProjects[dir2]
+				warnings = append(warnings, errors.Errorf("Projects %v (outputDir %q) and %v (outputDir %q) have a parent-child directory relationship, which may cause conflicts when generating Conjure output", projects1, dir1, projects2, dir2))
+			}
+		}
+	}
+
+	return warnings
+}
+
 // isChild checks if child is a subdirectory of parent.
 // Paths are normalized with filepath.Clean before comparison.
-// todo(aradinsky); depend on the public one
 func isChild(parent, child string) bool {
 	parent = filepath.Clean(parent)
 	child = filepath.Clean(child)
