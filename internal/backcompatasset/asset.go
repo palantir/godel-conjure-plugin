@@ -22,23 +22,31 @@ import (
 	"github.com/pkg/errors"
 )
 
-// BackCompatAsset represents a wrapper around a backcompat asset executable.
-type BackCompatAsset struct {
+// BackCompatChecker represents a wrapper around a backcompat asset executable.
+type BackCompatChecker interface {
+	// CheckBackCompat runs the asset's backcompat check for the specified project.
+	// It executes the asset as a command-line tool with the relevant arguments.
+	// If the command exits with code 1, it indicates backcompat breaks were found and returns an error specific to that case.
+	// Any other execution errors are wrapped and returned.
+	CheckBackCompat(groupID, project string, currentIR string, godelProjectDir string) error
+
+	// AcceptBackCompatBreaks runs the asset's backcompat check for the specified project,
+	// but only returns an error if the command fails to execute, not if backcompat breaks are found.
+	// This is used to accept and record the presence of backcompat breaks.
+	AcceptBackCompatBreaks(groupID, project string, currentIR string, godelProjectDir string) error
+}
+
+type backCompatCheckerImpl struct {
 	asset string
 }
 
-// New constructs a new BackCompatAsset with the provided asset path.
-func New(asset string) BackCompatAsset {
-	return BackCompatAsset{
+func New(asset string) BackCompatChecker {
+	return &backCompatCheckerImpl{
 		asset: asset,
 	}
 }
 
-// CheckBackCompat runs the asset's backcompat check for the specified project.
-// It executes the asset as a command-line tool with the relevant arguments.
-// If the command exits with code 1, it indicates backcompat breaks were found and returns an error specific to that case.
-// Any other execution errors are wrapped and returned.
-func (b BackCompatAsset) CheckBackCompat(
+func (b *backCompatCheckerImpl) CheckBackCompat(
 	groupID, project string,
 	currentIR string,
 	godelProjectDir string,
@@ -65,10 +73,7 @@ func (b BackCompatAsset) CheckBackCompat(
 	return errors.Wrapf(err, "failed to execute check conjure backcompat on project %q", project)
 }
 
-// AcceptBackCompatBreaks runs the asset's backcompat check for the specified project,
-// but only returns an error if the command fails to execute, not if backcompat breaks are found.
-// This is used to accept and record the presence of backcompat breaks.
-func (b BackCompatAsset) AcceptBackCompatBreaks(
+func (b *backCompatCheckerImpl) AcceptBackCompatBreaks(
 	groupID, project string,
 	currentIR string,
 	godelProjectDir string,
