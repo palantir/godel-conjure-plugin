@@ -16,7 +16,7 @@ package backcompatasset
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"os/exec"
 
 	"github.com/pkg/errors"
@@ -37,12 +37,19 @@ type BackCompatChecker interface {
 }
 
 type backCompatCheckerImpl struct {
-	asset string
+	asset  string
+	stdout io.Writer
+	stderr io.Writer
 }
 
-func New(asset string) BackCompatChecker {
+func New(
+	asset string,
+	stdout, stderr io.Writer,
+) BackCompatChecker {
 	return &backCompatCheckerImpl{
-		asset: asset,
+		asset:  asset,
+		stdout: stdout,
+		stderr: stderr,
 	}
 }
 
@@ -58,8 +65,8 @@ func (b *backCompatCheckerImpl) CheckBackCompat(
 		"--current-ir", currentIR,
 		"--godel-project-dir", godelProjectDir,
 	)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = b.stdout
+	cmd.Stderr = b.stderr
 
 	err := cmd.Run()
 	if err == nil {
@@ -85,8 +92,8 @@ func (b *backCompatCheckerImpl) AcceptBackCompatBreaks(
 		"--current-ir", currentIR,
 		"--godel-project-dir", godelProjectDir,
 	)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = b.stdout
+	cmd.Stderr = b.stderr
 
 	if err := cmd.Run(); err != nil {
 		return errors.Wrapf(err, "failed to execute accept conjure backcompat breaks on project %q", project)
