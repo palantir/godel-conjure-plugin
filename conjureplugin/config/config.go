@@ -173,15 +173,21 @@ func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
 		return ConjurePluginConfig{}, errors.WithStack(err)
 	}
 
-	configBytes, err := UpgradeConfig(inputBytes)
-	if err != nil {
-		return ConjurePluginConfig{}, errors.Wrapf(err, "failed to upgrade configuration")
-	}
-	var cfg v2.ConjurePluginConfig
-	if err := yaml.UnmarshalStrict(configBytes, &cfg); err != nil {
-		return ConjurePluginConfig{}, errors.WithStack(err)
-	}
+	switch version {
+	case "", "1":
+		var cfg v1.ConjurePluginConfig
+		if err := yaml.UnmarshalStrict(inputBytes, &cfg); err != nil {
+			return ConjurePluginConfig{}, errors.WithStack(err)
+		}
 
-	return ConjurePluginConfig(cfg), nil
+		return ConjurePluginConfig(cfg.ToV2()), nil
+	case "2":
+		var cfg v2.ConjurePluginConfig
+		if err := yaml.UnmarshalStrict(inputBytes, &cfg); err != nil {
+			return ConjurePluginConfig{}, errors.WithStack(err)
+		}
+		return ConjurePluginConfig(cfg), nil
+	default:
+		return ConjurePluginConfig{}, errors.Errorf("unsupported configuration version: %s", version)
 	}
 }

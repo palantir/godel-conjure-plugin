@@ -700,7 +700,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 				},
 			},
 			wantWarnings: []string{
-				"Projects [project-1] (outputDir \"outputDir\") and [project-2] (outputDir \"outputDir/subdir\") have a parent-child directory relationship, which may cause conflicts when generating Conjure output",
+				"Projects [project-2] are configured with outputDir \"outputDir/subdir\", which is a subdirectory of the outputDir \"outputDir\" configured for projects [project-1], which may cause conflicts when generating Conjure output",
 			},
 		},
 		{
@@ -747,7 +747,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 				},
 			},
 			wantWarnings: []string{
-				"Projects [project-1] (outputDir \"base/dir\") and [project-2] (outputDir \"base/dir/nested\") have a parent-child directory relationship, which may cause conflicts when generating Conjure output",
+				"Projects [project-2] are configured with outputDir \"base/dir/nested\", which is a subdirectory of the outputDir \"base/dir\" configured for projects [project-1], which may cause conflicts when generating Conjure output",
 			},
 		},
 	} {
@@ -818,7 +818,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "Projects [project-1] (outputDir \"base/dir\") and [project-2] (outputDir \"base/dir/nested\") have a parent-child directory relationship, which may cause conflicts when generating Conjure output",
+			wantError: "Projects [project-2] are configured with outputDir \"base/dir/nested\", which is a subdirectory of the outputDir \"base/dir\" configured for projects [project-1], which may cause conflicts when generating Conjure output",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

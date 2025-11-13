@@ -171,10 +171,10 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 }
 
 func GetConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
-	var errors []error
+	var warnings []error
 
 	sortedOutputDirs := slices.Sorted(maps.Keys(outputDirToProjects))
-	for _, outputDir := range sortedOutputDir {
+	for _, outputDir := range sortedOutputDirs {
 		projects := outputDirToProjects[outputDir]
 		if len(projects) <= 1 {
 			continue
@@ -182,27 +182,31 @@ func GetConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
 		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
 	}
 
+	for i, dir1 := range sortedOutputDirs {
+		for _, dir2 := range sortedOutputDirs[i+1:] {
 			var parentDir string
 			var subdir string
-			if isChild(dir1, dir2) {
+			if isSubdirectory(dir1, dir2) {
 				parentDir = dir1
 				subdir = dir2
-			} else if isChild(dir2, dir1) {
+			} else if isSubdirectory(dir2, dir1) {
 				parentDir = dir2
 				subdir = dir1
 			} else {
 				// no subdirectory issues
 				continue
 			}
-			warnings = append(warnings, 
+			warnings = append(warnings,
 				errors.Errorf(
-					"Projects %v are configured with outputDir %q, which is a subidrectory of the outputDir %q configured for projects %v, which may cause conflicts when generating Conjure output", 
+					"Projects %v are configured with outputDir %q, which is a subdirectory of the outputDir %q configured for projects %v, which may cause conflicts when generating Conjure output",
 					outputDirToProjects[subdir],
 					subdir,
 					parentDir,
 					outputDirToProjects[parentDir],
 				),
 			)
+		}
+	}
 
 	return warnings
 }
@@ -213,7 +217,7 @@ func GetConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
 // absolute and the other is relative). Does not resolve symlinks.
 func isSubdirectory(parent, potentialSubDir string) bool {
 	parent = filepath.Clean(parent)
-	child = filepath.Clean(child)
-	rel, err := filepath.Rel(parent, child)
+	potentialSubDir = filepath.Clean(potentialSubDir)
+	rel, err := filepath.Rel(parent, potentialSubDir)
 	return err == nil && !strings.HasPrefix(rel, "..") && rel != "."
 }
