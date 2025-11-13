@@ -729,9 +729,11 @@ projects:
 					"godel/config/conjure-plugin.yml": `version: 2
 projects:
   sls-health-api:
+    omit-top-level-project-dir:  true
     # comment
     output-dir: internal/generated/conjure
     ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+allow-conflicting-output-dirs: false
 `,
 				},
 				WantOutput: "",
@@ -739,9 +741,11 @@ projects:
 					"godel/config/conjure-plugin.yml": `version: 2
 projects:
   sls-health-api:
+    omit-top-level-project-dir:  true
     # comment
     output-dir: internal/generated/conjure
     ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+allow-conflicting-output-dirs: false
 `,
 				},
 			},
