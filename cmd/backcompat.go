@@ -26,7 +26,7 @@ var backcompatCmd = &cobra.Command{
 	Use:   "backcompat",
 	Short: "Check backward compatibility of Conjure definitions",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if loadedAssets.ConjureBackcompat != nil {
+		if loadedAssets.ConjureBackcompat == nil {
 			return nil
 		}
 
