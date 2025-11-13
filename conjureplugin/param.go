@@ -45,6 +45,8 @@ type ConjureProjectParam struct {
 	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
+	// SkipConjureBackcompat specifies whether or not backcompat checks should be skipped for this Conjure project.
+	SkipConjureBackcompat bool
 }
 
 // ForEach iterates over all project parameters in the order specified by SortedKeys,

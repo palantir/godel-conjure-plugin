@@ -75,14 +75,21 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+
+		// Validate skip-conjure-backcompat configuration
+		if currConfig.SkipConjureBackcompat && !irProvider.GeneratedFromYAML() {
+			return conjureplugin.ConjureProjectParams{}, nil, errors.Errorf("project %s has skip-conjure-backcompat set to true, but does not generate IR from YAML; remove the skip-conjure-backcompat configuration", key)
+		}
+
 		params[key] = conjureplugin.ConjureProjectParam{
-			OutputDir:   outputDir,
-			IRProvider:  irProvider,
-			AcceptFuncs: acceptFuncsFlag,
-			Server:      currConfig.Server,
-			CLI:         currConfig.CLI,
-			Publish:     publishVal,
-			GroupID:     groupID,
+			OutputDir:             outputDir,
+			IRProvider:            irProvider,
+			AcceptFuncs:           acceptFuncsFlag,
+			Server:                currConfig.Server,
+			CLI:                   currConfig.CLI,
+			Publish:               publishVal,
+			GroupID:               groupID,
+			SkipConjureBackcompat: currConfig.SkipConjureBackcompat,
 		}
 	}
 

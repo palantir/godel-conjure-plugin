@@ -43,6 +43,9 @@ type SingleConjureConfig struct {
 	// AcceptFuncs indicates if we will generate lambda based visitor code.
 	// Currently this is behind a feature flag and is subject to change.
 	AcceptFuncs *bool `yaml:"accept-funcs,omitempty"`
+	// SkipConjureBackcompat indicates if backcompat checks should be skipped for this project.
+	// Defaults to false (backcompat checks will run). Only valid for projects that generate IR from YAML.
+	SkipConjureBackcompat bool `yaml:"skip-conjure-backcompat,omitempty"`
 	// Extensions contain metadata for consumption by assets of type `conjure-ir-extensions-provider`.
 	Extensions map[string]any `yaml:"extensions,omitempty"`
 }

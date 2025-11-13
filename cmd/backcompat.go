@@ -40,7 +40,10 @@ var backcompatCmd = &cobra.Command{
 		}
 
 		return projectParams.ForEach(func(project string, param conjureplugin.ConjureProjectParam) error {
-			if !param.Publish {
+			if param.SkipConjureBackcompat {
+				return nil
+			}
+			if !param.IRProvider.GeneratedFromYAML() {
 				return nil
 			}
 
