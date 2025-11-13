@@ -19,6 +19,7 @@ import (
 	"io"
 	"os/exec"
 
+	"github.com/palantir/godel-conjure-plugin/v6/backcompatasset"
 	"github.com/pkg/errors"
 )
 
@@ -59,7 +60,7 @@ func (b *backCompatCheckerImpl) CheckBackCompat(
 	godelProjectDir string,
 ) error {
 	cmd := exec.Command(b.asset,
-		"check-backcompat",
+		backcompatasset.CheckBackCompatCommand,
 		"--group-id", groupID,
 		"--project", project,
 		"--current-ir", currentIR,
@@ -86,7 +87,7 @@ func (b *backCompatCheckerImpl) AcceptBackCompatBreaks(
 	godelProjectDir string,
 ) error {
 	cmd := exec.Command(b.asset,
-		"accept-backcompat-breaks",
+		backcompatasset.AcceptBackCompatBreaksCommand,
 		"--group-id", groupID,
 		"--project", project,
 		"--current-ir", currentIR,

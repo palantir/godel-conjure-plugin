@@ -57,8 +57,8 @@ func NewCheckerRootCommand(name, description string, checker Checker) *cobra.Com
 }
 
 const (
-	checkBackCompatCommand        = "check-backcompat"
-	acceptBackCompatBreaksCommand = "accept-backcompat-breaks"
+	CheckBackCompatCommand        = "check-backcompat"
+	AcceptBackCompatBreaksCommand = "accept-backcompat-breaks"
 
 	groupIDFlagName         = "group-id"
 	projectFlagName         = "project"
@@ -69,7 +69,7 @@ const (
 func newCheckBackCompatCmd(checker Checker) *cobra.Command {
 	var params BackCompatParams
 	cmd := &cobra.Command{
-		Use:   checkBackCompatCommand,
+		Use:   CheckBackCompatCommand,
 		Short: "Check backward compatibility of Conjure definitions",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return checker.CheckBackCompat(params)
@@ -82,7 +82,7 @@ func newCheckBackCompatCmd(checker Checker) *cobra.Command {
 func newAcceptBackCompatBreaksCmd(checker Checker) *cobra.Command {
 	var params BackCompatParams
 	cmd := &cobra.Command{
-		Use:   acceptBackCompatBreaksCommand,
+		Use:   AcceptBackCompatBreaksCommand,
 		Short: "Accept current backward compatibility breaks",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return checker.AcceptBackCompatBreaks(params)

@@ -68,7 +68,6 @@ func (p *ConjureProjectParams) ForEach(fn func(project string, param ConjureProj
 // (i.e., projects where SkipConjureBackcompat is false and IR is generated from YAML).
 // For each eligible project, it generates the IR bytes, writes them to a temporary file,
 // and invokes the provided function with the project name, parameter, and IR file path.
-// It accumulates and returns any errors produced by the function calls using errors.Join.
 func (p *ConjureProjectParams) ForEachBackCompatProject(
 	fn func(project string, param ConjureProjectParam, irFile string) error,
 ) error {

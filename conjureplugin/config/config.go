@@ -78,7 +78,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 
 		// Validate skip-conjure-backcompat configuration
 		if currConfig.SkipConjureBackcompat && !irProvider.GeneratedFromYAML() {
-			return conjureplugin.ConjureProjectParams{}, nil, errors.Errorf("project %s has skip-conjure-backcompat set to true, but does not generate IR from YAML; remove the skip-conjure-backcompat configuration", key)
+			return conjureplugin.ConjureProjectParams{}, nil, errors.Errorf("project %q has skip-conjure-backcompat set to true, but does not generate IR from YAML; remove the skip-conjure-backcompat configuration", key)
 		}
 
 		params[key] = conjureplugin.ConjureProjectParam{
