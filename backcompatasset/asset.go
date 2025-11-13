@@ -44,22 +44,16 @@ type Checker interface {
 // NewCheckerRootCommand creates a Cobra root command for an asset that checks backward compatibility.
 // The returned command has the required subcommands hooked up for reporting the asset type and performing
 // backcompat checks according to the asset spec using the provided checker as its implementation.
-func NewCheckerRootCommand(name, description string, checker Checker) (*cobra.Command, error) {
+func NewCheckerRootCommand(name, description string, checker Checker) *cobra.Command {
 	rootCmd := assetapiinternal.NewAssetRootCmd(assetapi.ConjureBackcompat, name, description)
 
-	checkCmd, err := newCheckBackCompatCmd(checker)
-	if err != nil {
-		return nil, err
-	}
+	checkCmd := newCheckBackCompatCmd(checker)
 	rootCmd.AddCommand(checkCmd)
 
-	acceptCmd, err := newAcceptBackCompatBreaksCmd(checker)
-	if err != nil {
-		return nil, err
-	}
+	acceptCmd := newAcceptBackCompatBreaksCmd(checker)
 	rootCmd.AddCommand(acceptCmd)
 
-	return rootCmd, nil
+	return rootCmd
 }
 
 const (
@@ -72,7 +66,7 @@ const (
 	godelProjectDirFlagName = "godel-project-dir"
 )
 
-func newCheckBackCompatCmd(checker Checker) (*cobra.Command, error) {
+func newCheckBackCompatCmd(checker Checker) *cobra.Command {
 	var params BackCompatParams
 	cmd := &cobra.Command{
 		Use:   checkBackCompatCommand,
@@ -81,13 +75,11 @@ func newCheckBackCompatCmd(checker Checker) (*cobra.Command, error) {
 			return checker.CheckBackCompat(params)
 		},
 	}
-	if err := addBackCompatFlags(cmd, &params); err != nil {
-		return nil, err
-	}
-	return cmd, nil
+	addBackCompatFlags(cmd, &params)
+	return cmd
 }
 
-func newAcceptBackCompatBreaksCmd(checker Checker) (*cobra.Command, error) {
+func newAcceptBackCompatBreaksCmd(checker Checker) *cobra.Command {
 	var params BackCompatParams
 	cmd := &cobra.Command{
 		Use:   acceptBackCompatBreaksCommand,
@@ -96,25 +88,23 @@ func newAcceptBackCompatBreaksCmd(checker Checker) (*cobra.Command, error) {
 			return checker.AcceptBackCompatBreaks(params)
 		},
 	}
-	if err := addBackCompatFlags(cmd, &params); err != nil {
-		return nil, err
-	}
-	return cmd, nil
+	addBackCompatFlags(cmd, &params)
+
+	return cmd
 }
 
-func addBackCompatFlags(cmd *cobra.Command, params *BackCompatParams) error {
+func addBackCompatFlags(cmd *cobra.Command, params *BackCompatParams) {
 	cmd.Flags().StringVar(&params.GroupID, groupIDFlagName, "", "Group ID of the Conjure project")
 	cmd.Flags().StringVar(&params.Project, projectFlagName, "", "Name of the Conjure project")
 	cmd.Flags().StringVar(&params.CurrentIR, currentIRFlagName, "", "Path to the current Conjure IR file")
 	cmd.Flags().StringVar(&params.GodelProjectDir, godelProjectDirFlagName, "", "Path to the godel project directory")
-	return markFlagsRequired(cmd, groupIDFlagName, projectFlagName, currentIRFlagName, godelProjectDirFlagName)
+	markFlagsRequired(cmd, groupIDFlagName, projectFlagName, currentIRFlagName, godelProjectDirFlagName)
 }
 
-func markFlagsRequired(cmd *cobra.Command, flagNames ...string) error {
+func markFlagsRequired(cmd *cobra.Command, flagNames ...string) {
 	for _, currFlagName := range flagNames {
 		if err := cmd.MarkFlagRequired(currFlagName); err != nil {
-			return err
+			panic(err)
 		}
 	}
-	return nil
 }
