@@ -25,6 +25,7 @@ import (
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
+	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -90,7 +91,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	conflicts := v1.GetConflictingOutputDirs(seenDirs)
+	conflicts := validate.GetConflictingOutputDirs(seenDirs)
 
 	if !c.AllowConflictingOutputDirs && len(conflicts) > 0 {
 		return conjureplugin.ConjureProjectParams{}, nil, stderrors.Join(conflicts...)

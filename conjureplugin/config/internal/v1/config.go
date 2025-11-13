@@ -15,12 +15,10 @@
 package v1
 
 import (
-	"maps"
 	"path/filepath"
-	"slices"
-	"strings"
 
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
+	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -151,7 +149,7 @@ func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
 		outputDirs[resolvedOutputDir] = append(outputDirs[resolvedOutputDir], projectName)
 	}
 
-	v2cfg.AllowConflictingOutputDirs = len(GetConflictingOutputDirs(outputDirs)) > 0
+	v2cfg.AllowConflictingOutputDirs = len(validate.GetConflictingOutputDirs(outputDirs)) > 0
 
 	return v2cfg
 }
@@ -168,56 +166,4 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 	}
 
 	return cfgBytes, nil
-}
-
-func GetConflictingOutputDirs(outputDirToProjects map[string][]string) []error {
-	var warnings []error
-
-	sortedOutputDirs := slices.Sorted(maps.Keys(outputDirToProjects))
-	for _, outputDir := range sortedOutputDirs {
-		projects := outputDirToProjects[outputDir]
-		if len(projects) <= 1 {
-			continue
-		}
-		warnings = append(warnings, errors.Errorf("Projects %v are configured with the same outputDir %q, which may cause conflicts when generating Conjure output", projects, outputDir))
-	}
-
-	for i, dir1 := range sortedOutputDirs {
-		for _, dir2 := range sortedOutputDirs[i+1:] {
-			var parentDir string
-			var subdir string
-			if isSubdirectory(dir1, dir2) {
-				parentDir = dir1
-				subdir = dir2
-			} else if isSubdirectory(dir2, dir1) {
-				parentDir = dir2
-				subdir = dir1
-			} else {
-				// no subdirectory issues
-				continue
-			}
-			warnings = append(warnings,
-				errors.Errorf(
-					"Projects %v are configured with outputDir %q, which is a subdirectory of the outputDir %q configured for projects %v, which may cause conflicts when generating Conjure output",
-					outputDirToProjects[subdir],
-					subdir,
-					parentDir,
-					outputDirToProjects[parentDir],
-				),
-			)
-		}
-	}
-
-	return warnings
-}
-
-// isSubdirectory returns true if potentialSubDir is a subdirectory of parent, false otherwise.
-// This determination is made by normalizing both paths using filepath.Clean and using filepath.Rel to determine if one path
-// is a subdirectory of the other. Returns false if filepath.Rel returns an error (for example, if one path is
-// absolute and the other is relative). Does not resolve symlinks.
-func isSubdirectory(parent, potentialSubDir string) bool {
-	parent = filepath.Clean(parent)
-	potentialSubDir = filepath.Clean(potentialSubDir)
-	rel, err := filepath.Rel(parent, potentialSubDir)
-	return err == nil && !strings.HasPrefix(rel, "..") && rel != "."
 }
