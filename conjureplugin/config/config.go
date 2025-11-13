@@ -30,8 +30,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// ConjurePluginConfig is now a type alias to v2.ConjurePluginConfig (the canonical version).
-// v1 configs are automatically translated to v2 at load time.
 type ConjurePluginConfig v2.ConjurePluginConfig
 
 func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
