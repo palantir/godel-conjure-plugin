@@ -67,7 +67,12 @@ func newAssetTypeCmd(assetType assetapi.AssetType) *cobra.Command {
 			if err != nil {
 				return errors.Wrapf(err, "failed to marshal JSON")
 			}
-			cmd.OutOrStdout().Write(jsonOutput)
+
+			_, err = cmd.OutOrStdout().Write(jsonOutput)
+			if err != nil {
+				return errors.Wrapf(err, "failed write JSON to stdout")
+			}
+
 			return nil
 		},
 	}
