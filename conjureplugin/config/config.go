@@ -52,7 +52,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 	conflicts := ToConjurePluginConfig(c).OutputDirConflicts()
 
 	params := make(map[string]conjureplugin.ConjureProjectParam)
-	var conflictErrs error
+	var conflictErrs []error
 	for _, key := range sortedKeys {
 		if err := validate.ValidateProjectName(key); err != nil {
 			return conjureplugin.ConjureProjectParams{}, nil, err
@@ -63,7 +63,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		outputDir := currConfig.ResolvedOutputDir(key)
 
 		if !currConfig.SkipDeleteGeneratedFiles && len(conflicts[key]) > 0 {
-			conflictErrs = errors.Join(conflictErrs, errors.Join(conflicts[key]...))
+			conflictErrs = append(conflictErrs, conflicts[key]...)
 		}
 
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
@@ -99,8 +99,8 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	if conflictErrs != nil {
-		return conjureplugin.ConjureProjectParams{}, nil, errors.Join(fmt.Errorf("cannot delete generated files when output directories conflict"), conflictErrs)
+	if err := errors.Join(conflictErrs...); err != nil {
+		return conjureplugin.ConjureProjectParams{}, nil, errors.Join(fmt.Errorf("cannot delete generated files when output directories conflict"), err)
 	}
 
 	var err error
