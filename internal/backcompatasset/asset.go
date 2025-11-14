@@ -61,10 +61,10 @@ func (b *backCompatCheckerImpl) CheckBackCompat(
 ) error {
 	cmd := exec.Command(b.asset,
 		backcompatasset.CheckBackCompatCommand,
-		"--group-id", groupID,
-		"--project", project,
-		"--current-ir", currentIR,
-		"--godel-project-dir", godelProjectDir,
+		"--"+backcompatasset.GroupIDFlagName, groupID,
+		"--"+backcompatasset.ProjectFlagName, project,
+		"--"+backcompatasset.CurrentIRFlagName, currentIR,
+		"--"+backcompatasset.GodelProjectDirFlagName, godelProjectDir,
 	)
 	cmd.Stdout = b.stdout
 	cmd.Stderr = b.stderr
@@ -88,10 +88,10 @@ func (b *backCompatCheckerImpl) AcceptBackCompatBreaks(
 ) error {
 	cmd := exec.Command(b.asset,
 		backcompatasset.AcceptBackCompatBreaksCommand,
-		"--group-id", groupID,
-		"--project", project,
-		"--current-ir", currentIR,
-		"--godel-project-dir", godelProjectDir,
+		"--"+backcompatasset.GroupIDFlagName, groupID,
+		"--"+backcompatasset.ProjectFlagName, project,
+		"--"+backcompatasset.CurrentIRFlagName, currentIR,
+		"--"+backcompatasset.GodelProjectDirFlagName, godelProjectDir,
 	)
 	cmd.Stdout = b.stdout
 	cmd.Stderr = b.stderr

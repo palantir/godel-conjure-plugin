@@ -67,10 +67,10 @@ const (
 	CheckBackCompatCommand        = "check-backcompat"
 	AcceptBackCompatBreaksCommand = "accept-backcompat-breaks"
 
-	groupIDFlagName         = "group-id"
-	projectFlagName         = "project"
-	currentIRFlagName       = "current-ir"
-	godelProjectDirFlagName = "godel-project-dir"
+	GroupIDFlagName         = "group-id"
+	ProjectFlagName         = "project"
+	CurrentIRFlagName       = "current-ir-file"
+	GodelProjectDirFlagName = "godel-project-dir"
 )
 
 func newCheckBackCompatCmd(checker Checker) (*cobra.Command, error) {
@@ -104,11 +104,11 @@ func newAcceptBackCompatBreaksCmd(checker Checker) (*cobra.Command, error) {
 }
 
 func addBackCompatFlags(cmd *cobra.Command, params *BackCompatParams) error {
-	cmd.Flags().StringVar(&params.GroupID, groupIDFlagName, "", "Group ID of the Conjure project")
-	cmd.Flags().StringVar(&params.Project, projectFlagName, "", "Name of the Conjure project")
-	cmd.Flags().StringVar(&params.CurrentIR, currentIRFlagName, "", "Path to the current Conjure IR file")
-	cmd.Flags().StringVar(&params.GodelProjectDir, godelProjectDirFlagName, "", "Path to the godel project directory")
-	return markFlagsRequired(cmd, groupIDFlagName, projectFlagName, currentIRFlagName, godelProjectDirFlagName)
+	cmd.Flags().StringVar(&params.GroupID, GroupIDFlagName, "", "Group ID of the Conjure project")
+	cmd.Flags().StringVar(&params.Project, ProjectFlagName, "", "Name of the Conjure project")
+	cmd.Flags().StringVar(&params.CurrentIR, CurrentIRFlagName, "", "Path to the current Conjure IR file")
+	cmd.Flags().StringVar(&params.GodelProjectDir, GodelProjectDirFlagName, "", "Path to the godel project directory")
+	return markFlagsRequired(cmd, GroupIDFlagName, ProjectFlagName, CurrentIRFlagName, GodelProjectDirFlagName)
 }
 
 func markFlagsRequired(cmd *cobra.Command, flagNames ...string) error {
