@@ -16,10 +16,8 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -27,27 +25,15 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 	Use:   "accept-backcompat-breaks",
 	Short: "Accept current backward compatibility breaks",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if loadedAssets.ConjureBackcompat == nil {
-			return nil
-		}
-
-		projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
-		if err != nil {
-			return err
-		}
-		if err := os.Chdir(projectDirFlagVal); err != nil {
-			return errors.Wrapf(err, "failed to set working directory")
-		}
-
-		if err := projectParams.ForEachBackCompatProject(
+		return runBackCompatCommand(
+			cmd,
 			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
 				return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, irFile, projectDirFlagVal)
 			},
-		); err != nil {
-			return fmt.Errorf("failed to accept conjure breaks: %w", err)
-		}
-
-		return nil
+			func(err error) error {
+				return fmt.Errorf(`failed to accept conjure breaks: %w`, err)
+			},
+		)
 	},
 }
 

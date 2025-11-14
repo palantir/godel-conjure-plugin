@@ -19,6 +19,7 @@ import (
 	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -27,30 +28,56 @@ var backcompatCmd = &cobra.Command{
 	Use:   "backcompat",
 	Short: "Check backward compatibility of Conjure definitions",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if loadedAssets.ConjureBackcompat == nil {
-			return nil
-		}
-
-		projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
-		if err != nil {
-			return err
-		}
-		if err := os.Chdir(projectDirFlagVal); err != nil {
-			return errors.Wrapf(err, "failed to set working directory")
-		}
-
-		if err := projectParams.ForEachBackCompatProject(
+		return runBackCompatCommand(
+			cmd,
 			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
 				return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal)
 			},
-		); err != nil {
-			return fmt.Errorf(`failed to check conjure backcompat: %w\nto accept breaks run "./godelw conjure-accept-backcompat-breaks"`, err)
-		}
-
-		return nil
+			func(err error) error {
+				return fmt.Errorf(`failed to check conjure backcompat: %w\nto accept breaks run "./godelw conjure-accept-backcompat-breaks"`, err)
+			},
+		)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(backcompatCmd)
+}
+
+func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param conjureplugin.ConjureProjectParam, irFile string) error, errorHandler func(error) error) error {
+	if loadedAssets.ConjureBackcompat == nil {
+		return nil
+	}
+
+	projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
+	if err != nil {
+		return err
+	}
+	if err := os.Chdir(projectDirFlagVal); err != nil {
+		return errors.Wrapf(err, "failed to set working directory")
+	}
+
+	if err := projectParams.ForEach(func(project string, param conjureplugin.ConjureProjectParam) error {
+		if param.SkipConjureBackcompat {
+			return nil
+		}
+		if !param.IRProvider.GeneratedFromYAML() {
+			return nil
+		}
+
+		bytes, err := param.IRProvider.IRBytes()
+		if err != nil {
+			return err
+		}
+
+		file, err := tempfilecreator.WriteBytesToTempFile(bytes)
+		if err != nil {
+			return err
+		}
+
+		return runCmd(project, param, file)
+	}); err != nil {
+		return errorHandler(err)
+	}
+	return nil
 }
