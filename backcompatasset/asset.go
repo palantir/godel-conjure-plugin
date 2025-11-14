@@ -45,7 +45,7 @@ type Checker interface {
 // The returned command has the required subcommands hooked up for reporting the asset type and performing
 // backcompat checks according to the asset spec using the provided checker as its implementation.
 func NewCheckerRootCommand(name, description string, checker Checker) *cobra.Command {
-	rootCmd := assetapiinternal.NewAssetRootCmd(assetapi.ConjureBackcompat, name, description)
+	rootCmd := assetapiinternal.NewAssetRootCmd(assetapi.ConjureBackCompat, name, description)
 
 	checkCmd := newCheckBackCompatCmd(checker)
 	rootCmd.AddCommand(checkCmd)

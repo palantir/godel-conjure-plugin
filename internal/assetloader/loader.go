@@ -43,7 +43,7 @@ func LoadAssets(assets []string, stdout, stderr io.Writer) (LoadedAssets, error)
 	}
 
 	var conjureBackCompat backcompatasset.BackCompatChecker
-	backcompatAssets := assetTypeToAssetsMap[assetapi.ConjureBackcompat]
+	backcompatAssets := assetTypeToAssetsMap[assetapi.ConjureBackCompat]
 	switch len(backcompatAssets) {
 	case 0:
 		// Do nothing
