@@ -86,7 +86,7 @@ func (c *ConjurePluginConfig) Conflicts() map[string][]error {
 		return projects[i].name < projects[j].name
 	})
 
-	r := make(map[string][]error)
+	result := make(map[string][]error)
 	for i1, p1 := range projects {
 		for i2, p2 := range projects {
 			if i1 == i2 {
@@ -97,28 +97,14 @@ func (c *ConjurePluginConfig) Conflicts() map[string][]error {
 			p2Dir := p2.config.ResolvedOutputDir(p2.name)
 
 			if p1Dir == p2Dir {
-				// todo: better error messages
-				r[p1.name] = append(r[p1.name], fmt.Errorf("project %qs output directory %q is the same as project %qs output directory", p1.name, p1Dir, p2.name))
+				result[p1.name] = append(result[p1.name], fmt.Errorf("project %qs output directory %q is the same as project %qs output directory", p1.name, p1Dir, p2.name))
 			} else if validate.IsSubdirectory(p1Dir, p2Dir) {
-				r[p1.name] = append(r[p1.name], fmt.Errorf("project %qs output directory %q contains project %qs output directory %q as a subdirectory", p1.name, p1Dir, p2.name, p2Dir))
+				result[p1.name] = append(result[p1.name], fmt.Errorf("project %qs output directory %q contains project %qs output directory %q as a subdirectory", p1.name, p1Dir, p2.name, p2Dir))
 			}
 		}
 	}
 
-	// todo: figure out how to dedupe and normalize the errors for the easy testing
-
-	// final := make(map[string][]error)
-	// for project, result := range r {
-	// 	slices.Sort(result)
-	// 	result = slices.Compact(result)
-	// 	var errs []error
-	// 	for _, msg := range result {
-	// 		errs = append(errs, stderrors.New(msg))
-	// 	}
-	// 	final[project] = errs
-	// }
-
-	return r
+	return result
 }
 
 // ResolvedOutputDir returns the final output directory path where generated code will be written.
