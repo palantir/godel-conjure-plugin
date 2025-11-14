@@ -48,13 +48,13 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
 // Currently, if multiple Conjure projects have the same output directory (after normalization using filepath.Clean),
 // this is considered to be warning. The returned warning is an error created using errors.Join that contains one error
 // per output path shared by multiple projects.
-func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, err error) {
+func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, _ error) {
 	sortedKeys := slices.Sorted(maps.Keys(c.ProjectConfigs))
 
 	conflicts := ToConjurePluginConfig(c).Conflicts()
 
 	params := make(map[string]conjureplugin.ConjureProjectParam)
-	var conflictErrs []error
+	var conflictErrs error
 	for _, key := range sortedKeys {
 		if err := validate.ValidateProjectName(key); err != nil {
 			return conjureplugin.ConjureProjectParams{}, nil, err
@@ -65,8 +65,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		outputDir := currConfig.ResolvedOutputDir(key)
 
 		if !currConfig.SkipDeleteGeneratedFiles && len(conflicts[key]) > 0 {
-			// todo: make this error message better but i think the logic here is sound
-			conflictErrs = append(conflictErrs, fmt.Errorf("project %q has conflicting output directories with other projects: %w", key, errors.Join(conflicts[key]...)))
+			conflictErrs = errors.Join(conflictErrs, errors.Join(conflicts[key]...))
 		}
 
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
@@ -102,20 +101,18 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	if len(conflictErrs) > 0 {
-		// todo: logic here is sound but i think we need better error messages here
-		return conjureplugin.ConjureProjectParams{}, nil, fmt.Errorf("cannot delete generated files when output directories conflict: %w", errors.Join(conflictErrs...))
+	if conflictErrs != nil {
+		return conjureplugin.ConjureProjectParams{}, nil, errors.Join(fmt.Errorf("cannot delete generated files when output directories conflict"), conflictErrs)
 	}
 
-	if !c.AllowConflictingOutputDirs && len(conflicts) > 0 {
-		// todo: sound logic (i think) but clean up the error messages
-		var allConflictErrs []error
-		for projectName, projectConflicts := range conflicts {
-			if len(projectConflicts) > 0 {
-				allConflictErrs = append(allConflictErrs, fmt.Errorf("project %q: %w", projectName, errors.Join(projectConflicts...)))
-			}
+	var err error
+	if !c.AllowConflictingOutputDirs {
+		for _, projectConflicts := range conflicts {
+			err = errors.Join(err, errors.Join(projectConflicts...))
 		}
-		return conjureplugin.ConjureProjectParams{}, nil, fmt.Errorf("output directory conflicts detected: %w", errors.Join(allConflictErrs...))
+		if err != nil {
+			return conjureplugin.ConjureProjectParams{}, nil, errors.Join(fmt.Errorf("output directory conflicts detected"), err)
+		}
 	}
 
 	for _, projectConflicts := range conflicts {

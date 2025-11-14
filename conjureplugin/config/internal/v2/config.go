@@ -98,9 +98,9 @@ func (c *ConjurePluginConfig) Conflicts() map[string][]error {
 
 			if p1Dir == p2Dir {
 				// todo: better error messages
-				r[p1.name] = append(r[p1.name], fmt.Errorf("project %q output directory %q is the same as project %q output directory", p1.name, p1Dir, p2.name))
+				r[p1.name] = append(r[p1.name], fmt.Errorf("project %qs output directory %q is the same as project %qs output directory", p1.name, p1Dir, p2.name))
 			} else if validate.IsSubdirectory(p1Dir, p2Dir) {
-				r[p1.name] = append(r[p1.name], fmt.Errorf("project %q output directory %q contains project %q output directory %q as a subdirectory", p1.name, p1Dir, p2.name, p2Dir))
+				r[p1.name] = append(r[p1.name], fmt.Errorf("project %qs output directory %q contains project %qs output directory %q as a subdirectory", p1.name, p1Dir, p2.name, p2Dir))
 			}
 		}
 	}
