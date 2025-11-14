@@ -15,8 +15,11 @@
 package v2
 
 import (
+	"fmt"
 	"path/filepath"
+	"sort"
 
+	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -63,6 +66,59 @@ type SingleConjureConfig struct {
 	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
 	// When true, preserves v1 behavior (no cleanup).
 	SkipDeleteGeneratedFiles bool `yaml:"skip-delete-generated-files,omitempty"`
+}
+
+func (c *ConjurePluginConfig) Conflicts() map[string][]error {
+	type Project struct {
+		name   string
+		config SingleConjureConfig
+	}
+
+	var projects []Project
+	for project, config := range c.ProjectConfigs {
+		projects = append(projects, Project{
+			name:   project,
+			config: config,
+		})
+	}
+
+	sort.Slice(projects, func(i, j int) bool {
+		return projects[i].name < projects[j].name
+	})
+
+	r := make(map[string][]error)
+	for i1, p1 := range projects {
+		for i2, p2 := range projects {
+			if i1 == i2 {
+				continue
+			}
+
+			p1Dir := p1.config.ResolvedOutputDir(p1.name)
+			p2Dir := p2.config.ResolvedOutputDir(p2.name)
+
+			if p1Dir == p2Dir {
+				// todo: better error messages
+				r[p1.name] = append(r[p1.name], fmt.Errorf("project %q output directory %q is the same as project %q output directory", p1.name, p1Dir, p2.name))
+			} else if validate.IsSubdirectory(p1Dir, p2Dir) {
+				r[p1.name] = append(r[p1.name], fmt.Errorf("project %q output directory %q contains project %q output directory %q as a subdirectory", p1.name, p1Dir, p2.name, p2Dir))
+			}
+		}
+	}
+
+	// todo: figure out how to dedupe and normalize the errors for the easy testing
+
+	// final := make(map[string][]error)
+	// for project, result := range r {
+	// 	slices.Sort(result)
+	// 	result = slices.Compact(result)
+	// 	var errs []error
+	// 	for _, msg := range result {
+	// 		errs = append(errs, stderrors.New(msg))
+	// 	}
+	// 	final[project] = errs
+	// }
+
+	return r
 }
 
 // ResolvedOutputDir returns the final output directory path where generated code will be written.

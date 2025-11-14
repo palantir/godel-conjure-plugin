@@ -18,7 +18,6 @@ import (
 	"path/filepath"
 
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -149,7 +148,7 @@ func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
 		outputDirs[resolvedOutputDir] = append(outputDirs[resolvedOutputDir], projectName)
 	}
 
-	v2cfg.AllowConflictingOutputDirs = len(validate.GetConflictingOutputDirs(outputDirs)) > 0
+	v2cfg.AllowConflictingOutputDirs = len(v2cfg.Conflicts()) > 0
 
 	return v2cfg
 }

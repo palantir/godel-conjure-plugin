@@ -15,7 +15,8 @@
 package config
 
 import (
-	stderrors "errors"
+	"errors"
+	"fmt"
 	"maps"
 	"net/url"
 	"os"
@@ -27,7 +28,7 @@ import (
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
-	"github.com/pkg/errors"
+	werror "github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -50,8 +51,10 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
 func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, err error) {
 	sortedKeys := slices.Sorted(maps.Keys(c.ProjectConfigs))
 
-	seenDirs := make(map[string][]string)
+	conflicts := ToConjurePluginConfig(c).Conflicts()
+
 	params := make(map[string]conjureplugin.ConjureProjectParam)
+	var conflictErrs []error
 	for _, key := range sortedKeys {
 		if err := validate.ValidateProjectName(key); err != nil {
 			return conjureplugin.ConjureProjectParams{}, nil, err
@@ -60,11 +63,15 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		currConfig := c.ProjectConfigs[key]
 
 		outputDir := currConfig.ResolvedOutputDir(key)
-		seenDirs[outputDir] = append(seenDirs[outputDir], key)
+
+		if !currConfig.SkipDeleteGeneratedFiles && len(conflicts[key]) > 0 {
+			// todo: make this error message better but i think the logic here is sound
+			conflictErrs = append(conflictErrs, fmt.Errorf("project %q has conflicting output directories with other projects: %w", key, errors.Join(conflicts[key]...)))
+		}
 
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
 		if err != nil {
-			return conjureplugin.ConjureProjectParams{}, nil, errors.Wrapf(err, "failed to convert configuration for %s to provider", key)
+			return conjureplugin.ConjureProjectParams{}, nil, werror.Wrapf(err, "failed to convert configuration for %s to provider", key)
 		}
 
 		groupID := c.GroupID
@@ -95,12 +102,24 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 	}
 
-	conflicts := validate.GetConflictingOutputDirs(seenDirs)
+	if len(conflictErrs) > 0 {
+		// todo: logic here is sound but i think we need better error messages here
+		return conjureplugin.ConjureProjectParams{}, nil, fmt.Errorf("cannot delete generated files when output directories conflict: %w", errors.Join(conflictErrs...))
+	}
 
 	if !c.AllowConflictingOutputDirs && len(conflicts) > 0 {
-		return conjureplugin.ConjureProjectParams{}, nil, stderrors.Join(conflicts...)
-	} else {
-		warnings = append(warnings, conflicts...)
+		// todo: sound logic (i think) but clean up the error messages
+		var allConflictErrs []error
+		for projectName, projectConflicts := range conflicts {
+			if len(projectConflicts) > 0 {
+				allConflictErrs = append(allConflictErrs, fmt.Errorf("project %q: %w", projectName, errors.Join(projectConflicts...)))
+			}
+		}
+		return conjureplugin.ConjureProjectParams{}, nil, fmt.Errorf("output directory conflicts detected: %w", errors.Join(allConflictErrs...))
+	}
+
+	for _, projectConflicts := range conflicts {
+		warnings = append(warnings, projectConflicts...)
 	}
 
 	return conjureplugin.ConjureProjectParams{
@@ -125,7 +144,7 @@ func ToIRLocatorConfig(in *IRLocatorConfig) *v2.IRLocatorConfig {
 
 func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 	if cfg.Locator == "" {
-		return nil, errors.Errorf("locator cannot be empty")
+		return nil, werror.Errorf("locator cannot be empty")
 	}
 
 	locatorType := cfg.Type
@@ -160,14 +179,14 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 	case v2.LocatorTypeIRFile:
 		return conjureplugin.NewLocalFileIRProvider(cfg.Locator), nil
 	default:
-		return nil, errors.Errorf("unknown locator type: %s", locatorType)
+		return nil, werror.Errorf("unknown locator type: %s", locatorType)
 	}
 }
 
 func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
 	bytes, err := os.ReadFile(f)
 	if err != nil {
-		return ConjurePluginConfig{}, errors.WithStack(err)
+		return ConjurePluginConfig{}, werror.WithStack(err)
 	}
 	return ReadConfigFromBytes(bytes)
 }
@@ -175,24 +194,24 @@ func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
 func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
 	version, err := versionedconfig.ConfigVersion(inputBytes)
 	if err != nil {
-		return ConjurePluginConfig{}, errors.WithStack(err)
+		return ConjurePluginConfig{}, werror.WithStack(err)
 	}
 
 	switch version {
 	case "", "1":
 		var cfg v1.ConjurePluginConfig
 		if err := yaml.UnmarshalStrict(inputBytes, &cfg); err != nil {
-			return ConjurePluginConfig{}, errors.WithStack(err)
+			return ConjurePluginConfig{}, werror.WithStack(err)
 		}
 
 		return ConjurePluginConfig(cfg.ToV2()), nil
 	case "2":
 		var cfg v2.ConjurePluginConfig
 		if err := yaml.UnmarshalStrict(inputBytes, &cfg); err != nil {
-			return ConjurePluginConfig{}, errors.WithStack(err)
+			return ConjurePluginConfig{}, werror.WithStack(err)
 		}
 		return ConjurePluginConfig(cfg), nil
 	default:
-		return ConjurePluginConfig{}, errors.Errorf("unsupported configuration version: %s", version)
+		return ConjurePluginConfig{}, werror.Errorf("unsupported configuration version: %s", version)
 	}
 }
