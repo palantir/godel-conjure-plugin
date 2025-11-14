@@ -849,6 +849,84 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 			wantError: "output directory conflicts detected\nproject \"project-1\"s output directory \"base/dir\" contains project \"project-2\"s output directory \"base/dir/nested\" as a subdirectory",
 		},
 		{
+			name: "Error when attempting to delete with same output directory",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir:   true,
+						SkipDeleteGeneratedFiles: false,
+					},
+					"project-2": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+						OmitTopLevelProjectDir:   true,
+						SkipDeleteGeneratedFiles: false,
+					},
+				},
+			},
+			wantError: "cannot delete generated files when output directories conflict\nproject \"project-1\"s output directory \"outputDir\" is the same as project \"project-2\"s output directory",
+		},
+		{
+			name: "Error when attempting to delete with nested output directory",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "base/dir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir:   true,
+						SkipDeleteGeneratedFiles: false,
+					},
+					"project-2": {
+						OutputDir: "base/dir/nested",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+						OmitTopLevelProjectDir:   true,
+						SkipDeleteGeneratedFiles: false,
+					},
+				},
+			},
+			wantError: "cannot delete generated files when output directories conflict\nproject \"project-1\"s output directory \"base/dir\" contains project \"project-2\"s output directory \"base/dir/nested\" as a subdirectory",
+		},
+		{
+			name: "Error when attempting to delete with one project having skip=false and conflicts exist",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: map[string]v2.SingleConjureConfig{
+					"project-1": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local/yaml-dir",
+						},
+						OmitTopLevelProjectDir:   true,
+						SkipDeleteGeneratedFiles: false,
+					},
+					"project-2": {
+						OutputDir: "outputDir",
+						IRLocator: v2.IRLocatorConfig{
+							Type:    v2.LocatorTypeAuto,
+							Locator: "local-2/yaml-dir",
+						},
+						OmitTopLevelProjectDir:   true,
+						SkipDeleteGeneratedFiles: true,
+					},
+				},
+			},
+			wantError: "cannot delete generated files when output directories conflict\nproject \"project-1\"s output directory \"outputDir\" is the same as project \"project-2\"s output directory",
+		},
+		{
 			name: "Error for invalid project name with forward slash",
 			in: config.ConjurePluginConfig{
 				ProjectConfigs: map[string]v2.SingleConjureConfig{
