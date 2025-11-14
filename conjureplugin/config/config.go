@@ -51,7 +51,7 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
 func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, _ error) {
 	sortedKeys := slices.Sorted(maps.Keys(c.ProjectConfigs))
 
-	conflicts := ToConjurePluginConfig(c).Conflicts()
+	conflicts := ToConjurePluginConfig(c).OutputDirConflicts()
 
 	params := make(map[string]conjureplugin.ConjureProjectParam)
 	var conflictErrs error

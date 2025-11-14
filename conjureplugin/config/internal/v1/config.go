@@ -148,7 +148,7 @@ func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
 		outputDirs[resolvedOutputDir] = append(outputDirs[resolvedOutputDir], projectName)
 	}
 
-	v2cfg.AllowConflictingOutputDirs = len(v2cfg.Conflicts()) > 0
+	v2cfg.AllowConflictingOutputDirs = len(v2cfg.OutputDirConflicts()) > 0
 
 	return v2cfg
 }

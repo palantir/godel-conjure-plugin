@@ -68,7 +68,16 @@ type SingleConjureConfig struct {
 	SkipDeleteGeneratedFiles bool `yaml:"skip-delete-generated-files,omitempty"`
 }
 
-func (c *ConjurePluginConfig) Conflicts() map[string][]error {
+// OutputDirConflicts detects output directory conflicts between projects.
+// Returns a map from project name to a list of errors describing conflicts with other projects.
+//
+// Two types of conflicts are detected:
+//   - Identical output directories: Two projects writing to the exact same directory
+//   - Nested output directories: One project's output directory is a subdirectory of another's
+//
+// Projects are compared in sorted order to ensure deterministic error messages.
+// An empty map indicates no conflicts were found.
+func (c *ConjurePluginConfig) OutputDirConflicts() map[string][]error {
 	type Project struct {
 		name   string
 		config SingleConjureConfig
