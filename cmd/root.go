@@ -56,7 +56,7 @@ func init() {
 	// load all assets before running any command
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		var err error
-		loadedAssets, err = assetloader.LoadAssets(assetsFlagVal)
+		loadedAssets, err = assetloader.LoadAssets(assetsFlagVal, cmd.OutOrStdout(), cmd.OutOrStderr())
 		if err != nil {
 			return err
 		}

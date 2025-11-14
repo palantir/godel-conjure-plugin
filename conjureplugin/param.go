@@ -14,6 +14,12 @@
 
 package conjureplugin
 
+import (
+	"errors"
+
+	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
+)
+
 type ConjureProjectParams struct {
 	SortedKeys []string
 	Params     map[string]ConjureProjectParam
@@ -41,4 +47,48 @@ type ConjureProjectParam struct {
 	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
+	// SkipConjureBackcompat specifies whether or not backcompat checks should be skipped for this Conjure project.
+	SkipConjureBackcompat bool
+}
+
+// ForEach iterates over all project parameters in the order specified by SortedKeys,
+// invoking the provided function for each project name and its associated parameter.
+// It accumulates and returns any errors produced by the function calls using errors.Join.
+func (p *ConjureProjectParams) ForEach(fn func(project string, param ConjureProjectParam) error) error {
+	var err error
+
+	for _, project := range p.SortedKeys {
+		err = errors.Join(err, fn(project, p.Params[project]))
+	}
+
+	return err
+}
+
+// ForEachBackCompatProject iterates over all project parameters that should run backcompat checks
+// (i.e., projects where SkipConjureBackcompat is false and IR is generated from YAML).
+// For each eligible project, it generates the IR bytes, writes them to a temporary file,
+// and invokes the provided function with the project name, parameter, and IR file path.
+func (p *ConjureProjectParams) ForEachBackCompatProject(
+	fn func(project string, param ConjureProjectParam, irFile string) error,
+) error {
+	return p.ForEach(func(project string, param ConjureProjectParam) error {
+		if param.SkipConjureBackcompat {
+			return nil
+		}
+		if !param.IRProvider.GeneratedFromYAML() {
+			return nil
+		}
+
+		bytes, err := param.IRProvider.IRBytes()
+		if err != nil {
+			return err
+		}
+
+		file, err := tempfilecreator.WriteBytesToTempFile(bytes)
+		if err != nil {
+			return err
+		}
+
+		return fn(project, param, file)
+	})
 }

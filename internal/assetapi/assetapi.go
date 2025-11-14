@@ -33,6 +33,7 @@ const ConjureIRExtensionsProvider assetapi.AssetType = "conjure-ir-extensions-pr
 // AllAssetsTypes returns a slice of all supported asset types.
 func AllAssetsTypes() []assetapi.AssetType {
 	return []assetapi.AssetType{
+		assetapi.ConjureBackCompat,
 		ConjureIRExtensionsProvider,
 	}
 }
@@ -66,7 +67,12 @@ func newAssetTypeCmd(assetType assetapi.AssetType) *cobra.Command {
 			if err != nil {
 				return errors.Wrapf(err, "failed to marshal JSON")
 			}
-			cmd.Print(string(jsonOutput))
+
+			_, err = cmd.OutOrStdout().Write(jsonOutput)
+			if err != nil {
+				return errors.Wrapf(err, "failed write JSON to stdout")
+			}
+
 			return nil
 		},
 	}
