@@ -807,8 +807,8 @@ projects:
 	defer runPluginCleanup()
 	require.NoError(t, err, outputBuf.String())
 
-	assert.Equal(t, `[WARNING]: Projects [project-1 project-2] are configured with the same outputDir "conjure-output", which may cause conflicts when generating Conjure output
-[WARNING]: Projects [project-3 project-4] are configured with the same outputDir "conjure-output-2", which may cause conflicts when generating Conjure output
+	assert.Equal(t, `[WARNING]: project "project-1"s output directory "conjure-output" is the same as project "project-2"s output directory
+[WARNING]: project "project-3"s output directory "conjure-output-2" is the same as project "project-4"s output directory
 `, outputBuf.String())
 }
 

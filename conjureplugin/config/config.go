@@ -107,16 +107,16 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 
 	var err error
 	if !c.AllowConflictingOutputDirs {
-		for _, projectConflicts := range conflicts {
-			err = errors.Join(err, errors.Join(projectConflicts...))
+		for _, key := range sortedKeys {
+			err = errors.Join(err, errors.Join(conflicts[key]...))
 		}
 		if err != nil {
 			return conjureplugin.ConjureProjectParams{}, nil, errors.Join(fmt.Errorf("output directory conflicts detected"), err)
 		}
 	}
 
-	for _, projectConflicts := range conflicts {
-		warnings = append(warnings, projectConflicts...)
+	for _, key := range sortedKeys {
+		warnings = append(warnings, conflicts[key]...)
 	}
 
 	return conjureplugin.ConjureProjectParams{

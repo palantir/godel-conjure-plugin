@@ -77,6 +77,7 @@ type SingleConjureConfig struct {
 //
 // Projects are compared in sorted order to ensure deterministic error messages.
 // An empty map indicates no conflicts were found.
+// For identical directories, only one error is reported (for the lexicographically first project).
 func (c *ConjurePluginConfig) OutputDirConflicts() map[string][]error {
 	type Project struct {
 		name   string
@@ -105,7 +106,8 @@ func (c *ConjurePluginConfig) OutputDirConflicts() map[string][]error {
 			p1Dir := p1.config.ResolvedOutputDir(p1.name)
 			p2Dir := p2.config.ResolvedOutputDir(p2.name)
 
-			if p1Dir == p2Dir {
+			if p1Dir == p2Dir && i1 < i2 {
+				// For identical directories, report the error for the first project only
 				result[p1.name] = append(result[p1.name], fmt.Errorf("project %qs output directory %q is the same as project %qs output directory", p1.name, p1Dir, p2.name))
 			} else if validate.IsSubdirectory(p1Dir, p2Dir) {
 				result[p1.name] = append(result[p1.name], fmt.Errorf("project %qs output directory %q contains project %qs output directory %q as a subdirectory", p1.name, p1Dir, p2.name, p2Dir))
