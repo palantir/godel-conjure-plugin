@@ -108,9 +108,9 @@ func (c *ConjurePluginConfig) OutputDirConflicts() map[string][]error {
 
 			if p1Dir == p2Dir && i1 < i2 {
 				// For identical directories, report the error for the first project only
-				result[p1.name] = append(result[p1.name], fmt.Errorf("project %qs output directory %q is the same as project %qs output directory", p1.name, p1Dir, p2.name))
+				result[p1.name] = append(result[p1.name], fmt.Errorf("project %q and %q have the same output directory %q", p1.name, p2.name, p1Dir))
 			} else if validate.IsSubdirectory(p1Dir, p2Dir) {
-				result[p1.name] = append(result[p1.name], fmt.Errorf("project %qs output directory %q contains project %qs output directory %q as a subdirectory", p1.name, p1Dir, p2.name, p2Dir))
+				result[p1.name] = append(result[p1.name], fmt.Errorf("output directory %q of project %q is a subdirectory of output directory %q of project %q", p2Dir, p2.name, p1Dir, p1Dir))
 			}
 		}
 	}
