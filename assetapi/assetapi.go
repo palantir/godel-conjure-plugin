@@ -17,5 +17,5 @@ package assetapi
 type AssetType string
 
 const (
-	ConjureBackcompat AssetType = "backcompat"
+	ConjureBackCompat AssetType = "backcompat"
 )
