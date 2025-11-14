@@ -753,6 +753,110 @@ allow-conflicting-output-dirs: false
 `,
 				},
 			},
+			{
+				Name: "v1 config with conflicting output directories sets allow-conflicting-output-dirs",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  project-1:
+    output-dir: shared-output
+    ir-locator: https://example.com/project1.json
+  project-2:
+    output-dir: shared-output
+    ir-locator: https://example.com/project2.json
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+allow-conflicting-output-dirs: true
+projects:
+  project-1:
+    output-dir: shared-output
+    ir-locator:
+      type: auto
+      locator: https://example.com/project1.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+  project-2:
+    output-dir: shared-output
+    ir-locator:
+      type: auto
+      locator: https://example.com/project2.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config with nested output directories sets allow-conflicting-output-dirs",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  parent-project:
+    output-dir: parent
+    ir-locator: https://example.com/parent.json
+  child-project:
+    output-dir: parent/child
+    ir-locator: https://example.com/child.json
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+allow-conflicting-output-dirs: true
+projects:
+  child-project:
+    output-dir: parent/child
+    ir-locator:
+      type: auto
+      locator: https://example.com/child.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+  parent-project:
+    output-dir: parent
+    ir-locator:
+      type: auto
+      locator: https://example.com/parent.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config without conflicting output directories does not set allow-conflicting-output-dirs",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  project-1:
+    output-dir: output1
+    ir-locator: https://example.com/project1.json
+  project-2:
+    output-dir: output2
+    ir-locator: https://example.com/project2.json
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+projects:
+  project-1:
+    output-dir: output1
+    ir-locator:
+      type: auto
+      locator: https://example.com/project1.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+  project-2:
+    output-dir: output2
+    ir-locator:
+      type: auto
+      locator: https://example.com/project2.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
 		},
 	)
 }
