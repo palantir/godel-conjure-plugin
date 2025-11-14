@@ -15,6 +15,9 @@
 package v1
 
 import (
+	"path/filepath"
+
+	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -82,10 +85,84 @@ func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) err
 	return nil
 }
 
+func (v1proj *SingleConjureConfig) ToV2(projectName string) v2.SingleConjureConfig {
+	v2proj := v2.SingleConjureConfig{
+		IRLocator: v2.IRLocatorConfig{
+			Type:    v2.LocatorType(v1proj.IRLocator.Type),
+			Locator: v1proj.IRLocator.Locator,
+		},
+		GroupID:                  v1proj.GroupID,
+		Publish:                  v1proj.Publish,
+		Server:                   v1proj.Server,
+		CLI:                      v1proj.CLI,
+		AcceptFuncs:              v1proj.AcceptFuncs,
+		Extensions:               v1proj.Extensions,
+		SkipDeleteGeneratedFiles: true,
+	}
+
+	normalizedOutput := filepath.Clean(v1proj.OutputDir)
+	v2Default := filepath.Clean(filepath.Join(v2.DefaultOutputDir, projectName))
+
+	if normalizedOutput == v2Default {
+		// v1 output matches v2 default (internal/generated/conjure/{projectName}).
+		// Leave OutputDir empty to use v2's default, with OmitTopLevelProjectDir=false.
+	} else if normalizedOutput == filepath.Clean(v2.DefaultOutputDir) {
+		// v1 output is internal/generated/conjure (no project subdirectory).
+		// Leave OutputDir empty to use v2's default, but set OmitTopLevelProjectDir=true.
+		v2proj.OmitTopLevelProjectDir = true
+	} else if normalizedOutput == filepath.Clean(projectName) {
+		// v1 output is just the project name as a directory.
+		// Set OutputDir to "." and don't omit project dir to get ./{projectName}.
+		v2proj.OutputDir = "."
+	} else {
+		// v1 output is a custom path that doesn't match any v2 convention.
+		// Set OutputDir to the custom path and omit the project subdirectory.
+		v2proj.OutputDir = normalizedOutput
+		v2proj.OmitTopLevelProjectDir = true
+	}
+
+	return v2proj
+}
+
+// ToV2 intelligently converts a v1 config to v2, attempting to use v2 defaults when possible.
+// This is the conversion logic used by UpgradeConfig.
+func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
+	// Create v2 config with intelligent field mapping
+	v2cfg := v2.ConjurePluginConfig{
+		ConfigWithVersion: versionedconfig.ConfigWithVersion{Version: "2"},
+		GroupID:           v1cfg.GroupID,
+		ProjectConfigs:    make(map[string]v2.SingleConjureConfig),
+	}
+
+	// Convert each project using the per-project conversion logic
+	for projectName, v1proj := range v1cfg.ProjectConfigs {
+		v2cfg.ProjectConfigs[projectName] = v1proj.ToV2(projectName)
+	}
+
+	// Check if we need to allow conflicting output directories.
+	// We detect conflicts the same way ToParams does: exact same directory AND parent-child relationships.
+	// Calculate the actual output directories for each project
+	outputDirs := make(map[string][]string)
+	for projectName, proj := range v2cfg.ProjectConfigs {
+		resolvedOutputDir := proj.ResolvedOutputDir(projectName)
+		outputDirs[resolvedOutputDir] = append(outputDirs[resolvedOutputDir], projectName)
+	}
+
+	v2cfg.AllowConflictingOutputDirs = len(v2cfg.OutputDirConflicts()) > 0
+
+	return v2cfg
+}
+
 func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 	var cfg ConjurePluginConfig
 	if err := yaml.UnmarshalStrict(cfgBytes, &cfg); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal conjure-plugin v1 configuration")
 	}
+
+	cfgBytes, err := yaml.Marshal(cfg.ToV2())
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to marshal upgraded v2 configuration")
+	}
+
 	return cfgBytes, nil
 }

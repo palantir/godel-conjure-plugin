@@ -17,6 +17,7 @@ package config
 import (
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/legacy"
 	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
+	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 )
@@ -41,6 +42,8 @@ func UpgradeConfig(cfgBytes []byte) ([]byte, error) {
 		return nil, errors.Errorf("v0 configuration is not supported")
 	case "1":
 		return v1.UpgradeConfig(cfgBytes)
+	case "2":
+		return v2.UpgradeConfig(cfgBytes)
 	default:
 		return nil, errors.Errorf("unsupported version: %s", version)
 	}
