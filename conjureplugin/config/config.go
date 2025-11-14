@@ -24,10 +24,8 @@ import (
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
-	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	werror "github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -189,26 +187,13 @@ func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
 }
 
 func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
-	version, err := versionedconfig.ConfigVersion(inputBytes)
+	configBytes, err := UpgradeConfig(inputBytes)
 	if err != nil {
+		return ConjurePluginConfig{}, werror.Wrapf(err, "failed to upgrade configuration")
+	}
+	var cfg v2.ConjurePluginConfig
+	if err := yaml.UnmarshalStrict(configBytes, &cfg); err != nil {
 		return ConjurePluginConfig{}, werror.WithStack(err)
 	}
-
-	switch version {
-	case "", "1":
-		var cfg v1.ConjurePluginConfig
-		if err := yaml.UnmarshalStrict(inputBytes, &cfg); err != nil {
-			return ConjurePluginConfig{}, werror.WithStack(err)
-		}
-
-		return ConjurePluginConfig(cfg.ToV2()), nil
-	case "2":
-		var cfg v2.ConjurePluginConfig
-		if err := yaml.UnmarshalStrict(inputBytes, &cfg); err != nil {
-			return ConjurePluginConfig{}, werror.WithStack(err)
-		}
-		return ConjurePluginConfig(cfg), nil
-	default:
-		return ConjurePluginConfig{}, werror.Errorf("unsupported configuration version: %s", version)
-	}
+	return ConjurePluginConfig(cfg), nil
 }

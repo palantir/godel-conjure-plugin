@@ -73,6 +73,7 @@ types:
 `
 		yamlDir              = "yamlDir"
 		conjureYMLSubstitute = `
+version: 1
 projects:
   project-1:
     accept-funcs: true
@@ -330,6 +331,7 @@ types:
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(`
+version: 1
 projects:
   project-1:
     output-dir: conjure
@@ -373,6 +375,7 @@ types:
 `
 		yamlDir    = "yamlDir"
 		conjureYML = `
+version: 1
 projects:
   project-1:
     output-dir: conjure-output
@@ -444,6 +447,7 @@ func TestConjurePluginPublishAssetSpec(t *testing.T) {
 	const (
 		yamlDir    = "yamlDir"
 		conjureYML = `
+version: 1
 projects:
   project-1: { }
 `
@@ -769,6 +773,7 @@ types:
 `
 		yamlDir    = "yamlDir"
 		conjureYML = `
+version: 1
 projects:
   project-1:
     output-dir: conjure-output
