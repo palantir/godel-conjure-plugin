@@ -89,7 +89,6 @@ func newAcceptBackCompatBreaksCmd(checker Checker) *cobra.Command {
 		},
 	}
 	addBackCompatFlags(cmd, &params)
-
 	return cmd
 }
 
