@@ -21,8 +21,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const acceptBackCompatBreaksCmdName = "accept-backcompat-breaks"
+
 var acceptBackcompatBreaksCmd = &cobra.Command{
-	Use:   "accept-backcompat-breaks",
+	Use:   acceptBackCompatBreaksCmdName,
 	Short: "Accept current backward compatibility breaks",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackCompatCommand(

@@ -17,6 +17,7 @@ package backcompatasset
 import (
 	"github.com/palantir/godel-conjure-plugin/v6/assetapi"
 	assetapiinternal "github.com/palantir/godel-conjure-plugin/v6/internal/assetapi"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -113,7 +114,7 @@ func addBackCompatFlags(cmd *cobra.Command, params *BackCompatParams) error {
 func markFlagsRequired(cmd *cobra.Command, flagNames ...string) error {
 	for _, currFlagName := range flagNames {
 		if err := cmd.MarkFlagRequired(currFlagName); err != nil {
-			return err
+			return errors.Wrapf(err, "failed to mark flag %q as required", currFlagName)
 		}
 	}
 	return nil

@@ -34,7 +34,7 @@ var backcompatCmd = &cobra.Command{
 				return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal)
 			},
 			func(err error) error {
-				return fmt.Errorf(`failed to check conjure backcompat: %w\nto accept breaks run "./godelw conjure-accept-backcompat-breaks"`, err)
+				return fmt.Errorf("Conjure projects had backwards compatibility issues : %w\nIf the breaks are intentional please run `./godelw %s` to accept them", err, acceptBackCompatBreaksCmdName)
 			},
 		)
 	},
