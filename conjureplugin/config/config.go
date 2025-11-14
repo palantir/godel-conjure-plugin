@@ -26,7 +26,7 @@ import (
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
-	werror "github.com/pkg/errors"
+	pkgerror "github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -68,7 +68,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
 		if err != nil {
-			return conjureplugin.ConjureProjectParams{}, nil, werror.Wrapf(err, "failed to convert configuration for %s to provider", key)
+			return conjureplugin.ConjureProjectParams{}, nil, pkgerror.Wrapf(err, "failed to convert configuration for %s to provider", key)
 		}
 
 		groupID := c.GroupID
@@ -139,7 +139,7 @@ func ToIRLocatorConfig(in *IRLocatorConfig) *v2.IRLocatorConfig {
 
 func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 	if cfg.Locator == "" {
-		return nil, werror.Errorf("locator cannot be empty")
+		return nil, pkgerror.Errorf("locator cannot be empty")
 	}
 
 	locatorType := cfg.Type
@@ -174,14 +174,14 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 	case v2.LocatorTypeIRFile:
 		return conjureplugin.NewLocalFileIRProvider(cfg.Locator), nil
 	default:
-		return nil, werror.Errorf("unknown locator type: %s", locatorType)
+		return nil, pkgerror.Errorf("unknown locator type: %s", locatorType)
 	}
 }
 
 func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
 	bytes, err := os.ReadFile(f)
 	if err != nil {
-		return ConjurePluginConfig{}, werror.WithStack(err)
+		return ConjurePluginConfig{}, pkgerror.WithStack(err)
 	}
 	return ReadConfigFromBytes(bytes)
 }
@@ -189,11 +189,11 @@ func ReadConfigFromFile(f string) (ConjurePluginConfig, error) {
 func ReadConfigFromBytes(inputBytes []byte) (ConjurePluginConfig, error) {
 	configBytes, err := UpgradeConfig(inputBytes)
 	if err != nil {
-		return ConjurePluginConfig{}, werror.Wrapf(err, "failed to upgrade configuration")
+		return ConjurePluginConfig{}, pkgerror.Wrapf(err, "failed to upgrade configuration")
 	}
 	var cfg v2.ConjurePluginConfig
 	if err := yaml.UnmarshalStrict(configBytes, &cfg); err != nil {
-		return ConjurePluginConfig{}, werror.WithStack(err)
+		return ConjurePluginConfig{}, pkgerror.WithStack(err)
 	}
 	return ConjurePluginConfig(cfg), nil
 }
