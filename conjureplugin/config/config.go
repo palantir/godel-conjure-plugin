@@ -100,7 +100,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 	}
 
 	if err := errors.Join(conflictErrs...); err != nil {
-		return conjureplugin.ConjureProjectParams{}, nil, errors.Join(fmt.Errorf("cannot delete generated files when output directories conflict"), err)
+		return conjureplugin.ConjureProjectParams{}, nil, fmt.Errorf("cannot delete generated files when output directories conflict: %w", err)
 	}
 
 	var err error
