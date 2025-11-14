@@ -916,8 +916,10 @@ projects:
 	defer runPluginCleanup()
 	require.NoError(t, err, outputBuf.String())
 
-	assert.Equal(t, `[WARNING]: project "project-1"s output directory "conjure-output" is the same as project "project-2"s output directory
-[WARNING]: project "project-3"s output directory "conjure-output-2" is the same as project "project-4"s output directory
+	assert.Equal(t, `[WARNING]: project "project-1" and "project-2" have the same output directory "conjure-output"
+[WARNING]: project "project-2" and "project-1" have the same output directory "conjure-output"
+[WARNING]: project "project-3" and "project-4" have the same output directory "conjure-output-2"
+[WARNING]: project "project-4" and "project-3" have the same output directory "conjure-output-2"
 `, outputBuf.String())
 }
 

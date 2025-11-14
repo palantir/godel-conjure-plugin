@@ -532,7 +532,8 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 				},
 			},
 			wantWarnings: []string{
-				`project "project-1"s output directory "outputDir" is the same as project "project-2"s output directory`,
+				`project "project-1" and "project-2" have the same output directory "outputDir"`,
+				`project "project-2" and "project-1" have the same output directory "outputDir"`,
 			},
 		},
 		{
@@ -583,7 +584,8 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 				},
 			},
 			wantWarnings: []string{
-				`project "project-1"s output directory "outputDir" is the same as project "project-2"s output directory`,
+				`project "project-1" and "project-2" have the same output directory "outputDir"`,
+				`project "project-2" and "project-1" have the same output directory "outputDir"`,
 			},
 		},
 		{
@@ -668,8 +670,10 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 				},
 			},
 			wantWarnings: []string{
-				`project "project-1"s output directory "outputDir" is the same as project "project-2"s output directory`,
-				`project "project-3"s output directory "outputDir-other" is the same as project "project-4"s output directory`,
+				`project "project-1" and "project-2" have the same output directory "outputDir"`,
+				`project "project-2" and "project-1" have the same output directory "outputDir"`,
+				`project "project-3" and "project-4" have the same output directory "outputDir-other"`,
+				`project "project-4" and "project-3" have the same output directory "outputDir-other"`,
 			},
 		},
 		{
@@ -720,7 +724,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 				},
 			},
 			wantWarnings: []string{
-				`project "project-1"s output directory "outputDir" contains project "project-2"s output directory "outputDir/subdir" as a subdirectory`,
+				`output directory "outputDir/subdir" of project "project-2" is a subdirectory of output directory "outputDir" of project "project-1"`,
 			},
 		},
 		{
@@ -771,7 +775,7 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 				},
 			},
 			wantWarnings: []string{
-				`project "project-1"s output directory "base/dir" contains project "project-2"s output directory "base/dir/nested" as a subdirectory`,
+				`output directory "base/dir/nested" of project "project-2" is a subdirectory of output directory "base/dir" of project "project-1"`,
 			},
 		},
 	} {
@@ -819,7 +823,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "output directory conflicts detected\nproject \"project-1\"s output directory \"outputDir\" is the same as project \"project-2\"s output directory",
+			wantError: "output directory conflicts detected\nproject \"project-1\" and \"project-2\" have the same output directory \"outputDir\"\nproject \"project-2\" and \"project-1\" have the same output directory \"outputDir\"",
 		},
 		{
 			name: "Error for parent-child directory relationship when conflicts not allowed",
@@ -846,7 +850,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "output directory conflicts detected\nproject \"project-1\"s output directory \"base/dir\" contains project \"project-2\"s output directory \"base/dir/nested\" as a subdirectory",
+			wantError: "output directory conflicts detected\noutput directory \"base/dir/nested\" of project \"project-2\" is a subdirectory of output directory \"base/dir\" of project \"project-1\"",
 		},
 		{
 			name: "Error when attempting to delete with same output directory",
@@ -872,7 +876,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "cannot delete generated files when output directories conflict\nproject \"project-1\"s output directory \"outputDir\" is the same as project \"project-2\"s output directory",
+			wantError: "cannot delete generated files when output directories conflict: project \"project-1\" and \"project-2\" have the same output directory \"outputDir\"\nproject \"project-2\" and \"project-1\" have the same output directory \"outputDir\"",
 		},
 		{
 			name: "Error when attempting to delete with nested output directory",
@@ -898,7 +902,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "cannot delete generated files when output directories conflict\nproject \"project-1\"s output directory \"base/dir\" contains project \"project-2\"s output directory \"base/dir/nested\" as a subdirectory",
+			wantError: "cannot delete generated files when output directories conflict: output directory \"base/dir/nested\" of project \"project-2\" is a subdirectory of output directory \"base/dir\" of project \"project-1\"",
 		},
 		{
 			name: "Error when attempting to delete with one project having skip=false and conflicts exist",
@@ -924,7 +928,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "cannot delete generated files when output directories conflict\nproject \"project-1\"s output directory \"outputDir\" is the same as project \"project-2\"s output directory",
+			wantError: "cannot delete generated files when output directories conflict: project \"project-1\" and \"project-2\" have the same output directory \"outputDir\"",
 		},
 		{
 			name: "Error for invalid project name with forward slash",
