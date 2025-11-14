@@ -823,7 +823,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "output directory conflicts detected\nproject \"project-1\" and \"project-2\" have the same output directory \"outputDir\"\nproject \"project-2\" and \"project-1\" have the same output directory \"outputDir\"",
+			wantError: "output directory conflicts detected: project \"project-1\" and \"project-2\" have the same output directory \"outputDir\"\nproject \"project-2\" and \"project-1\" have the same output directory \"outputDir\"",
 		},
 		{
 			name: "Error for parent-child directory relationship when conflicts not allowed",
@@ -850,7 +850,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "output directory conflicts detected\noutput directory \"base/dir/nested\" of project \"project-2\" is a subdirectory of output directory \"base/dir\" of project \"project-1\"",
+			wantError: "output directory conflicts detected: output directory \"base/dir/nested\" of project \"project-2\" is a subdirectory of output directory \"base/dir\" of project \"project-1\"",
 		},
 		{
 			name: "Error when attempting to delete with same output directory",
