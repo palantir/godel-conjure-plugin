@@ -74,11 +74,11 @@ func (b *backCompatCheckerImpl) CheckBackCompat(
 	}
 
 	if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
-		fmt.Fprintf(b.stderr, "Conjure breaks found in project %q\n", project)
+		_, _ = fmt.Fprintf(b.stderr, "Conjure breaks found in project %q\n", project)
 		return fmt.Errorf("conjure breaks found in project %q", project)
 	}
 
-	fmt.Fprintf(b.stderr, "Failed to execute check conjure backcompat on project %q\n", project)
+	_, _ = fmt.Fprintf(b.stderr, "Failed to execute check conjure backcompat on project %q\n", project)
 	return fmt.Errorf("failed to execute check conjure backcompat on project %q", project)
 }
 
@@ -99,7 +99,7 @@ func (b *backCompatCheckerImpl) AcceptBackCompatBreaks(
 
 	err := cmd.Run()
 	if err != nil {
-		fmt.Fprintf(b.stderr, "Failed to accept conjure backcompat breaks for project %q\n", project)
+		_, _ = fmt.Fprintf(b.stderr, "Failed to accept conjure backcompat breaks for project %q\n", project)
 		return fmt.Errorf("failed to execute accept conjure backcompat breaks on project %q", project)
 	}
 
