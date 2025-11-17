@@ -876,7 +876,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "cannot delete generated files when output directories conflict: project \"project-1\" and \"project-2\" have the same output directory \"outputDir\"\nproject \"project-2\" and \"project-1\" have the same output directory \"outputDir\"",
+			wantError: "project \"project-1\" cannot delete generated files when output directories conflict\nproject \"project-1\" and \"project-2\" have the same output directory \"outputDir\"",
 		},
 		{
 			name: "Error when attempting to delete with nested output directory",
@@ -902,7 +902,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "cannot delete generated files when output directories conflict: output directory \"base/dir/nested\" of project \"project-2\" is a subdirectory of output directory \"base/dir\" of project \"project-1\"",
+			wantError: "project \"project-1\" cannot delete generated files when output directories conflict\noutput directory \"base/dir/nested\" of project \"project-2\" is a subdirectory of output directory \"base/dir\" of project \"project-1\"",
 		},
 		{
 			name: "Error when attempting to delete with one project having skip=false and conflicts exist",
@@ -928,7 +928,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "cannot delete generated files when output directories conflict: project \"project-1\" and \"project-2\" have the same output directory \"outputDir\"",
+			wantError: "project \"project-1\" cannot delete generated files when output directories conflict\nproject \"project-1\" and \"project-2\" have the same output directory \"outputDir\"",
 		},
 		{
 			name: "Error for invalid project name with forward slash",
