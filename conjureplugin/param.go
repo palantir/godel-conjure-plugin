@@ -47,6 +47,10 @@ type ConjureProjectParam struct {
 	Publish bool
 	// SkipConjureBackcompat specifies whether or not backcompat checks should be skipped for this Conjure project.
 	SkipConjureBackcompat bool
+	// SkipDeleteGeneratedFiles skips cleanup of old generated files before regeneration.
+	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
+	// When true, preserves v1 behavior (no cleanup).
+	SkipDeleteGeneratedFiles bool
 }
 
 // ForEach iterates over all project parameters in the order specified by SortedKeys,

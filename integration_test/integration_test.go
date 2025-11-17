@@ -73,6 +73,7 @@ types:
 `
 		yamlDir              = "yamlDir"
 		conjureYMLSubstitute = `
+version: 1
 projects:
   project-1:
     accept-funcs: true
@@ -330,6 +331,7 @@ types:
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(`
+version: 1
 projects:
   project-1:
     output-dir: conjure
@@ -373,6 +375,7 @@ types:
 `
 		yamlDir    = "yamlDir"
 		conjureYML = `
+version: 1
 projects:
   project-1:
     output-dir: conjure-output
@@ -444,6 +447,7 @@ func TestConjurePluginPublishAssetSpec(t *testing.T) {
 	const (
 		yamlDir    = "yamlDir"
 		conjureYML = `
+version: 1
 projects:
   project-1: { }
 `
@@ -632,26 +636,224 @@ conjure-projects:
 				WantOutput: "",
 			},
 			{
-				Name: "current config is unmodified",
+				Name: "v1 config with custom output-dir upgrades to v2 with escape valves",
 				ConfigFiles: map[string]string{
-					"godel/config/conjure-plugin.yml": `
-version: 1
+					"godel/config/conjure-plugin.yml": `version: 1
 projects:
   sls-health-api:
-    # comment
     output-dir: conjure
     ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
 `,
 				},
-				WantOutput: "",
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
 				WantFiles: map[string]string{
-					"godel/config/conjure-plugin.yml": `
-version: 1
+					"godel/config/conjure-plugin.yml": `version: "2"
 projects:
   sls-health-api:
-    # comment
     output-dir: conjure
+    ir-locator:
+      type: auto
+      locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config matching v2 defaults upgrades to clean v2",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  myproject:
+    output-dir: internal/generated/conjure/myproject
+    ir-locator: https://example.com/ir.json
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+projects:
+  myproject:
+    ir-locator:
+      type: auto
+      locator: https://example.com/ir.json
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config with base internal/generated/conjure upgrades with escape valves",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  api:
+    output-dir: internal/generated/conjure
+    ir-locator: ./conjure/api.yml
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+projects:
+  api:
+    ir-locator:
+      type: auto
+      locator: ./conjure/api.yml
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config where output-dir matches project name upgrades cleanly",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  mag-api:
+    output-dir: mag-api
+    ir-locator: ./conjure/mag-api.yml
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+projects:
+  mag-api:
+    output-dir: .
+    ir-locator:
+      type: auto
+      locator: ./conjure/mag-api.yml
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v2 config is validated and unchanged",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 2
+projects:
+  sls-health-api:
+    omit-top-level-project-dir:  true
+    # comment
+    output-dir: internal/generated/conjure
     ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+allow-conflicting-output-dirs: false
+`,
+				},
+				WantOutput: "",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 2
+projects:
+  sls-health-api:
+    omit-top-level-project-dir:  true
+    # comment
+    output-dir: internal/generated/conjure
+    ir-locator: https://publish.artifactory.com/artifactory/internal-conjure-release/com/palantir/spec/health-api/3.2.0/health-api-3.2.0.json
+allow-conflicting-output-dirs: false
+`,
+				},
+			},
+			{
+				Name: "v1 config with conflicting output directories sets allow-conflicting-output-dirs",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  project-1:
+    output-dir: shared-output
+    ir-locator: https://example.com/project1.json
+  project-2:
+    output-dir: shared-output
+    ir-locator: https://example.com/project2.json
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+allow-conflicting-output-dirs: true
+projects:
+  project-1:
+    output-dir: shared-output
+    ir-locator:
+      type: auto
+      locator: https://example.com/project1.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+  project-2:
+    output-dir: shared-output
+    ir-locator:
+      type: auto
+      locator: https://example.com/project2.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config with nested output directories sets allow-conflicting-output-dirs",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  parent-project:
+    output-dir: parent
+    ir-locator: https://example.com/parent.json
+  child-project:
+    output-dir: parent/child
+    ir-locator: https://example.com/child.json
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+allow-conflicting-output-dirs: true
+projects:
+  child-project:
+    output-dir: parent/child
+    ir-locator:
+      type: auto
+      locator: https://example.com/child.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+  parent-project:
+    output-dir: parent
+    ir-locator:
+      type: auto
+      locator: https://example.com/parent.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+`,
+				},
+			},
+			{
+				Name: "v1 config without conflicting output directories does not set allow-conflicting-output-dirs",
+				ConfigFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: 1
+projects:
+  project-1:
+    output-dir: output1
+    ir-locator: https://example.com/project1.json
+  project-2:
+    output-dir: output2
+    ir-locator: https://example.com/project2.json
+`,
+				},
+				WantOutput: "Upgraded configuration for conjure-plugin.yml\n",
+				WantFiles: map[string]string{
+					"godel/config/conjure-plugin.yml": `version: "2"
+projects:
+  project-1:
+    output-dir: output1
+    ir-locator:
+      type: auto
+      locator: https://example.com/project1.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+  project-2:
+    output-dir: output2
+    ir-locator:
+      type: auto
+      locator: https://example.com/project2.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
 `,
 				},
 			},
@@ -675,6 +877,7 @@ types:
 `
 		yamlDir    = "yamlDir"
 		conjureYML = `
+version: 1
 projects:
   project-1:
     output-dir: conjure-output
@@ -713,7 +916,174 @@ projects:
 	defer runPluginCleanup()
 	require.NoError(t, err, outputBuf.String())
 
-	assert.Equal(t, `[WARNING]: Projects [project-1 project-2] are configured with the same outputDir "conjure-output", which may cause conflicts when generating Conjure output
-[WARNING]: Projects [project-3 project-4] are configured with the same outputDir "conjure-output-2", which may cause conflicts when generating Conjure output
+	assert.Equal(t, `[WARNING]: project "project-1" and "project-2" have the same output directory "conjure-output"
+[WARNING]: project "project-2" and "project-1" have the same output directory "conjure-output"
+[WARNING]: project "project-3" and "project-4" have the same output directory "conjure-output-2"
+[WARNING]: project "project-4" and "project-3" have the same output directory "conjure-output-2"
 `, outputBuf.String())
+}
+
+func TestSkipDeleteGeneratedFiles(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.conjure.test.api
+    objects:
+      TestCase:
+        fields:
+          name: string
+`
+		yamlDir = "yamlDir"
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	defer cleanup()
+
+	ymlDir := filepath.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+
+	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	require.NoError(t, err)
+
+	t.Run("skip-delete-generated-files=false deletes old generated files", func(t *testing.T) {
+		// Create config with skip-delete-generated-files: false (explicit)
+		conjureYML := `version: 2
+projects:
+  test-project:
+    output-dir: conjure-output
+    omit-top-level-project-dir: true
+    ir-locator: ` + yamlDir + `
+    skip-delete-generated-files: false
+`
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+		require.NoError(t, err)
+
+		// First generation
+		outputBuf := &bytes.Buffer{}
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify file was generated
+		generatedFilePath := filepath.Join(projectDir, "conjure-output", "conjure", "test", "api", "structs.conjure.go")
+		originalContent, err := os.ReadFile(generatedFilePath)
+		require.NoError(t, err)
+		require.Contains(t, string(originalContent), "type TestCase struct")
+
+		// Create an additional conjure file that should be deleted
+		oldFilePath := filepath.Join(projectDir, "conjure-output", "conjure", "test", "api", "oldfile.conjure.go")
+		err = os.WriteFile(oldFilePath, []byte("// This is an old generated file\npackage api"), 0644)
+		require.NoError(t, err)
+
+		// Modify the generated file to verify it gets regenerated
+		err = os.WriteFile(generatedFilePath, []byte("// MODIFIED CONTENT"), 0644)
+		require.NoError(t, err)
+
+		// Second generation - should delete old files and regenerate
+		outputBuf = &bytes.Buffer{}
+		runPluginCleanup, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify the old file was deleted
+		_, err = os.Stat(oldFilePath)
+		assert.True(t, os.IsNotExist(err), "expected old conjure file to be deleted")
+
+		// Verify the modified file was regenerated (not preserved)
+		newContent, err := os.ReadFile(generatedFilePath)
+		require.NoError(t, err)
+		assert.NotEqual(t, "// MODIFIED CONTENT", string(newContent), "expected file to be regenerated, not preserved")
+		assert.Contains(t, string(newContent), "type TestCase struct", "expected regenerated file to contain correct content")
+	})
+
+	t.Run("skip-delete-generated-files=true preserves existing generated files", func(t *testing.T) {
+		// Create config with skip-delete-generated-files: true
+		conjureYML := `version: 2
+projects:
+  test-project:
+    output-dir: conjure-output2
+    omit-top-level-project-dir: true
+    ir-locator: ` + yamlDir + `
+    skip-delete-generated-files: true
+`
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+		require.NoError(t, err)
+
+		// First generation
+		outputBuf := &bytes.Buffer{}
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify file was generated
+		generatedFilePath := filepath.Join(projectDir, "conjure-output2", "conjure", "test", "api", "structs.conjure.go")
+		originalContent, err := os.ReadFile(generatedFilePath)
+		require.NoError(t, err)
+		require.Contains(t, string(originalContent), "type TestCase struct")
+
+		// Create an additional conjure file that should NOT be deleted
+		oldFilePath := filepath.Join(projectDir, "conjure-output2", "conjure", "test", "api", "oldfile.conjure.go")
+		oldFileContent := "// This is an old generated file\npackage api"
+		err = os.WriteFile(oldFilePath, []byte(oldFileContent), 0644)
+		require.NoError(t, err)
+
+		// Second generation - should NOT delete old files (v1 behavior)
+		outputBuf = &bytes.Buffer{}
+		runPluginCleanup, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify the old file was NOT deleted (preserved)
+		preservedContent, err := os.ReadFile(oldFilePath)
+		require.NoError(t, err, "expected old conjure file to be preserved")
+		assert.Equal(t, oldFileContent, string(preservedContent), "expected old file content to be unchanged")
+
+		// Verify the main file was still regenerated
+		newContent, err := os.ReadFile(generatedFilePath)
+		require.NoError(t, err)
+		assert.Contains(t, string(newContent), "type TestCase struct", "expected main file to be regenerated")
+	})
+
+	t.Run("default behavior (omitted) deletes old generated files", func(t *testing.T) {
+		// Create config WITHOUT skip-delete-generated-files (should default to false)
+		conjureYML := `version: 2
+projects:
+  test-project:
+    output-dir: conjure-output3
+    omit-top-level-project-dir: true
+    ir-locator: ` + yamlDir + `
+`
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+		require.NoError(t, err)
+
+		// First generation
+		outputBuf := &bytes.Buffer{}
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Create an old file that should be deleted by default
+		oldFilePath := filepath.Join(projectDir, "conjure-output3", "conjure", "test", "api", "oldfile.conjure.go")
+		err = os.WriteFile(oldFilePath, []byte("// This is an old generated file\npackage api"), 0644)
+		require.NoError(t, err)
+
+		// Second generation - should delete old files (default behavior)
+		outputBuf = &bytes.Buffer{}
+		runPluginCleanup, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Verify the old file was deleted (default is false)
+		_, err = os.Stat(oldFilePath)
+		assert.True(t, os.IsNotExist(err), "expected old conjure file to be deleted by default")
+	})
 }
