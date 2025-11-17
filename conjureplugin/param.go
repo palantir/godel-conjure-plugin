@@ -14,10 +14,6 @@
 
 package conjureplugin
 
-import (
-	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
-)
-
 type ConjureProjectParams struct {
 	SortedKeys []string
 	Params     map[string]ConjureProjectParam
@@ -67,34 +63,4 @@ func (p *ConjureProjectParams) ForEach(fn func(project string, param ConjureProj
 	}
 
 	return errs
-}
-
-// ForEachBackCompatProject iterates over all project parameters that should run backcompat checks
-// (i.e., projects where SkipConjureBackcompat is false and IR is generated from YAML).
-// For each eligible project, it generates the IR bytes, writes them to a temporary file,
-// and invokes the provided function with the project name, parameter, and IR file path.
-// Returns a map of project names to their errors (only includes projects that errored).
-func (p *ConjureProjectParams) ForEachBackCompatProject(
-	fn func(project string, param ConjureProjectParam, irFile string) error,
-) map[string]error {
-	return p.ForEach(func(project string, param ConjureProjectParam) error {
-		if param.SkipConjureBackcompat {
-			return nil
-		}
-		if !param.IRProvider.GeneratedFromYAML() {
-			return nil
-		}
-
-		bytes, err := param.IRProvider.IRBytes()
-		if err != nil {
-			return err
-		}
-
-		file, err := tempfilecreator.WriteBytesToTempFile(bytes)
-		if err != nil {
-			return err
-		}
-
-		return fn(project, param, file)
-	})
 }
