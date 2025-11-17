@@ -72,7 +72,7 @@ func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param 
 
 		file, err := tempfilecreator.WriteBytesToTempFile(bytes)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "failed to create temporary IR file for project %q", project)
 		}
 
 		return runCmd(project, param, file)
