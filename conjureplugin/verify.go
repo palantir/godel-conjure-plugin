@@ -22,17 +22,11 @@ import (
 	"path/filepath"
 
 	"github.com/palantir/conjure-go/v6/conjure"
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/godel/v2/pkg/dirchecksum"
 	"github.com/pkg/errors"
 )
 
-// diffOnDisk generates the conjure files in memory and compares checksums to on-disk files.
-func diffOnDisk(conjureDefinition spec.ConjureDefinition, projectDir string, outputConf conjure.OutputConfiguration) (dirchecksum.ChecksumsDiff, error) {
-	files, err := conjure.GenerateOutputFiles(conjureDefinition, outputConf)
-	if err != nil {
-		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "conjure failed")
-	}
+func diffOnDisk(projectDir string, files []*conjure.OutputFile) (dirchecksum.ChecksumsDiff, error) {
 	originalChecksums, err := checksumOnDiskFiles(files, projectDir)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute on-disk checksums")
