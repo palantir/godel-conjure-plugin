@@ -19,7 +19,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/palantir/conjure-go/v6/conjure"
@@ -58,20 +57,10 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return errors.Wrap(err, "conjure failed")
 		}
 
-		filesThatWillGetGenned := make(map[string]struct{})
-		for _, file := range files {
-			filesThatWillGetGenned[file.AbsPath()] = struct{}{}
-		}
-
-		filesThatWillGetDeleted, err := getAllGeneratedFiles(outputConf.OutputDir)
+		filesToDelete, err := computeObsoleteFiles(outputConf.OutputDir, files)
 		if err != nil {
 			return err
 		}
-
-		filesThatWillGetDeleted = slices.DeleteFunc(filesThatWillGetDeleted, func(s string) bool {
-			_, ok := filesThatWillGetGenned[s]
-			return ok
-		})
 
 		if verify {
 			diff, err := diffOnDisk(projectDir, files)
@@ -84,9 +73,11 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				msg = diff.String()
 			}
 
-			if len(filesThatWillGetDeleted) > 0 {
-				msg += "\n\n things will get deleted\n"
-				msg += fmt.Sprintf("%v\n", filesThatWillGetDeleted)
+			if len(filesToDelete) > 0 {
+				msg += "\n\nThe following generated files will be deleted:\n"
+				for _, file := range filesToDelete {
+					msg += fmt.Sprintf("  - %s\n", file)
+				}
 			}
 
 			if msg != "" {
@@ -94,7 +85,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			}
 		} else {
 			if !currParam.SkipDeleteGeneratedFiles {
-				for _, file := range filesThatWillGetDeleted {
+				for _, file := range filesToDelete {
 					if err := os.Remove(file); err != nil {
 						return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
 					}
@@ -134,6 +125,35 @@ func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefiniti
 	return conjureDefinition, nil
 }
 
+// computeObsoleteFiles identifies existing generated files that are no longer part of the
+// current generation output and should be deleted. It compares all Conjure-generated files
+// currently on disk in the output directory against the set of files that will be generated,
+// returning those that exist but won't be regenerated.
+func computeObsoleteFiles(outputDir string, filesToGenerate []*conjure.OutputFile) ([]string, error) {
+	existingFiles, err := getAllGeneratedFiles(outputDir)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build a set of file paths that will be generated
+	generatedPaths := make(map[string]struct{}, len(filesToGenerate))
+	for _, file := range filesToGenerate {
+		generatedPaths[file.AbsPath()] = struct{}{}
+	}
+
+	// Find files that exist but won't be regenerated
+	var obsoleteFiles []string
+	for _, existingFile := range existingFiles {
+		if _, willBeGenerated := generatedPaths[existingFile]; !willBeGenerated {
+			obsoleteFiles = append(obsoleteFiles, existingFile)
+		}
+	}
+
+	return obsoleteFiles, nil
+}
+
+// getAllGeneratedFiles returns the absolute paths of all Conjure-generated files
+// (files ending in .conjure.go or .conjure.json) within the specified output directory.
 func getAllGeneratedFiles(outputDir string) ([]string, error) {
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		return nil, nil
@@ -149,8 +169,7 @@ func getAllGeneratedFiles(outputDir string) ([]string, error) {
 			return nil
 		}
 
-		name := d.Name()
-		if strings.HasSuffix(name, ".conjure.go") || strings.HasSuffix(name, ".conjure.json") {
+		if isConjureGeneratedFile(d.Name()) {
 			files = append(files, path)
 		}
 
@@ -159,15 +178,19 @@ func getAllGeneratedFiles(outputDir string) ([]string, error) {
 		return nil, err
 	}
 
-	var abs []string
+	abs := make([]string, 0, len(files))
 	for _, file := range files {
-		ab, err := filepath.Abs(file)
+		absPath, err := filepath.Abs(file)
 		if err != nil {
 			return nil, err
 		}
-
-		abs = append(abs, ab)
+		abs = append(abs, absPath)
 	}
 
 	return abs, nil
+}
+
+// isConjureGeneratedFile returns true if the filename matches the pattern for Conjure-generated files.
+func isConjureGeneratedFile(filename string) bool {
+	return strings.HasSuffix(filename, ".conjure.go") || strings.HasSuffix(filename, ".conjure.json")
 }
