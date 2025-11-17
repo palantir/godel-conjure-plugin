@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/palantir/conjure-go/v6/conjure"
@@ -51,23 +52,58 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
 		}
+
+		files, err := conjure.GenerateOutputFiles(conjureDef, outputConf)
+		if err != nil {
+			return errors.Wrap(err, "conjure failed")
+		}
+
+		filesThatWillGetGenned := make(map[string]struct{})
+		for _, file := range files {
+			filesThatWillGetGenned[file.AbsPath()] = struct{}{}
+		}
+
+		filesThatWillGetDeleted, err := getAllGeneratedFiles(outputConf.OutputDir)
+		if err != nil {
+			return err
+		}
+
+		filesThatWillGetDeleted = slices.DeleteFunc(filesThatWillGetDeleted, func(s string) bool {
+			_, ok := filesThatWillGetGenned[s]
+			return ok
+		})
+
 		if verify {
-			diff, err := diffOnDisk(conjureDef, projectDir, outputConf)
+			diff, err := diffOnDisk(projectDir, files)
 			if err != nil {
 				return err
 			}
+
+			var msg string
 			if len(diff.Diffs) > 0 {
-				verifyFailedFn(k, diff.String())
+				msg = diff.String()
+			}
+
+			if len(filesThatWillGetDeleted) > 0 {
+				msg += "\n\n things will get deleted\n"
+				msg += fmt.Sprintf("%v\n", filesThatWillGetDeleted)
+			}
+
+			if msg != "" {
+				verifyFailedFn(k, msg)
 			}
 		} else {
-			// Delete old generated files before regeneration unless skipped
 			if !currParam.SkipDeleteGeneratedFiles {
-				if err := deleteGeneratedFiles(outputConf.OutputDir); err != nil {
-					return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
+				for _, file := range filesThatWillGetDeleted {
+					if err := os.Remove(file); err != nil {
+						return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
+					}
 				}
 			}
-			if err := conjure.Generate(conjureDef, outputConf); err != nil {
-				return err
+			for _, file := range files {
+				if err := file.Write(); err != nil {
+					return err
+				}
 			}
 		}
 		k++
@@ -98,38 +134,40 @@ func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefiniti
 	return conjureDefinition, nil
 }
 
-// deleteGeneratedFiles removes all Conjure-generated files (*.conjure.go and *.conjure.json)
-// from the specified output directory and its subdirectories.
-func deleteGeneratedFiles(outputDir string) error {
-	// Check if the output directory exists
+func getAllGeneratedFiles(outputDir string) ([]string, error) {
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
-		// Directory doesn't exist, nothing to delete
-		return nil
+		return nil, nil
 	}
 
-	// Walk the directory tree and delete files matching the Conjure-generated pattern
-	return filepath.WalkDir(outputDir, deleteConjureFile)
-}
-
-// deleteConjureFile is a filepath.WalkDirFunc that deletes Conjure-generated files.
-func deleteConjureFile(path string, d os.DirEntry, err error) error {
-	if err != nil {
-		// If we can't access a file/directory, skip it
-		return nil
-	}
-
-	// Only process files, not directories
-	if d.IsDir() {
-		return nil
-	}
-
-	// Check if the file matches the Conjure-generated pattern
-	name := d.Name()
-	if strings.HasSuffix(name, ".conjure.go") || strings.HasSuffix(name, ".conjure.json") {
-		if err := os.Remove(path); err != nil {
-			return errors.Wrapf(err, "failed to delete generated file %s", path)
+	var files []string
+	if err := filepath.WalkDir(outputDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return nil
 		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		name := d.Name()
+		if strings.HasSuffix(name, ".conjure.go") || strings.HasSuffix(name, ".conjure.json") {
+			files = append(files, path)
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
-	return nil
+	var abs []string
+	for _, file := range files {
+		ab, err := filepath.Abs(file)
+		if err != nil {
+			return nil, err
+		}
+
+		abs = append(abs, ab)
+	}
+
+	return abs, nil
 }
