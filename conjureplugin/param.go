@@ -15,8 +15,6 @@
 package conjureplugin
 
 import (
-	"errors"
-
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 )
 
@@ -53,24 +51,28 @@ type ConjureProjectParam struct {
 
 // ForEach iterates over all project parameters in the order specified by SortedKeys,
 // invoking the provided function for each project name and its associated parameter.
-// It accumulates and returns any errors produced by the function calls using errors.Join.
-func (p *ConjureProjectParams) ForEach(fn func(project string, param ConjureProjectParam) error) error {
-	var err error
+// It returns a map of project names to their errors (only includes projects that errored).
+// Returns an empty map if all projects succeeded.
+func (p *ConjureProjectParams) ForEach(fn func(project string, param ConjureProjectParam) error) map[string]error {
+	errs := make(map[string]error)
 
 	for _, project := range p.SortedKeys {
-		err = errors.Join(err, fn(project, p.Params[project]))
+		if err := fn(project, p.Params[project]); err != nil {
+			errs[project] = err
+		}
 	}
 
-	return err
+	return errs
 }
 
 // ForEachBackCompatProject iterates over all project parameters that should run backcompat checks
 // (i.e., projects where SkipConjureBackcompat is false and IR is generated from YAML).
 // For each eligible project, it generates the IR bytes, writes them to a temporary file,
 // and invokes the provided function with the project name, parameter, and IR file path.
+// Returns a map of project names to their errors (only includes projects that errored).
 func (p *ConjureProjectParams) ForEachBackCompatProject(
 	fn func(project string, param ConjureProjectParam, irFile string) error,
-) error {
+) map[string]error {
 	return p.ForEach(func(project string, param ConjureProjectParam) error {
 		if param.SkipConjureBackcompat {
 			return nil

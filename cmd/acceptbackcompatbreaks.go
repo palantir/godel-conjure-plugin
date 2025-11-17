@@ -16,6 +16,9 @@ package cmd
 
 import (
 	"fmt"
+	"maps"
+	"slices"
+	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	"github.com/spf13/cobra"
@@ -32,8 +35,16 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
 				return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, irFile, projectDirFlagVal)
 			},
-			func(err error) error {
-				return fmt.Errorf(`failed to accept conjure breaks: %w`, err)
+			func(failedProjects map[string]error) error {
+				projects := slices.Collect(maps.Keys(failedProjects))
+
+				if len(projects) == 1 {
+					return fmt.Errorf("failed to accept conjure breaks for project %q", projects[0])
+				}
+
+				slices.Sort(projects)
+
+				return fmt.Errorf("failed to accept conjure breaks for projects: %s", strings.Join(projects, ", "))
 			},
 		)
 	},

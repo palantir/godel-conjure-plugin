@@ -16,7 +16,11 @@ package cmd
 
 import (
 	"fmt"
+	"maps"
 	"os"
+	"slices"
+	"sort"
+	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
@@ -33,8 +37,16 @@ var backcompatCmd = &cobra.Command{
 			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
 				return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal)
 			},
-			func(err error) error {
-				return fmt.Errorf("Conjure projects had backwards compatibility issues : %w\nIf the breaks are intentional please run `./godelw %s` to accept them", err, acceptBackCompatBreaksCmdName)
+			func(failedProjects map[string]error) error {
+				projects := slices.Collect(maps.Keys(failedProjects))
+
+				if len(projects) == 1 {
+					return fmt.Errorf("Conjure project had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", projects[0], acceptBackCompatBreaksCmdName)
+				}
+
+				sort.Strings(projects)
+
+				return fmt.Errorf("Conjure projects had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", strings.Join(projects, ", "), acceptBackCompatBreaksCmdName)
 			},
 		)
 	},
@@ -44,7 +56,7 @@ func init() {
 	rootCmd.AddCommand(backcompatCmd)
 }
 
-func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param conjureplugin.ConjureProjectParam, irFile string) error, errorHandler func(error) error) error {
+func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param conjureplugin.ConjureProjectParam, irFile string) error, errorHandler func(map[string]error) error) error {
 	if loadedAssets.ConjureBackcompat == nil {
 		return nil
 	}
@@ -57,7 +69,7 @@ func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param 
 		return errors.Wrapf(err, "failed to set working directory")
 	}
 
-	if err := projectParams.ForEach(func(project string, param conjureplugin.ConjureProjectParam) error {
+	if errs := projectParams.ForEach(func(project string, param conjureplugin.ConjureProjectParam) error {
 		if param.SkipConjureBackcompat {
 			return nil
 		}
@@ -76,8 +88,8 @@ func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param 
 		}
 
 		return runCmd(project, param, file)
-	}); err != nil {
-		return errorHandler(err)
+	}); len(errs) > 0 {
+		return errorHandler(errs)
 	}
 	return nil
 }
