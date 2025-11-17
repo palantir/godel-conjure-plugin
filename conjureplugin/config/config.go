@@ -97,6 +97,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			CLI:                      currConfig.CLI,
 			Publish:                  publishVal,
 			GroupID:                  groupID,
+			SkipConjureBackcompat:    currConfig.SkipBackCompat,
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
 		}
 	}

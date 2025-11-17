@@ -41,8 +41,26 @@ type ConjureProjectParam struct {
 	AcceptFuncs bool
 	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
 	Publish bool
+	// SkipConjureBackcompat specifies whether or not backcompat checks should be skipped for this Conjure project.
+	SkipConjureBackcompat bool
 	// SkipDeleteGeneratedFiles skips cleanup of old generated files before regeneration.
 	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
 	// When true, preserves v1 behavior (no cleanup).
 	SkipDeleteGeneratedFiles bool
+}
+
+// ForEach iterates over all project parameters in the order specified by SortedKeys,
+// invoking the provided function for each project name and its associated parameter.
+// It returns a map of project names to their errors (only includes projects that errored).
+// Returns an empty map if all projects succeeded.
+func (p *ConjureProjectParams) ForEach(fn func(project string, param ConjureProjectParam) error) map[string]error {
+	errs := make(map[string]error)
+
+	for _, project := range p.SortedKeys {
+		if err := fn(project, p.Params[project]); err != nil {
+			errs[project] = err
+		}
+	}
+
+	return errs
 }

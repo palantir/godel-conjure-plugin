@@ -89,9 +89,16 @@ Assets
 `godel-conjure-plugin` supports the use of [assets](https://github.com/palantir/godel/wiki/Plugins#assets) to extend its
 functionality in defined a defined manner.
 
-## Conjure IR Extensions Asset
-The only `asset type` currently supported by `godel-conjure-plugin` is `"conjure-ir-extensions-provider"`. This
-`asset type` allows key-value pairs to be added to the [`extensions`](https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions) block of the Conjure IR **as part of the
+## Supported Asset Types
+
+### Conjure Backcompat Asset
+The `"backcompat"` asset type enables backward compatibility checking for Conjure definitions.
+This asset is invoked by the `conjure-backcompat` task (integrated into `./godelw verify`) to verify that Conjure API changes maintain backward compatibility for projects that generate IR from YAML definitions.
+
+See [backcompatasset/asset.go](backcompatasset/asset.go) for the asset API that can be used to implement backcompat checking assets.
+
+### Conjure IR Extensions Asset
+The `"conjure-ir-extensions-provider"` asset type allows key-value pairs to be added to the [`extensions`](https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions) block of the Conjure IR **as part of the
 `publish` command (the `conjure-publish` godel task)**.
 
 ### Requirements

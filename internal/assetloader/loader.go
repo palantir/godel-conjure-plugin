@@ -16,28 +16,45 @@ package assetloader
 
 import (
 	"errors"
+	"io"
 	"os/exec"
 	"slices"
 
 	"github.com/palantir/godel-conjure-plugin/v6/assetapi"
 	assetapiinternal "github.com/palantir/godel-conjure-plugin/v6/internal/assetapi"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompatasset"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/cmdutils"
 	pkgerrors "github.com/pkg/errors"
 )
 
 type LoadedAssets struct {
+	ConjureBackcompat            backcompatasset.BackCompatChecker
 	ConjureIRExtensionsProviders []string
 }
 
 // LoadAssets takes a list of asset paths and returns a LoadedAssets struct that contains the typed assets. Returns an
 // error if any of the provided assets are not valid according to the plugin asset specification.
-func LoadAssets(assets []string) (LoadedAssets, error) {
+// In addition to general validation, this function performs the following additional checks:
+//   - Ensures that at most one "backcompat" asset is configured; returns an error if more than one is provided.
+func LoadAssets(assets []string, stdout, stderr io.Writer) (LoadedAssets, error) {
 	assetTypeToAssetsMap, err := createAssetTypeToAssetsMap(assets)
 	if err != nil {
 		return LoadedAssets{}, err
 	}
 
+	var conjureBackCompat backcompatasset.BackCompatChecker
+	backcompatAssets := assetTypeToAssetsMap[assetapi.ConjureBackCompat]
+	switch len(backcompatAssets) {
+	case 0:
+		// Do nothing
+	case 1:
+		conjureBackCompat = backcompatasset.New(backcompatAssets[0], stdout, stderr)
+	default:
+		return LoadedAssets{}, pkgerrors.Errorf(`only 0 or 1 "backcompat" can be configured, detected %d: %v`, len(backcompatAssets), backcompatAssets)
+	}
+
 	return LoadedAssets{
+		ConjureBackcompat:            conjureBackCompat,
 		ConjureIRExtensionsProviders: assetTypeToAssetsMap[assetapiinternal.ConjureIRExtensionsProvider],
 	}, nil
 }

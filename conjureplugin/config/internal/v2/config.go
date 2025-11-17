@@ -66,6 +66,9 @@ type SingleConjureConfig struct {
 	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
 	// When true, preserves v1 behavior (no cleanup).
 	SkipDeleteGeneratedFiles bool `yaml:"skip-delete-generated-files,omitempty"`
+	// SkipBackCompat indicates if backcompat operations should be skipped for this project.
+	// Defaults to false (backcompat operations will run). Only valid for projects that generate IR from YAML: config validation will fail if this is set to true for projects that do not generate IR from YAML.
+	SkipBackCompat bool `yaml:"skip-backcompat,omitempty"`
 }
 
 // OutputDirConflicts detects output directory conflicts between projects.
