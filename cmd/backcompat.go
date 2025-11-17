@@ -67,7 +67,7 @@ func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param 
 
 		bytes, err := param.IRProvider.IRBytes()
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "failed to generate IR bytes for project %q", project)
 		}
 
 		file, err := tempfilecreator.WriteBytesToTempFile(bytes)
