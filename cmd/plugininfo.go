@@ -19,6 +19,10 @@ import (
 	"github.com/palantir/godel/v2/framework/verifyorder"
 )
 
+const (
+	acceptBackCompatBreaksCmdName = "conjure-accept-backcompat-breaks"
+)
+
 var (
 	Version    = "unspecified"
 	PluginInfo = pluginapi.MustNewPluginInfo(
@@ -53,7 +57,7 @@ var (
 			pluginapi.TaskInfoVerifyOptions(),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			"conjure-accept-backcompat-breaks",
+			acceptBackCompatBreaksCmdName,
 			"Accept current backward compatibility breaks",
 			pluginapi.TaskInfoCommand("accept-backcompat-breaks"),
 		),
