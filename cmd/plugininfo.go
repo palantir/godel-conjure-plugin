@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	acceptBackCompatBreaksCmdName = "conjure-accept-backcompat-breaks"
+	acceptBackCompatBreaksTaskName = "conjure-accept-backcompat-breaks"
 )
 
 var (
@@ -57,7 +57,7 @@ var (
 			pluginapi.TaskInfoVerifyOptions(),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			acceptBackCompatBreaksCmdName,
+			acceptBackCompatBreaksTaskName,
 			"Accept current backward compatibility breaks",
 			pluginapi.TaskInfoCommand("accept-backcompat-breaks"),
 		),

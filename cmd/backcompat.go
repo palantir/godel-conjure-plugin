@@ -41,12 +41,12 @@ var backcompatCmd = &cobra.Command{
 				projects := slices.Collect(maps.Keys(failedProjects))
 
 				if len(projects) == 1 {
-					return fmt.Errorf("Conjure project had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", projects[0], acceptBackCompatBreaksCmdName)
+					return fmt.Errorf("Conjure project had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", projects[0], acceptBackCompatBreaksTaskName)
 				}
 
 				sort.Strings(projects)
 
-				return fmt.Errorf("Conjure projects had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", strings.Join(projects, ", "), acceptBackCompatBreaksCmdName)
+				return fmt.Errorf("Conjure projects had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", strings.Join(projects, ", "), acceptBackCompatBreaksTaskName)
 			},
 		)
 	},
