@@ -28,8 +28,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	backcompatCmdName = "backcompat"
+)
+
 var backcompatCmd = &cobra.Command{
-	Use:   "backcompat",
+	Use:   backcompatCmdName,
 	Short: "Check backward compatibility of Conjure definitions",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackCompatCommand(
