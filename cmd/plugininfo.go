@@ -20,10 +20,10 @@ import (
 )
 
 const (
-	conjureTaskName                = "conjure"
-	conjurePublishTaskName         = "conjure-publish"
-	conjureBackcompatTaskName      = "conjure-backcompat"
-	acceptBackCompatBreaksTaskName = "conjure-accept-backcompat-breaks"
+	conjureTaskName                       = "conjure"
+	conjurePublishTaskName                = "conjure-publish"
+	conjureBackcompatTaskName             = "conjure-backcompat"
+	conjureAcceptBackCompatBreaksTaskName = "conjure-accept-backcompat-breaks"
 )
 
 var (
@@ -60,7 +60,7 @@ var (
 			pluginapi.TaskInfoVerifyOptions(),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			acceptBackCompatBreaksTaskName,
+			conjureAcceptBackCompatBreaksTaskName,
 			"Accept current backward compatibility breaks",
 			pluginapi.TaskInfoCommand(acceptBackCompatBreaksCmdName),
 		),
