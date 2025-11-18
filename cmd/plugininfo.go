@@ -19,6 +19,13 @@ import (
 	"github.com/palantir/godel/v2/framework/verifyorder"
 )
 
+const (
+	conjureTaskName                       = "conjure"
+	conjurePublishTaskName                = "conjure-publish"
+	conjureBackcompatTaskName             = "conjure-backcompat"
+	conjureAcceptBackCompatBreaksTaskName = "conjure-accept-backcompat-breaks"
+)
+
 var (
 	Version    = "unspecified"
 	PluginInfo = pluginapi.MustNewPluginInfo(
@@ -32,9 +39,9 @@ var (
 			pluginapi.GlobalFlagOptionsParamConfigFlag("--"+pluginapi.ConfigFlagName),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			"conjure",
+			conjureTaskName,
 			"Run Conjure generation",
-			pluginapi.TaskInfoCommand("run"),
+			pluginapi.TaskInfoCommand(runCmdName),
 			pluginapi.TaskInfoVerifyOptions(
 				// by default, run after "generate" but before next built-in task
 				pluginapi.VerifyOptionsOrdering(intVar(verifyorder.Generate+75)),
@@ -42,20 +49,20 @@ var (
 			),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			"conjure-publish",
+			conjurePublishTaskName,
 			"Publish Conjure IR",
-			pluginapi.TaskInfoCommand("publish"),
+			pluginapi.TaskInfoCommand(publishCmdName),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			"conjure-backcompat",
+			conjureBackcompatTaskName,
 			"Check backward compatibility of Conjure definitions",
-			pluginapi.TaskInfoCommand("backcompat"),
+			pluginapi.TaskInfoCommand(backcompatCmdName),
 			pluginapi.TaskInfoVerifyOptions(),
 		),
 		pluginapi.PluginInfoTaskInfo(
-			"conjure-accept-backcompat-breaks",
+			conjureAcceptBackCompatBreaksTaskName,
 			"Accept current backward compatibility breaks",
-			pluginapi.TaskInfoCommand("accept-backcompat-breaks"),
+			pluginapi.TaskInfoCommand(acceptBackCompatBreaksCmdName),
 		),
 		pluginapi.PluginInfoUpgradeConfigTaskInfo(
 			pluginapi.UpgradeConfigTaskInfoCommand("upgrade-config"),

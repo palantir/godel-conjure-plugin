@@ -27,6 +27,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	publishCmdName = "publish"
+)
+
 var (
 	groupIDFlagVal    string
 	urlFlagVal        string
@@ -38,7 +42,7 @@ var (
 )
 
 var publishCmd = &cobra.Command{
-	Use:   "publish",
+	Use:   publishCmdName,
 	Short: "Publish Conjure IR",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())

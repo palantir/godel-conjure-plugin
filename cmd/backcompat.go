@@ -28,8 +28,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	backcompatCmdName = "backcompat"
+)
+
 var backcompatCmd = &cobra.Command{
-	Use:   "backcompat",
+	Use:   backcompatCmdName,
 	Short: "Check backward compatibility of Conjure definitions",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackCompatCommand(
@@ -41,12 +45,12 @@ var backcompatCmd = &cobra.Command{
 				projects := slices.Collect(maps.Keys(failedProjects))
 
 				if len(projects) == 1 {
-					return fmt.Errorf("Conjure project had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", projects[0], acceptBackCompatBreaksCmdName)
+					return fmt.Errorf("Conjure project had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", projects[0], conjureAcceptBackCompatBreaksTaskName)
 				}
 
 				sort.Strings(projects)
 
-				return fmt.Errorf("Conjure projects had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", strings.Join(projects, ", "), acceptBackCompatBreaksCmdName)
+				return fmt.Errorf("Conjure projects had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", strings.Join(projects, ", "), conjureAcceptBackCompatBreaksTaskName)
 			},
 		)
 	},

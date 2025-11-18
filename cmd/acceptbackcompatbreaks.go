@@ -24,7 +24,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const acceptBackCompatBreaksCmdName = "accept-backcompat-breaks"
+const (
+	acceptBackCompatBreaksCmdName = "accept-backcompat-breaks"
+)
 
 var acceptBackcompatBreaksCmd = &cobra.Command{
 	Use:   acceptBackCompatBreaksCmdName,
