@@ -361,6 +361,48 @@ projects:
 	stdout := outputBuf.String()
 	assert.True(t, strings.Contains(stdout, structsFile+": checksum changed"), "Unexpected standard out: %s", stdout)
 
+	t.Run("verify does not detect stale files that would not be deleted", func(t *testing.T) {
+		// Create a fresh project directory
+		projectDir, cleanup, err := dirs.TempDir(".", "")
+		require.NoError(t, err)
+		defer cleanup()
+
+		ymlDir := filepath.Join(projectDir, yamlDir)
+		err = os.Mkdir(ymlDir, 0755)
+		require.NoError(t, err)
+
+		err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+		require.NoError(t, err)
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(`
+version: 2
+projects:
+  project-1:
+    skip-delete-generated-files: true
+    ir-locator: `+yamlDir+`
+`), 0644)
+		require.NoError(t, err)
+
+		err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+		require.NoError(t, err)
+
+		// Generate initial files
+		outputBuf := &bytes.Buffer{}
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+		require.NoError(t, err, outputBuf.String())
+		runPluginCleanup()
+
+		// Create a stale generated file (one that shouldn't exist based on current IR)
+		staleFile := filepath.Join(projectDir, "internal", "generated", "conjure", "project-1", "base", "api", "oldfile.conjure.go")
+		err = os.MkdirAll(filepath.Dir(staleFile), 0755)
+		require.NoError(t, err)
+		err = os.WriteFile(staleFile, []byte("// This is an old generated file\npackage api"), 0644)
+		require.NoError(t, err)
+
+		// Run verify - should detect the stale file
+		outputBuf = &bytes.Buffer{}
+		_, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", []string{"--verify"}, projectDir, false, outputBuf)
+		assert.NoError(t, err, "verify should not fail when stale files exist but delete is skipped")
+	})
 	t.Run("verify detects stale files that should be deleted", func(t *testing.T) {
 		// Create a fresh project directory
 		projectDir, cleanup, err := dirs.TempDir(".", "")
