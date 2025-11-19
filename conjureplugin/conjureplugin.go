@@ -66,28 +66,13 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		}
 
 		if verify {
-			diff, err := diffOnDisk(projectDir, files)
+			diff, err := diffOnDisk(projectDir, files, outputConf.OutputDir, currParam.SkipDeleteGeneratedFiles)
 			if err != nil {
 				return err
 			}
 
-			var msg string
 			if len(diff.Diffs) > 0 {
-				msg = diff.String()
-			}
-
-			if len(filesToDelete) > 0 {
-				if msg != "" {
-					msg += "\n\n"
-				}
-				msg += "The following generated files will be deleted:\n"
-				for _, file := range filesToDelete {
-					msg += fmt.Sprintf("  - %s\n", file)
-				}
-			}
-
-			if msg != "" {
-				verifyFailedFn(k, msg)
+				verifyFailedFn(k, diff.String())
 			}
 		} else {
 			for _, file := range filesToDelete {

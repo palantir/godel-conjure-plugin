@@ -26,14 +26,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func diffOnDisk(projectDir string, files []*conjure.OutputFile) (dirchecksum.ChecksumsDiff, error) {
-	originalChecksums, err := checksumOnDiskFiles(files, projectDir)
-	if err != nil {
-		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute on-disk checksums")
-	}
+func diffOnDisk(projectDir string, files []*conjure.OutputFile, outputDir string, skipDeleteGeneratedFiles bool) (dirchecksum.ChecksumsDiff, error) {
 	newChecksums, err := checksumRenderedFiles(files, projectDir)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute generated checksums")
+	}
+	originalChecksums, err := checksumOnDiskFiles(files, projectDir, outputDir, skipDeleteGeneratedFiles)
+	if err != nil {
+		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute on-disk checksums")
 	}
 
 	return originalChecksums.Diff(newChecksums), nil
@@ -67,36 +67,64 @@ func checksumRenderedFiles(files []*conjure.OutputFile, projectDir string) (dirc
 	return set, nil
 }
 
-func checksumOnDiskFiles(files []*conjure.OutputFile, projectDir string) (dirchecksum.ChecksumSet, error) {
+func checksumOnDiskFiles(files []*conjure.OutputFile, projectDir string, outputDir string, skipDeleteGeneratedFiles bool) (dirchecksum.ChecksumSet, error) {
 	set := dirchecksum.ChecksumSet{
 		RootDir:   projectDir,
 		Checksums: map[string]dirchecksum.FileChecksumInfo{},
 	}
+
+	// Build a set of files that WILL be generated (for quick lookup)
+	willBeGenerated := make(map[string]bool)
 	for _, file := range files {
-		relPath, err := filepath.Rel(projectDir, file.AbsPath())
+		willBeGenerated[file.AbsPath()] = true
+	}
+
+	// Determine which files to checksum on disk
+	var filesToChecksum []string
+
+	if skipDeleteGeneratedFiles {
+		// OLD BEHAVIOR: Only checksum files that will be generated
+		for _, file := range files {
+			filesToChecksum = append(filesToChecksum, file.AbsPath())
+		}
+	} else {
+		// NEW BEHAVIOR: Checksum ALL existing generated files in outputDir
+		allExistingFiles, err := getAllGeneratedFiles(outputDir)
+		if err != nil {
+			return dirchecksum.ChecksumSet{}, err
+		}
+		filesToChecksum = allExistingFiles
+	}
+
+	// Compute checksums for the determined set of files
+	for _, absPath := range filesToChecksum {
+		relPath, err := filepath.Rel(projectDir, absPath)
 		if err != nil {
 			return dirchecksum.ChecksumSet{}, err
 		}
 
-		f, err := os.Open(file.AbsPath())
+		f, err := os.Open(absPath)
 		if os.IsNotExist(err) {
-			// skip nonexistent files
+			// File doesn't exist on disk - skip it
 			continue
 		} else if err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to open file for checksum %s", file.AbsPath())
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to open file for checksum %s", absPath)
 		}
 		defer func() {
 			// file is opened for reading only, so safe to ignore errors on close
 			_ = f.Close()
 		}()
+
 		h := sha256.New()
 		if _, err := io.Copy(h, f); err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to checksum on-disk content for %s", file.AbsPath())
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to checksum on-disk content for %s", absPath)
 		}
+
 		set.Checksums[relPath] = dirchecksum.FileChecksumInfo{
 			Path:           relPath,
 			SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
 		}
 	}
+
 	return set, nil
 }

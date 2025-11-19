@@ -478,7 +478,7 @@ projects:
 	_, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", []string{"--verify"}, projectDir, false, outputBuf)
 	assert.Error(t, err, "verify should fail when stale files exist")
 	stdout := outputBuf.String()
-	assert.Contains(t, stdout, "The following generated files will be deleted:", "verify should mention files to be deleted")
+	assert.Contains(t, stdout, "oldfile.conjure.go: missing", "verify should show stale file as missing")
 	assert.Contains(t, stdout, "oldfile.conjure.go", "verify should list the stale file")
 }
 
