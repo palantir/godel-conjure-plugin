@@ -57,6 +57,14 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return errors.Wrap(err, "failed to generate conjure output files")
 		}
 
+		var filesToDelete []string
+		if !currParam.SkipDeleteGeneratedFiles {
+			filesToDelete, err = computeObsoleteFiles(outputConf.OutputDir, files)
+			if err != nil {
+				return err
+			}
+		}
+
 		if verify {
 			diff, err := diffOnDisk(projectDir, files)
 			if err != nil {
@@ -68,17 +76,10 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				msg = diff.String()
 			}
 
-			if !currParam.SkipDeleteGeneratedFiles {
-				filesToDelete, err := computeObsoleteFiles(outputConf.OutputDir, files)
-				if err != nil {
-					return err
-				}
-
-				if len(filesToDelete) > 0 {
-					msg += "\n\nThe following generated files will be deleted:\n"
-					for _, file := range filesToDelete {
-						msg += fmt.Sprintf("  - %s\n", file)
-					}
+			if len(filesToDelete) > 0 {
+				msg += "\n\nThe following generated files will be deleted:\n"
+				for _, file := range filesToDelete {
+					msg += fmt.Sprintf("  - %s\n", file)
 				}
 			}
 
@@ -86,16 +87,9 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				verifyFailedFn(k, msg)
 			}
 		} else {
-			if !currParam.SkipDeleteGeneratedFiles {
-				filesToDelete, err := computeObsoleteFiles(outputConf.OutputDir, files)
-				if err != nil {
-					return err
-				}
-
-				for _, file := range filesToDelete {
-					if err := os.Remove(file); err != nil {
-						return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
-					}
+			for _, file := range filesToDelete {
+				if err := os.Remove(file); err != nil {
+					return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
 				}
 			}
 			for _, file := range files {
