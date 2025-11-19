@@ -77,7 +77,10 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			}
 
 			if len(filesToDelete) > 0 {
-				msg += "\n\nThe following generated files will be deleted:\n"
+				if msg != "" {
+					msg += "\n\n"
+				}
+				msg += "The following generated files will be deleted:\n"
 				for _, file := range filesToDelete {
 					msg += fmt.Sprintf("  - %s\n", file)
 				}
