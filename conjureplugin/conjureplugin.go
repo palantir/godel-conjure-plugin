@@ -161,6 +161,8 @@ func computeObsoleteFiles(outputDir string, filesToGenerate []*conjure.OutputFil
 func getAllGeneratedFiles(outputDir string) ([]string, error) {
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		return nil, nil
+	} else if err != nil {
+		return nil, errors.Wrapf(err, "failed to stat output directory %s", outputDir)
 	}
 
 	var files []string
@@ -179,14 +181,14 @@ func getAllGeneratedFiles(outputDir string) ([]string, error) {
 
 		return nil
 	}); err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to walk output directory %s", outputDir)
 	}
 
 	abs := make([]string, 0, len(files))
 	for _, file := range files {
 		absPath, err := filepath.Abs(file)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to get absolute path for file %s", file)
 		}
 		abs = append(abs, absPath)
 	}
