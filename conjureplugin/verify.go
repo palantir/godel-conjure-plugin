@@ -26,7 +26,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func diffOnDisk(projectDir string, files []*conjure.OutputFile) (dirchecksum.ChecksumsDiff, error) {
+func diffOnDisk(projectDir string, files []*conjure.OutputFile, filesToDelete []string) (dirchecksum.ChecksumsDiff, error) {
 	originalChecksums, err := checksumOnDiskFiles(files, projectDir)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute on-disk checksums")
@@ -35,8 +35,15 @@ func diffOnDisk(projectDir string, files []*conjure.OutputFile) (dirchecksum.Che
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute generated checksums")
 	}
+	for _, fileToDelete := range filesToDelete {
+		fileToDelete, err := filepath.Rel(projectDir, fileToDelete)
+		if err != nil {
+			return dirchecksum.ChecksumsDiff{}, err
+		}
+		originalChecksums.Checksums[fileToDelete] = dirchecksum.FileChecksumInfo{}
+	}
 
-	return originalChecksums.Diff(newChecksums), nil
+	return newChecksums.Diff(originalChecksums), nil
 }
 
 func checksumRenderedFiles(files []*conjure.OutputFile, projectDir string) (dirchecksum.ChecksumSet, error) {
