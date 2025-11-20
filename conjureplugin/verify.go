@@ -38,50 +38,23 @@ func diffOnDisk(conjureDefinition spec.ConjureDefinition, projectDir string, out
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute on-disk checksums")
 	}
-	newChecksums, err := checksumRenderedFiles(files, projectDir)
+	newChecksums, err := checksumRenderedFiles(files, projectDir, outputConf.OutputDir, deleteGeneratedFiles)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute generated checksums")
 	}
 
-	if deleteGeneratedFiles {
-		seenFiles := make(map[string]bool)
-		for _, file := range files {
-			seenFiles[file.AbsPath()] = true
-		}
-
-		if err := filepath.WalkDir(outputConf.OutputDir, func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return nil
-			}
-
-			if d.IsDir() {
-				return nil
-			}
-
-			if isConjureGeneratedFile(d.Name()) && !seenFiles[path] {
-				path, err := filepath.Rel(projectDir, path)
-				if err != nil {
-					return err
-				}
-				// panic(path)
-				newChecksums.Checksums[path] = dirchecksum.FileChecksumInfo{}
-			}
-
-			return nil
-		}); err != nil {
-			return dirchecksum.ChecksumsDiff{}, err
-		}
-	}
-
-	return originalChecksums.Diff(newChecksums), nil
+	return newChecksums.Diff(originalChecksums), nil
 }
 
-func checksumRenderedFiles(files []*conjure.OutputFile, projectDir string) (dirchecksum.ChecksumSet, error) {
+func checksumRenderedFiles(files []*conjure.OutputFile, projectDir, outputDir string, deleteGeneratedFiles bool) (dirchecksum.ChecksumSet, error) {
 	set := dirchecksum.ChecksumSet{
 		RootDir:   projectDir,
 		Checksums: map[string]dirchecksum.FileChecksumInfo{},
 	}
+
+	seenFiles := make(map[string]bool)
 	for _, file := range files {
+		seenFiles[file.AbsPath()] = true
 		relPath, err := filepath.Rel(projectDir, file.AbsPath())
 		if err != nil {
 			return dirchecksum.ChecksumSet{}, err
@@ -99,6 +72,30 @@ func checksumRenderedFiles(files []*conjure.OutputFile, projectDir string) (dirc
 			Path:           relPath,
 			IsDir:          false,
 			SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
+		}
+	}
+	if deleteGeneratedFiles {
+		if err := filepath.WalkDir(outputDir, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return nil
+			}
+
+			if d.IsDir() {
+				return nil
+			}
+
+			if isConjureGeneratedFile(d.Name()) && !seenFiles[path] {
+				path, err := filepath.Rel(projectDir, path)
+				if err != nil {
+					return err
+				}
+				// panic(path)
+				set.Checksums[path] = dirchecksum.FileChecksumInfo{}
+			}
+
+			return nil
+		}); err != nil {
+			return dirchecksum.ChecksumSet{}, err
 		}
 	}
 	return set, nil
