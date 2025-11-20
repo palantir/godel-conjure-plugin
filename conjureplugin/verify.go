@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
@@ -28,7 +29,7 @@ import (
 )
 
 // diffOnDisk generates the conjure files in memory and compares checksums to on-disk files.
-func diffOnDisk(conjureDefinition spec.ConjureDefinition, projectDir string, outputConf conjure.OutputConfiguration) (dirchecksum.ChecksumsDiff, error) {
+func diffOnDisk(conjureDefinition spec.ConjureDefinition, projectDir string, outputConf conjure.OutputConfiguration, deleteGeneratedFiles bool) (dirchecksum.ChecksumsDiff, error) {
 	files, err := conjure.GenerateOutputFiles(conjureDefinition, outputConf)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "conjure failed")
@@ -40,6 +41,36 @@ func diffOnDisk(conjureDefinition spec.ConjureDefinition, projectDir string, out
 	newChecksums, err := checksumRenderedFiles(files, projectDir)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute generated checksums")
+	}
+
+	if deleteGeneratedFiles {
+		seenFiles := make(map[string]bool)
+		for _, file := range files {
+			seenFiles[file.AbsPath()] = true
+		}
+
+		if err := filepath.WalkDir(outputConf.OutputDir, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return nil
+			}
+
+			if d.IsDir() {
+				return nil
+			}
+
+			if isConjureGeneratedFile(d.Name()) && !seenFiles[path] {
+				path, err := filepath.Rel(projectDir, path)
+				if err != nil {
+					return err
+				}
+				// panic(path)
+				newChecksums.Checksums[path] = dirchecksum.FileChecksumInfo{}
+			}
+
+			return nil
+		}); err != nil {
+			return dirchecksum.ChecksumsDiff{}, err
+		}
 	}
 
 	return originalChecksums.Diff(newChecksums), nil
@@ -105,4 +136,9 @@ func checksumOnDiskFiles(files []*conjure.OutputFile, projectDir string) (dirche
 		}
 	}
 	return set, nil
+}
+
+// isConjureGeneratedFile returns true if the filename matches the pattern for Conjure-generated files.
+func isConjureGeneratedFile(filename string) bool {
+	return strings.HasSuffix(filename, ".conjure.go") || strings.HasSuffix(filename, ".conjure.json")
 }

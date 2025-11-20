@@ -52,7 +52,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
 		}
 		if verify {
-			diff, err := diffOnDisk(conjureDef, projectDir, outputConf)
+			diff, err := diffOnDisk(conjureDef, projectDir, outputConf, !currParam.SkipDeleteGeneratedFiles)
 			if err != nil {
 				return err
 			}
@@ -125,7 +125,7 @@ func deleteConjureFile(path string, d os.DirEntry, err error) error {
 
 	// Check if the file matches the Conjure-generated pattern
 	name := d.Name()
-	if strings.HasSuffix(name, ".conjure.go") || strings.HasSuffix(name, ".conjure.json") {
+	if isConjureGeneratedFile(name) {
 		if err := os.Remove(path); err != nil {
 			return errors.Wrapf(err, "failed to delete generated file %s", path)
 		}
