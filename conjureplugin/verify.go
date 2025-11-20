@@ -27,20 +27,13 @@ import (
 )
 
 func diffOnDisk(projectDir string, files []*conjure.OutputFile, filesToDelete []string) (dirchecksum.ChecksumsDiff, error) {
-	originalChecksums, err := checksumOnDiskFiles(files, projectDir)
+	originalChecksums, err := checksumOnDiskFiles(files, projectDir, filesToDelete)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute on-disk checksums")
 	}
 	newChecksums, err := checksumRenderedFiles(files, projectDir)
 	if err != nil {
 		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute generated checksums")
-	}
-	for _, fileToDelete := range filesToDelete {
-		fileToDelete, err := filepath.Rel(projectDir, fileToDelete)
-		if err != nil {
-			return dirchecksum.ChecksumsDiff{}, err
-		}
-		originalChecksums.Checksums[fileToDelete] = dirchecksum.FileChecksumInfo{}
 	}
 
 	return newChecksums.Diff(originalChecksums), nil
@@ -74,7 +67,7 @@ func checksumRenderedFiles(files []*conjure.OutputFile, projectDir string) (dirc
 	return set, nil
 }
 
-func checksumOnDiskFiles(files []*conjure.OutputFile, projectDir string) (dirchecksum.ChecksumSet, error) {
+func checksumOnDiskFiles(files []*conjure.OutputFile, projectDir string, filesToDelete []string) (dirchecksum.ChecksumSet, error) {
 	set := dirchecksum.ChecksumSet{
 		RootDir:   projectDir,
 		Checksums: map[string]dirchecksum.FileChecksumInfo{},
@@ -105,5 +98,13 @@ func checksumOnDiskFiles(files []*conjure.OutputFile, projectDir string) (dirche
 			SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
 		}
 	}
+	for _, fileToDelete := range filesToDelete {
+		relPath, err := filepath.Rel(projectDir, fileToDelete)
+		if err != nil {
+			return dirchecksum.ChecksumSet{}, err
+		}
+		set.Checksums[relPath] = dirchecksum.FileChecksumInfo{}
+	}
+
 	return set, nil
 }
