@@ -30,6 +30,7 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 		createFile(t, filepath.Join(tmpDir, "aliases.conjure.go"), "package test")
 		createFile(t, filepath.Join(tmpDir, "structs.conjure.go"), "package test")
 		createFile(t, filepath.Join(tmpDir, "regular.go"), "package test")
+		createFile(t, filepath.Join(tmpDir, "conjure.go"), "package test")
 
 		files, err := getAllGeneratedFiles(tmpDir)
 		require.NoError(t, err)
@@ -43,6 +44,7 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 		assert.Contains(t, basenames, "aliases.conjure.go")
 		assert.Contains(t, basenames, "structs.conjure.go")
 		assert.NotContains(t, basenames, "regular.go")
+		assert.NotContains(t, basenames, "conjure.go")
 	})
 
 	t.Run("finds conjure.json files", func(t *testing.T) {
@@ -85,62 +87,6 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 
 		assert.True(t, filepath.IsAbs(files[0]), "expected absolute path, got: %s", files[0])
 	})
-}
-
-func TestIsConjureGeneratedFile(t *testing.T) {
-	tests := []struct {
-		name     string
-		filename string
-		want     bool
-	}{
-		{
-			name:     "conjure.go file",
-			filename: "aliases.conjure.go",
-			want:     true,
-		},
-		{
-			name:     "conjure.json file",
-			filename: "extensions.conjure.json",
-			want:     true,
-		},
-		{
-			name:     "regular go file",
-			filename: "regular.go",
-			want:     false,
-		},
-		{
-			name:     "regular json file",
-			filename: "config.json",
-			want:     false,
-		},
-		{
-			name:     "conjure.go backup file",
-			filename: "file.conjure.go.bak",
-			want:     false,
-		},
-		{
-			name:     "file named conjure.go",
-			filename: "conjure.go",
-			want:     false,
-		},
-		{
-			name:     "file with conjure in middle",
-			filename: "file_conjure.go",
-			want:     false,
-		},
-		{
-			name:     "empty string",
-			filename: "",
-			want:     false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := isConjureGeneratedFile(tt.filename)
-			assert.Equal(t, tt.want, got)
-		})
-	}
 }
 
 func createFile(t *testing.T, path string, content string) {

@@ -24,6 +24,7 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure"
 	conjurego "github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/pkg/matcher"
 	"github.com/pkg/errors"
 )
 
@@ -149,38 +150,27 @@ func getAllGeneratedFiles(outputDir string) ([]string, error) {
 		return nil, errors.Wrapf(err, "failed to stat output directory %s", outputDir)
 	}
 
-	var files []string
-	if err := filepath.WalkDir(outputDir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return nil
-		}
+	// Match files ending in .conjure.go or .conjure.json
+	include := matcher.Name(`.*\.conjure\.(go|json)$`)
 
-		if d.IsDir() {
-			return nil
-		}
-
-		if isConjureGeneratedFile(d.Name()) {
-			files = append(files, path)
-		}
-
-		return nil
-	}); err != nil {
-		return nil, errors.Wrapf(err, "failed to walk output directory %s", outputDir)
+	relPaths, err := matcher.ListFiles(outputDir, include, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to list files in output directory %s", outputDir)
 	}
 
-	abs := make([]string, 0, len(files))
-	for _, file := range files {
-		absPath, err := filepath.Abs(file)
+	// Convert to absolute paths, filtering out directories
+	// (matcher.ListFiles can return both files and directories that match)
+	var absPaths []string
+	for _, relPath := range relPaths {
+		absPath := filepath.Join(outputDir, relPath)
+		fileInfo, err := os.Stat(absPath)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get absolute path for file %s", file)
+			return nil, errors.Wrapf(err, "failed to stat %s", absPath)
 		}
-		abs = append(abs, absPath)
+		if !fileInfo.IsDir() {
+			absPaths = append(absPaths, absPath)
+		}
 	}
 
-	return abs, nil
-}
-
-// isConjureGeneratedFile returns true if the filename matches the pattern for Conjure-generated files.
-func isConjureGeneratedFile(filename string) bool {
-	return strings.HasSuffix(filename, ".conjure.go") || strings.HasSuffix(filename, ".conjure.json")
+	return absPaths, nil
 }
