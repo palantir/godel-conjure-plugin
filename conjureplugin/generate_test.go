@@ -77,6 +77,14 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 		assert.Len(t, files, 3)
 	})
 
+	t.Run("handles missing directory", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		files, err := getAllGeneratedFiles(filepath.Join(tmpDir, "does-not-exist"))
+		require.NoError(t, err)
+		assert.Empty(t, files)
+	})
+
 	t.Run("returns absolute paths", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		createFile(t, filepath.Join(tmpDir, "test.conjure.go"), "package test")
