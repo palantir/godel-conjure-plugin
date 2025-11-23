@@ -25,12 +25,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	runCmdName = "run"
+)
+
 var (
 	verifyFlag bool
 )
 
 var runCmd = &cobra.Command{
-	Use:   "run",
+	Use:   runCmdName,
 	Short: "Run conjure-go based on project configuration",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		stdout := cmd.OutOrStdout()
