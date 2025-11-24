@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"sync"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
@@ -197,7 +198,7 @@ func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition, errorReg
 func newGoFile(filePath string, file *jen.File) *OutputFile {
 	return &OutputFile{
 		absPath: filePath,
-		render:  func() ([]byte, error) { return renderJenFile(file) },
+		render:  sync.OnceValues(func() ([]byte, error) { return renderJenFile(file) }),
 	}
 }
 

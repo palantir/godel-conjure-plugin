@@ -15,6 +15,7 @@
 package conjureplugin
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
@@ -24,6 +25,7 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure"
 	conjurego "github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/godel/v2/pkg/dirchecksum"
 	"github.com/palantir/pkg/matcher"
 	"github.com/pkg/errors"
 )
@@ -58,34 +60,113 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return errors.Wrap(err, "failed to generate conjure output files")
 		}
 
-		var filesToDelete []string
-		if !currParam.SkipDeleteGeneratedFiles {
-			filesToDelete, err = computeObsoleteFiles(outputConf.OutputDir, files)
+		original := dirchecksum.ChecksumSet{
+			RootDir:   projectDir,
+			Checksums: make(map[string]dirchecksum.FileChecksumInfo),
+		}
+		for _, file := range files {
+			relPath, err := filepath.Rel(projectDir, file.AbsPath())
 			if err != nil {
 				return err
+			}
+			output, err := file.Render()
+			if err != nil {
+				return err
+			}
+			h := sha256.New()
+			_, err = h.Write(output)
+			if err != nil {
+				return errors.Wrapf(err, "failed to checksum generated content for %s", file.AbsPath())
+			}
+			original.Checksums[relPath] = dirchecksum.FileChecksumInfo{
+				Path:           relPath,
+				IsDir:          false,
+				SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
 			}
 		}
 
-		if verify {
-			diff, err := diffOnDisk(projectDir, files, filesToDelete)
+		new := dirchecksum.ChecksumSet{
+			RootDir:   projectDir,
+			Checksums: make(map[string]dirchecksum.FileChecksumInfo),
+		}
+		genFiles, err := getAllGeneratedFiles(outputDir)
+		if err != nil {
+			return err
+		}
+		for _, file := range genFiles {
+			f, err := os.Open(file)
 			if err != nil {
-				return err
+				return errors.Wrapf(err, "failed to open file for checksum %s", file)
 			}
+			defer func() {
+				// file is opened for reading only, so safe to ignore errors on close
+				_ = f.Close()
+			}()
+			h := sha256.New()
+			if _, err := io.Copy(h, f); err != nil {
+				return errors.Wrapf(err, "failed to checksum on-disk content for %s", file)
+			}
+			new.Checksums[file] = dirchecksum.FileChecksumInfo{
+				Path:           file,
+				SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
+			}
+		}
+
+		diff := original.Diff(new)
+		// panic(fmt.Errorf("%v", original.Diff(new)))
+
+		if verify {
 			if len(diff.Diffs) > 0 {
 				verifyFailedFn(k, diff.String())
 			}
 		} else {
-			for _, file := range filesToDelete {
-				if err := os.Remove(file); err != nil {
-					return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
-				}
-			}
+			qikFile := make(map[string]*conjure.OutputFile)
 			for _, file := range files {
-				if err := file.Write(); err != nil {
-					return err
+				qikFile[file.AbsPath()] = file
+			}
+			for file, problem := range diff.Diffs {
+				if problem == "extra" {
+					if !currParam.SkipDeleteGeneratedFiles {
+						if err := os.Remove(file); err != nil {
+							return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
+						}
+					}
+				} else {
+					file, err := filepath.Abs(file)
+					if err != nil {
+						panic(err)
+					}
+					fmt.Printf("file: %v\n", file)
+					// panic(fmt.Errorf("%v, %v", file, qikFile))
+					if err := qikFile[file].Write(); err != nil {
+						return err
+					}
 				}
 			}
 		}
+
+		/*
+			if verify {
+				diff, err := diffOnDisk(projectDir, files, filesToDelete)
+				if err != nil {
+					return err
+				}
+				if len(diff.Diffs) > 0 {
+					verifyFailedFn(k, diff.String())
+				}
+			} else {
+				for _, file := range filesToDelete {
+					if err := os.Remove(file); err != nil {
+						return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
+					}
+				}
+				for _, file := range files {
+					if err := file.Write(); err != nil {
+						return err
+					}
+				}
+			}
+		*/
 		k++
 	}
 
