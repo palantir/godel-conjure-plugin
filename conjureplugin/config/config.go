@@ -26,6 +26,8 @@ import (
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
 	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
+	"github.com/palantir/pkg/safejson"
 	pkgerror "github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -68,7 +70,19 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			)...)
 		}
 
-		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
+		var extensionsProvider conjureircli.ExtensionsProvider
+		// if extensions specified in config has entries, use it as an extensions provider
+		if len(currConfig.Extensions) > 0 {
+			jsonMarshalableExtensionsMap, err := toJSONMarshalableMap(currConfig.Extensions)
+			if err != nil {
+				return conjureplugin.ConjureProjectParams{}, nil, pkgerror.Wrapf(err, "failed to marshal extensions map for project %q", key)
+			}
+			extensionsProvider = func() (map[string]any, error) {
+				return jsonMarshalableExtensionsMap, nil
+			}
+		}
+
+		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider(extensionsProvider)
 		if err != nil {
 			return conjureplugin.ConjureProjectParams{}, nil, pkgerror.Wrapf(err, "failed to convert configuration for %s to provider", key)
 		}
@@ -122,6 +136,29 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 	}, warnings, nil
 }
 
+// toJSONMarshalableMap takes an input map and returns an equivalent map that is safe to marshal as JSON (if such a
+// conversion is possible), or returns the provided input map if it does not have any elements. A common use case is to
+// pass in a map constructed by a call to yaml.Unmarshal, as such a map can often have nested maps of type map[any]any
+// that cannot be marshalled as JSON unless they are converted to an equivalent map[string]any.
+func toJSONMarshalableMap(in map[string]any) (map[string]any, error) {
+	// if input map is empty, no need to do any conversions
+	if len(in) == 0 {
+		return in, nil
+	}
+
+	// use safejson.FromYAMLValue to convert input map to JSON-marshalable form if possible
+	jsonMarshalableMapValue, err := safejson.FromYAMLValue(in)
+	if err != nil {
+		return nil, pkgerror.Wrapf(err, "failed to convert map to a form that can be marshalled as JSON")
+	}
+	// perform type conversion
+	jsonMarshalableMap, ok := jsonMarshalableMapValue.(map[string]any)
+	if !ok {
+		return nil, pkgerror.Errorf("expected jsonMarshalableMapValue to be a map[string]any, but was %T", jsonMarshalableMapValue)
+	}
+	return jsonMarshalableMap, nil
+}
+
 type SingleConjureConfig v2.SingleConjureConfig
 
 func ToSingleConjureConfig(in *SingleConjureConfig) *v2.SingleConjureConfig {
@@ -136,7 +173,7 @@ func ToIRLocatorConfig(in *IRLocatorConfig) *v2.IRLocatorConfig {
 	return (*v2.IRLocatorConfig)(in)
 }
 
-func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
+func (cfg *IRLocatorConfig) ToIRProvider(extensionsProvider conjureircli.ExtensionsProvider) (conjureplugin.IRProvider, error) {
 	if cfg.Locator == "" {
 		return nil, pkgerror.Errorf("locator cannot be empty")
 	}
@@ -169,7 +206,15 @@ func (cfg *IRLocatorConfig) ToIRProvider() (conjureplugin.IRProvider, error) {
 	case v2.LocatorTypeRemote:
 		return conjureplugin.NewHTTPIRProvider(cfg.Locator), nil
 	case v2.LocatorTypeYAML:
-		return conjureplugin.NewLocalYAMLIRProvider(cfg.Locator), nil
+		var cliParams []conjureircli.Param
+		if extensionsProvider != nil {
+			param, err := conjureircli.ExtensionsProviderParam(extensionsProvider)
+			if err != nil {
+				return nil, pkgerror.Wrapf(err, "failed to create extensions provider parameter")
+			}
+			cliParams = append(cliParams, param)
+		}
+		return conjureplugin.NewLocalYAMLIRProvider(cfg.Locator, cliParams...), nil
 	case v2.LocatorTypeIRFile:
 		return conjureplugin.NewLocalFileIRProvider(cfg.Locator), nil
 	default:

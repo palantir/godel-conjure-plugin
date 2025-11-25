@@ -17,6 +17,7 @@ package integration_test
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -304,6 +305,109 @@ func NewTestUnionFromTestCase(v TestCase) TestUnion {
 	}
 }
 
+func TestConjurePluginSetsExtensions(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.conjure.test.api
+    objects:
+      TestCase:
+        fields:
+          name: string
+`
+		yamlDir    = "yamlDir"
+		conjureYML = `
+version: 2
+projects:
+  project-1:
+    ir-locator: ` + yamlDir + `
+    extensions:
+      test-key: test-value
+      test-key-map:
+        map-key: map-value
+        map-key-2: 2
+`
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	ymlDir := filepath.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+	defer cleanup()
+	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	require.NoError(t, err)
+
+	// start a server that listens for PUT calls that end in ".conjure.json" and then records the value to the variable
+	var gotConjureIRBytes []byte
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			return
+		}
+		if !strings.HasSuffix(r.URL.Path, ".conjure.json") {
+			return
+		}
+		bodyBytes, err := io.ReadAll(r.Body)
+		defer func() {
+			_ = r.Body.Close()
+		}()
+		require.NoError(t, err)
+		gotConjureIRBytes = bodyBytes
+	}))
+	defer ts.Close()
+
+	// perform publish
+	outputBuf := &bytes.Buffer{}
+	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure-publish", []string{
+		"--group-id=com.palantir.test-group",
+		"--repository=test-repo",
+		"--url=" + ts.URL,
+		"--username=test-username",
+		"--password=test-password",
+	}, projectDir, false, outputBuf)
+	defer runPluginCleanup()
+	require.NoError(t, err, outputBuf.String())
+
+	// verify that published IR matches expected value and includes the "extensions" block
+	assert.Equal(t, `{
+  "version" : 1,
+  "errors" : [ ],
+  "types" : [ {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "TestCase",
+        "package" : "com.palantir.conjure.test.api"
+      },
+      "fields" : [ {
+        "fieldName" : "name",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "STRING"
+        }
+      } ]
+    }
+  } ],
+  "services" : [ ],
+  "extensions" : {
+    "test-key" : "test-value",
+    "test-key-map" : {
+      "map-key" : "map-value",
+      "map-key-2" : 2
+    }
+  }
+}`, string(gotConjureIRBytes))
+}
+
 func TestConjurePluginVerify(t *testing.T) {
 	const (
 		conjureSpecYML = `
@@ -568,6 +672,128 @@ func innerTestConjurePluginPublishAssetSpec(pluginProvider pluginapitester.Plugi
 	}, projectDir, false, &bytes.Buffer{})
 	defer runPluginCleanup()
 	return err
+}
+
+func TestConjurePluginSetsExtensionsWithPublishAsset(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.conjure.test.api
+    objects:
+      TestCase:
+        fields:
+          name: string
+`
+		yamlDir    = "yamlDir"
+		conjureYML = `
+version: 2
+projects:
+  project-1:
+    ir-locator: ` + yamlDir + `
+    extensions:
+      original-config-key: original-config-value
+      common-key: original-config-value
+`
+		assetFileContent = `#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{ "type": "conjure-ir-extensions-provider" }'
+    exit 0
+fi
+
+printf '%s\n' '{"common-key": "asset-value", "asset-key": 7}'
+exit 0
+`
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	ymlDir := filepath.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+	defer cleanup()
+	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	require.NoError(t, err)
+
+	// start a server that listens for PUT calls that end in ".conjure.json" and then records the value to the variable
+	var gotConjureIRBytes []byte
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			return
+		}
+		if !strings.HasSuffix(r.URL.Path, ".conjure.json") {
+			return
+		}
+		bodyBytes, err := io.ReadAll(r.Body)
+		defer func() {
+			_ = r.Body.Close()
+		}()
+		require.NoError(t, err)
+		gotConjureIRBytes = bodyBytes
+	}))
+	defer ts.Close()
+
+	assetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(assetFileContent))
+	require.NoError(t, os.Chmod(assetFile, 0700))
+
+	// perform publish
+	outputBuf := &bytes.Buffer{}
+	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure-publish", []string{
+		"--group-id=com.palantir.test-group",
+		"--repository=test-repo",
+		"--assets=" + assetFile,
+		"--url=" + ts.URL,
+		"--username=test-username",
+		"--password=test-password",
+	}, projectDir, false, outputBuf)
+	defer runPluginCleanup()
+	require.NoError(t, err, outputBuf.String())
+
+	// verify that published IR matches expected value and includes the "extensions" block
+	// that is the result of applying the original map with the asset map
+	assert.Equal(t, `{
+	"errors": [],
+	"extensions": {
+		"asset-key": 7,
+		"common-key": "asset-value",
+		"original-config-key": "original-config-value"
+	},
+	"services": [],
+	"types": [
+		{
+			"object": {
+				"fields": [
+					{
+						"fieldName": "name",
+						"type": {
+							"primitive": "STRING",
+							"type": "primitive"
+						}
+					}
+				],
+				"typeName": {
+					"name": "TestCase",
+					"package": "com.palantir.conjure.test.api"
+				}
+			},
+			"type": "object"
+		}
+	],
+	"version": 1
+}`, string(gotConjureIRBytes))
 }
 
 func TestUpgradeConfig(t *testing.T) {
