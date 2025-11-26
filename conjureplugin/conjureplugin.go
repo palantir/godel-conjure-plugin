@@ -112,14 +112,16 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			// Write mode: apply the changes to disk.
 
 			// Categorize files by what action is needed.
-			requiresUpdating := make(map[string]bool) // Files that need to be written (changed or missing)
-			var requiresDeleting []string             // Files that need to be deleted (extra/stale)
-			for k, v := range diff.Diffs {
-				if v == "extra" {
-					requiresDeleting = append(requiresDeleting, k)
-				} else {
-					// "changed" or "missing" both require writing
-					requiresUpdating[k] = true
+			requiresWriting := make(map[string]bool) // Files that need to be written
+			var requiresDeleting []string            // Stale files to delete
+			for path, diffType := range diff.Diffs {
+				switch diffType {
+				case "extra":
+					// Stale file that should no longer exist
+					requiresDeleting = append(requiresDeleting, path)
+				default:
+					// All other cases require writing: "missing", "checksum changed...", etc.
+					requiresWriting[filepath.Clean(path)] = true
 				}
 			}
 
@@ -132,7 +134,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 
 			// Write only the files that need updating (optimization: skip unchanged files).
 			for _, file := range files {
-				if requiresUpdating[file.AbsPath()] {
+				if requiresWriting[filepath.Clean(file.AbsPath())] {
 					if err := file.Write(); err != nil {
 						return errors.Wrapf(err, "failed to write file %s", file.AbsPath())
 					}
