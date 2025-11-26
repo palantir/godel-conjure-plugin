@@ -55,7 +55,6 @@ func checksumRenderedFiles(files []*conjure.OutputFile) (dirchecksum.ChecksumSet
 // checksumOnDiskFiles computes checksums for files on disk at the specified paths.
 // Paths are normalized to absolute paths for consistent comparison.
 // For files that don't exist, returns an entry with empty checksum.
-// This handles edge cases like files being deleted between discovery and checksum computation.
 func checksumOnDiskFiles(files []string) (dirchecksum.ChecksumSet, error) {
 	set := dirchecksum.ChecksumSet{
 		Checksums: map[string]dirchecksum.FileChecksumInfo{},
@@ -95,10 +94,8 @@ func checksumOnDiskFiles(files []string) (dirchecksum.ChecksumSet, error) {
 // Example output: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
 func computeSHA256Hash(data []byte) (string, error) {
 	h := sha256.New()
-	// Write() on a hash.Hash never returns an error, but we check anyway for safety.
 	if _, err := h.Write(data); err != nil {
 		return "", err
 	}
-	// Format the hash as a lowercase hexadecimal string.
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }

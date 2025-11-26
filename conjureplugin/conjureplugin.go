@@ -68,7 +68,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		// Compute checksums for the files we're about to create/update.
 		// These are computed from the in-memory generated content.
 		// Checksums are keyed by absolute paths (using file.AbsPath()) for consistent diff comparison.
-		checksumsOfFilesToBeCreated, err := checksumRenderedFiles(files)
+		renderedChecksums, err := checksumRenderedFiles(files)
 		if err != nil {
 			return errors.Wrap(err, "failed to compute checksums for generated files")
 		}
@@ -93,7 +93,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		//   "checksum changed..."	- file exists but content differs
 		//   "missing"				- file should exist but doesn't
 		//   "extra"				- file exists but shouldn't (stale file to delete)
-		diff := checksumsOfFilesToBeCreated.Diff(onDiskChecksums)
+		diff := renderedChecksums.Diff(onDiskChecksums)
 		if currParam.SkipDeleteGeneratedFiles {
 			// When configured to skip deletion, filter out "extra" files from the diff.
 			// This means we won't report them in verify mode or delete them in write mode.
