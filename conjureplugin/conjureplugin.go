@@ -18,6 +18,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -42,14 +43,13 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 
 	k := 0
 	for _, currParam := range params.OrderedParams() {
-		outputDir := currParam.OutputDir
 		conjureDef, err := conjureDefinitionFromParam(currParam)
 		if err != nil {
 			return err
 		}
 
 		outputConf := conjure.OutputConfiguration{
-			OutputDir:            filepath.Join(projectDir, outputDir),
+			OutputDir:            filepath.Join(projectDir, currParam.OutputDir),
 			GenerateServer:       currParam.Server,
 			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
@@ -60,113 +60,71 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return errors.Wrap(err, "failed to generate conjure output files")
 		}
 
-		original := dirchecksum.ChecksumSet{
-			RootDir:   projectDir,
-			Checksums: make(map[string]dirchecksum.FileChecksumInfo),
-		}
-		for _, file := range files {
-			relPath, err := filepath.Rel(projectDir, file.AbsPath())
-			if err != nil {
-				return err
-			}
-			output, err := file.Render()
-			if err != nil {
-				return err
-			}
-			h := sha256.New()
-			_, err = h.Write(output)
-			if err != nil {
-				return errors.Wrapf(err, "failed to checksum generated content for %s", file.AbsPath())
-			}
-			original.Checksums[relPath] = dirchecksum.FileChecksumInfo{
-				Path:           relPath,
-				IsDir:          false,
-				SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
-			}
-		}
-
-		new := dirchecksum.ChecksumSet{
-			RootDir:   projectDir,
-			Checksums: make(map[string]dirchecksum.FileChecksumInfo),
-		}
-		genFiles, err := getAllGeneratedFiles(outputDir)
-		if err != nil {
-			return err
-		}
-		for _, file := range genFiles {
-			f, err := os.Open(file)
-			if err != nil {
-				return errors.Wrapf(err, "failed to open file for checksum %s", file)
-			}
-			defer func() {
-				// file is opened for reading only, so safe to ignore errors on close
-				_ = f.Close()
-			}()
-			h := sha256.New()
-			if _, err := io.Copy(h, f); err != nil {
-				return errors.Wrapf(err, "failed to checksum on-disk content for %s", file)
-			}
-			new.Checksums[file] = dirchecksum.FileChecksumInfo{
-				Path:           file,
-				SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
-			}
-		}
-
-		diff := original.Diff(new)
-		// panic(fmt.Errorf("%v", original.Diff(new)))
-
 		if verify {
+			new := make(map[string]dirchecksum.FileChecksumInfo)
+			for _, file := range files {
+				h := sha256.New()
+				bytes, err := file.Render()
+				if err != nil {
+					return err
+				}
+				if _, err := h.Write(bytes); err != nil {
+					return err
+				}
+				new[file.AbsPath()] = dirchecksum.FileChecksumInfo{
+					Path:           file.AbsPath(),
+					SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
+				}
+			}
+			og := make(map[string]dirchecksum.FileChecksumInfo)
+			if !currParam.SkipDeleteGeneratedFiles {
+				abs, err := getAllGeneratedFiles(outputConf.OutputDir)
+				if err != nil {
+					return err
+				}
+				for _, ab := range abs {
+					og[ab] = dirchecksum.FileChecksumInfo{Path: ab}
+				}
+			}
+			for _, file := range files {
+				if bytes, err := os.ReadFile(file.AbsPath()); errors.Is(err, fs.ErrNotExist) {
+					og[file.AbsPath()] = dirchecksum.FileChecksumInfo{Path: file.AbsPath()}
+				} else if err != nil {
+					return err
+				} else {
+					h := sha256.New()
+					if _, err := h.Write(bytes); err != nil {
+						return err
+					}
+					og[file.AbsPath()] = dirchecksum.FileChecksumInfo{
+						Path:           file.AbsPath(),
+						SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
+					}
+				}
+			}
+			t := dirchecksum.ChecksumSet{Checksums: new}
+			diff := t.Diff(dirchecksum.ChecksumSet{Checksums: og})
 			if len(diff.Diffs) > 0 {
 				verifyFailedFn(k, diff.String())
 			}
 		} else {
-			qikFile := make(map[string]*conjure.OutputFile)
-			for _, file := range files {
-				qikFile[file.AbsPath()] = file
-			}
-			for file, problem := range diff.Diffs {
-				if problem == "extra" {
-					if !currParam.SkipDeleteGeneratedFiles {
-						if err := os.Remove(file); err != nil {
-							return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
-						}
-					}
-				} else {
-					file, err := filepath.Abs(file)
-					if err != nil {
-						panic(err)
-					}
-					fmt.Printf("file: %v\n", file)
-					// panic(fmt.Errorf("%v, %v", file, qikFile))
-					if err := qikFile[file].Write(); err != nil {
-						return err
-					}
-				}
-			}
-		}
-
-		/*
-			if verify {
-				diff, err := diffOnDisk(projectDir, files, filesToDelete)
+			if !currParam.SkipDeleteGeneratedFiles {
+				allGeneratedFilePaths_Abs, err := getAllGeneratedFiles(outputConf.OutputDir)
 				if err != nil {
 					return err
 				}
-				if len(diff.Diffs) > 0 {
-					verifyFailedFn(k, diff.String())
-				}
-			} else {
-				for _, file := range filesToDelete {
-					if err := os.Remove(file); err != nil {
-						return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
-					}
-				}
-				for _, file := range files {
-					if err := file.Write(); err != nil {
+				for _, abs := range allGeneratedFilePaths_Abs {
+					if err := os.Remove(abs); err != nil {
 						return err
 					}
 				}
 			}
-		*/
+			for _, file := range files {
+				if err := file.Write(); err != nil {
+					return err
+				}
+			}
+		}
 		k++
 	}
 
@@ -193,33 +151,6 @@ func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefiniti
 		return spec.ConjureDefinition{}, err
 	}
 	return conjureDefinition, nil
-}
-
-// computeObsoleteFiles identifies existing generated files that are no longer part of the
-// current generation output and should be deleted. It compares all Conjure-generated files
-// currently on disk in the output directory against the set of files that will be generated,
-// returning those that exist but won't be regenerated.
-func computeObsoleteFiles(outputDir string, filesToGenerate []*conjure.OutputFile) ([]string, error) {
-	existingFiles, err := getAllGeneratedFiles(outputDir)
-	if err != nil {
-		return nil, err
-	}
-
-	// Build a set of file paths that will be generated
-	generatedPaths := make(map[string]struct{}, len(filesToGenerate))
-	for _, file := range filesToGenerate {
-		generatedPaths[file.AbsPath()] = struct{}{}
-	}
-
-	// Find files that exist but won't be regenerated
-	var obsoleteFiles []string
-	for _, existingFile := range existingFiles {
-		if _, willBeGenerated := generatedPaths[existingFile]; !willBeGenerated {
-			obsoleteFiles = append(obsoleteFiles, existingFile)
-		}
-	}
-
-	return obsoleteFiles, nil
 }
 
 // getAllGeneratedFiles returns the absolute paths of all Conjure-generated files
