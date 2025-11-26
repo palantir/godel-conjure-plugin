@@ -80,10 +80,16 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				checksumsOfOnDiskFiles[conjureGoFile] = dirchecksum.FileChecksumInfo{Path: conjureGoFile}
 			}
 
-			onDiskChecksums, err := getCheckSumsFromOnDiskFiles(files)
+			var genFilePaths []string
+			for _, file := range files {
+				genFilePaths = append(genFilePaths, file.AbsPath())
+			}
+
+			onDiskChecksums, err := getCheckSumsFromOnDiskFiles(genFilePaths)
 			if err != nil {
 				return err
 			}
+
 			maps.Copy(checksumsOfOnDiskFiles, onDiskChecksums)
 
 			diff := (&dirchecksum.ChecksumSet{Checksums: checksumsOfFilesToBeCreated}).Diff(dirchecksum.ChecksumSet{Checksums: checksumsOfOnDiskFiles})
@@ -152,13 +158,13 @@ func getChecksumsFromConjureGoFiles(files []*conjure.OutputFile) (map[string]dir
 
 // getCheckSumsFromOnDiskFiles computes checksums for files on disk at the paths specified by the files.
 // For files that don't exist, returns an entry with empty checksum.
-func getCheckSumsFromOnDiskFiles(files []*conjure.OutputFile) (map[string]dirchecksum.FileChecksumInfo, error) {
+func getCheckSumsFromOnDiskFiles(files []string) (map[string]dirchecksum.FileChecksumInfo, error) {
 	result := make(map[string]dirchecksum.FileChecksumInfo)
 	for _, file := range files {
-		bytes, err := os.ReadFile(file.AbsPath())
+		bytes, err := os.ReadFile(file)
 		if errors.Is(err, fs.ErrNotExist) {
 			// File doesn't exist - include with empty checksum
-			result[file.AbsPath()] = dirchecksum.FileChecksumInfo{Path: file.AbsPath()}
+			result[file] = dirchecksum.FileChecksumInfo{Path: file}
 			continue
 		}
 		if err != nil {
@@ -168,8 +174,8 @@ func getCheckSumsFromOnDiskFiles(files []*conjure.OutputFile) (map[string]dirche
 		if err != nil {
 			return nil, err
 		}
-		result[file.AbsPath()] = dirchecksum.FileChecksumInfo{
-			Path:           file.AbsPath(),
+		result[file] = dirchecksum.FileChecksumInfo{
+			Path:           file,
 			SHA256checksum: checksum,
 		}
 	}
