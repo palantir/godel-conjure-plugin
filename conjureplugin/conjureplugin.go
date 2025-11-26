@@ -141,12 +141,8 @@ func verifyConjureOutput(files []*conjure.OutputFile, outputDir string, skipDele
 func buildExpectedChecksums(files []*conjure.OutputFile) (map[string]dirchecksum.FileChecksumInfo, error) {
 	checksums := make(map[string]dirchecksum.FileChecksumInfo)
 	for _, file := range files {
-		h := sha256.New()
 		bytes, err := file.Render()
 		if err != nil {
-			return nil, err
-		}
-		if _, err := h.Write(bytes); err != nil {
 			return nil, err
 		}
 		checksums[file.AbsPath()] = dirchecksum.FileChecksumInfo{
