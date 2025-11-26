@@ -83,8 +83,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			}
 			maps.Copy(checksumsOfOnDiskFiles, onDiskChecksums)
 
-			t := dirchecksum.ChecksumSet{Checksums: checksumsOfFilesToBeCreated}
-			diff := t.Diff(dirchecksum.ChecksumSet{Checksums: checksumsOfOnDiskFiles})
+			diff := (&dirchecksum.ChecksumSet{Checksums: checksumsOfFilesToBeCreated}).Diff(dirchecksum.ChecksumSet{Checksums: checksumsOfOnDiskFiles})
 			if len(diff.Diffs) > 0 {
 				verifyFailedFn(k, diff.String())
 			}
