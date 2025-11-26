@@ -61,51 +61,12 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		}
 
 		if verify {
-			new := make(map[string]dirchecksum.FileChecksumInfo)
-			for _, file := range files {
-				h := sha256.New()
-				bytes, err := file.Render()
-				if err != nil {
-					return err
-				}
-				if _, err := h.Write(bytes); err != nil {
-					return err
-				}
-				new[file.AbsPath()] = dirchecksum.FileChecksumInfo{
-					Path:           file.AbsPath(),
-					SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
-				}
+			diffStr, err := verifyConjureOutput(files, outputConf.OutputDir, currParam.SkipDeleteGeneratedFiles)
+			if err != nil {
+				return err
 			}
-			og := make(map[string]dirchecksum.FileChecksumInfo)
-			if !currParam.SkipDeleteGeneratedFiles {
-				abs, err := getAllGeneratedFiles(outputConf.OutputDir)
-				if err != nil {
-					return err
-				}
-				for _, ab := range abs {
-					og[ab] = dirchecksum.FileChecksumInfo{Path: ab}
-				}
-			}
-			for _, file := range files {
-				if bytes, err := os.ReadFile(file.AbsPath()); errors.Is(err, fs.ErrNotExist) {
-					og[file.AbsPath()] = dirchecksum.FileChecksumInfo{Path: file.AbsPath()}
-				} else if err != nil {
-					return err
-				} else {
-					h := sha256.New()
-					if _, err := h.Write(bytes); err != nil {
-						return err
-					}
-					og[file.AbsPath()] = dirchecksum.FileChecksumInfo{
-						Path:           file.AbsPath(),
-						SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
-					}
-				}
-			}
-			t := dirchecksum.ChecksumSet{Checksums: new}
-			diff := t.Diff(dirchecksum.ChecksumSet{Checksums: og})
-			if len(diff.Diffs) > 0 {
-				verifyFailedFn(k, diff.String())
+			if diffStr != "" {
+				verifyFailedFn(k, diffStr)
 			}
 		} else {
 			if !currParam.SkipDeleteGeneratedFiles {
@@ -151,6 +112,90 @@ func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefiniti
 		return spec.ConjureDefinition{}, err
 	}
 	return conjureDefinition, nil
+}
+
+// verifyConjureOutput compares expected conjure output files against existing files on disk.
+// Returns a diff string if differences are found, or empty string if files match.
+func verifyConjureOutput(files []*conjure.OutputFile, outputDir string, skipDeleteGeneratedFiles bool) (string, error) {
+	expectedChecksums, err := buildExpectedChecksums(files)
+	if err != nil {
+		return "", err
+	}
+
+	actualChecksums, err := buildActualChecksums(files, outputDir, skipDeleteGeneratedFiles)
+	if err != nil {
+		return "", err
+	}
+
+	expectedSet := dirchecksum.ChecksumSet{Checksums: expectedChecksums}
+	actualSet := dirchecksum.ChecksumSet{Checksums: actualChecksums}
+	diff := expectedSet.Diff(actualSet)
+
+	if len(diff.Diffs) > 0 {
+		return diff.String(), nil
+	}
+	return "", nil
+}
+
+// buildExpectedChecksums builds a map of checksums for the generated conjure files.
+func buildExpectedChecksums(files []*conjure.OutputFile) (map[string]dirchecksum.FileChecksumInfo, error) {
+	checksums := make(map[string]dirchecksum.FileChecksumInfo)
+	for _, file := range files {
+		h := sha256.New()
+		bytes, err := file.Render()
+		if err != nil {
+			return nil, err
+		}
+		if _, err := h.Write(bytes); err != nil {
+			return nil, err
+		}
+		checksums[file.AbsPath()] = dirchecksum.FileChecksumInfo{
+			Path:           file.AbsPath(),
+			SHA256checksum: computeChecksum(bytes),
+		}
+	}
+	return checksums, nil
+}
+
+// buildActualChecksums builds a map of checksums for existing files on disk.
+// Includes all generated files in the output directory if skipDeleteGeneratedFiles is false.
+func buildActualChecksums(files []*conjure.OutputFile, outputDir string, skipDeleteGeneratedFiles bool) (map[string]dirchecksum.FileChecksumInfo, error) {
+	checksums := make(map[string]dirchecksum.FileChecksumInfo)
+
+	// Include all existing generated files if we're checking for extras to delete
+	if !skipDeleteGeneratedFiles {
+		existingFiles, err := getAllGeneratedFiles(outputDir)
+		if err != nil {
+			return nil, err
+		}
+		for _, path := range existingFiles {
+			checksums[path] = dirchecksum.FileChecksumInfo{Path: path}
+		}
+	}
+
+	// Compute checksums for expected files from disk
+	for _, file := range files {
+		bytes, err := os.ReadFile(file.AbsPath())
+		if errors.Is(err, fs.ErrNotExist) {
+			checksums[file.AbsPath()] = dirchecksum.FileChecksumInfo{Path: file.AbsPath()}
+		} else if err != nil {
+			return nil, err
+		} else {
+			checksums[file.AbsPath()] = dirchecksum.FileChecksumInfo{
+				Path:           file.AbsPath(),
+				SHA256checksum: computeChecksum(bytes),
+			}
+		}
+	}
+
+	return checksums, nil
+}
+
+// computeChecksum computes the SHA256 checksum for the given bytes.
+func computeChecksum(data []byte) string {
+	h := sha256.New()
+	_, _ = h.Write(data)
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 // getAllGeneratedFiles returns the absolute paths of all Conjure-generated files
