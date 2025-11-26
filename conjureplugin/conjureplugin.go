@@ -67,6 +67,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 
 		// Compute checksums for the files we're about to create/update.
 		// These are computed from the in-memory generated content.
+		// Checksums are keyed by absolute paths (using file.AbsPath()) for consistent diff comparison.
 		checksumsOfFilesToBeCreated, err := checksumRenderedFiles(files)
 		if err != nil {
 			return errors.Wrap(err, "failed to compute checksums for generated files")
@@ -81,7 +82,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		}
 
 		// Compute checksums for the existing conjure-generated files on disk.
-		// Files that don't exist get an empty checksum.
+		// Checksums are keyed by absolute paths (via filepath.Abs) for consistent diff comparison.
 		onDiskChecksums, err := checksumOnDiskFiles(allConjureGoFiles)
 		if err != nil {
 			return errors.Wrap(err, "failed to compute checksums for on-disk files")

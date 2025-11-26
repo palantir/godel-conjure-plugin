@@ -53,6 +53,7 @@ func checksumRenderedFiles(files []*conjure.OutputFile) (dirchecksum.ChecksumSet
 }
 
 // checksumOnDiskFiles computes checksums for files on disk at the specified paths.
+// Paths are normalized to absolute paths for consistent comparison.
 // For files that don't exist, returns an entry with empty checksum.
 // This handles edge cases like files being deleted between discovery and checksum computation.
 func checksumOnDiskFiles(files []string) (dirchecksum.ChecksumSet, error) {
@@ -60,24 +61,30 @@ func checksumOnDiskFiles(files []string) (dirchecksum.ChecksumSet, error) {
 		Checksums: map[string]dirchecksum.FileChecksumInfo{},
 	}
 	for _, file := range files {
+		// Normalize to absolute path for consistent comparison.
+		absPath, err := filepath.Abs(file)
+		if err != nil {
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to get absolute path for %s", file)
+		}
+
 		// Read the file from disk.
-		bytes, err := os.ReadFile(file)
+		bytes, err := os.ReadFile(absPath)
 		if errors.Is(err, fs.ErrNotExist) {
 			// File doesn't exist - include entry with empty checksum.
 			// The diff algorithm uses empty checksums to detect "missing" files.
-			set.Checksums[filepath.Clean(file)] = dirchecksum.FileChecksumInfo{Path: filepath.Clean(file)}
+			set.Checksums[absPath] = dirchecksum.FileChecksumInfo{Path: absPath}
 			continue
 		}
 		if err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to read file %s", file)
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to read file %s", absPath)
 		}
 		// Compute SHA256 hash of the file content.
 		checksum, err := computeSHA256Hash(bytes)
 		if err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to compute checksum for file %s", file)
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to compute checksum for file %s", absPath)
 		}
-		set.Checksums[filepath.Clean(file)] = dirchecksum.FileChecksumInfo{
-			Path:           filepath.Clean(file),
+		set.Checksums[absPath] = dirchecksum.FileChecksumInfo{
+			Path:           absPath,
 			SHA256checksum: checksum,
 		}
 	}
