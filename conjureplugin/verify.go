@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 
 	"github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/godel/v2/pkg/dirchecksum"
@@ -43,8 +44,8 @@ func checksumRenderedFiles(files []*conjure.OutputFile) (dirchecksum.ChecksumSet
 		if err != nil {
 			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to compute checksum for file %s", file.AbsPath())
 		}
-		set.Checksums[file.AbsPath()] = dirchecksum.FileChecksumInfo{
-			Path:           file.AbsPath(),
+		set.Checksums[filepath.Clean(file.AbsPath())] = dirchecksum.FileChecksumInfo{
+			Path:           filepath.Clean(file.AbsPath()),
 			SHA256checksum: checksum,
 		}
 	}
@@ -64,7 +65,7 @@ func checksumOnDiskFiles(files []string) (dirchecksum.ChecksumSet, error) {
 		if errors.Is(err, fs.ErrNotExist) {
 			// File doesn't exist - include entry with empty checksum.
 			// The diff algorithm uses empty checksums to detect "missing" files.
-			set.Checksums[file] = dirchecksum.FileChecksumInfo{Path: file}
+			set.Checksums[filepath.Clean(file)] = dirchecksum.FileChecksumInfo{Path: filepath.Clean(file)}
 			continue
 		}
 		if err != nil {
@@ -75,8 +76,8 @@ func checksumOnDiskFiles(files []string) (dirchecksum.ChecksumSet, error) {
 		if err != nil {
 			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to compute checksum for file %s", file)
 		}
-		set.Checksums[file] = dirchecksum.FileChecksumInfo{
-			Path:           file,
+		set.Checksums[filepath.Clean(file)] = dirchecksum.FileChecksumInfo{
+			Path:           filepath.Clean(file),
 			SHA256checksum: checksum,
 		}
 	}

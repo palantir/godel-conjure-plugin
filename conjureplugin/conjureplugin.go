@@ -40,13 +40,20 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 
 	k := 0
 	for _, currParam := range params.OrderedParams() {
+		// Convert output directory to absolute path for consistent path comparisons.
+		outputDir := filepath.Join(projectDir, currParam.OutputDir)
+		absOutputDir, err := filepath.Abs(outputDir)
+		if err != nil {
+			return errors.Wrapf(err, "failed to get absolute path for output directory %s", outputDir)
+		}
+
 		conjureDef, err := conjureDefinitionFromParam(currParam)
 		if err != nil {
 			return err
 		}
 
 		outputConf := conjure.OutputConfiguration{
-			OutputDir:            filepath.Join(projectDir, currParam.OutputDir),
+			OutputDir:            absOutputDir,
 			GenerateServer:       currParam.Server,
 			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
@@ -67,9 +74,10 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 
 		// Find all existing conjure-generated files in the output directory
 		// (files ending in .conjure.go or .conjure.json).
-		allConjureGoFiles, err := getAllConjureGoFilesInOutputDir(outputConf.OutputDir)
+		// Since absOutputDir is absolute, the returned paths will also be absolute.
+		allConjureGoFiles, err := getAllConjureGoFilesInOutputDir(absOutputDir)
 		if err != nil {
-			return errors.Wrapf(err, "failed to list existing conjure files in %s", outputConf.OutputDir)
+			return errors.Wrapf(err, "failed to list existing conjure files in %s", absOutputDir)
 		}
 
 		// Compute checksums for the existing conjure-generated files on disk.
@@ -159,8 +167,9 @@ func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefiniti
 	return conjureDefinition, nil
 }
 
-// getAllConjureGoFilesInOutputDir returns the absolute paths of all Conjure-generated files
+// getAllConjureGoFilesInOutputDir returns paths of all Conjure-generated files
 // (files ending in .conjure.go or .conjure.json) within the specified output directory.
+// Returns paths with outputDir prepended (absolute if outputDir is absolute, relative if relative).
 // Returns an empty slice if the directory doesn't exist (not an error - directory may not exist yet).
 // This is used to find all existing generated files so we can detect stale ones that need deletion.
 func getAllConjureGoFilesInOutputDir(outputDir string) ([]string, error) {
@@ -177,25 +186,25 @@ func getAllConjureGoFilesInOutputDir(outputDir string) ([]string, error) {
 	include := matcher.Name(`.*\.conjure\.(go|json)$`)
 
 	// List all matching files (returns paths relative to outputDir).
-	relPaths, err := matcher.ListFiles(outputDir, include, nil)
+	pathsRelativeToOutputDir, err := matcher.ListFiles(outputDir, include, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to list files in output directory %s", outputDir)
 	}
 
-	// Convert relative paths to absolute paths, filtering out directories.
+	// Convert relative paths to paths with outputDir prepended, filtering out directories.
 	// matcher.ListFiles can return both files and directories that match the pattern,
 	// so we need to filter to only actual files.
-	var absPaths []string
-	for _, relPath := range relPaths {
-		absPath := filepath.Join(outputDir, relPath)
-		fileInfo, err := os.Stat(absPath)
+	var pathsWithOutputDir []string
+	for _, relPath := range pathsRelativeToOutputDir {
+		fullPath := filepath.Join(outputDir, relPath)
+		fileInfo, err := os.Stat(fullPath)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to stat %s", absPath)
+			return nil, errors.Wrapf(err, "failed to stat %s", fullPath)
 		}
 		if !fileInfo.IsDir() {
-			absPaths = append(absPaths, absPath)
+			pathsWithOutputDir = append(pathsWithOutputDir, fullPath)
 		}
 	}
 
-	return absPaths, nil
+	return pathsWithOutputDir, nil
 }
