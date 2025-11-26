@@ -65,12 +65,12 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return err
 		}
 
-		allConjureGoFiles, err := getAllConjureGoFiles(outputConf.OutputDir)
+		allConjureGoFiles, err := getAllConjureGoFilesInOutputDir(outputConf.OutputDir)
 		if err != nil {
 			return err
 		}
 
-		onDiskChecksums, err := getCheckSumsFromOnDiskFiles(allConjureGoFiles)
+		onDiskChecksums, err := getChecksumsFromOnDiskFiles(allConjureGoFiles)
 		if err != nil {
 			return err
 		}
@@ -161,9 +161,9 @@ func getChecksumsFromConjureGoFiles(files []*conjure.OutputFile) (map[string]dir
 	return result, nil
 }
 
-// getCheckSumsFromOnDiskFiles computes checksums for files on disk at the paths specified by the files.
+// getChecksumsFromOnDiskFiles computes checksums for files on disk at the paths specified by the files.
 // For files that don't exist, returns an entry with empty checksum.
-func getCheckSumsFromOnDiskFiles(files []string) (map[string]dirchecksum.FileChecksumInfo, error) {
+func getChecksumsFromOnDiskFiles(files []string) (map[string]dirchecksum.FileChecksumInfo, error) {
 	result := make(map[string]dirchecksum.FileChecksumInfo)
 	for _, file := range files {
 		bytes, err := os.ReadFile(file)
@@ -196,9 +196,9 @@ func computeSHA256Hash(data []byte) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
-// getAllConjureGoFiles returns the absolute paths of all Conjure-generated files
+// getAllConjureGoFilesInOutputDir returns the absolute paths of all Conjure-generated files
 // (files ending in .conjure.go or .conjure.json) within the specified output directory.
-func getAllConjureGoFiles(outputDir string) ([]string, error) {
+func getAllConjureGoFilesInOutputDir(outputDir string) ([]string, error) {
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
 		return nil, nil
 	} else if err != nil {
