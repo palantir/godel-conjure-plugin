@@ -52,8 +52,8 @@ func checksumRenderedFiles(files []*conjure.OutputFile) (dirchecksum.ChecksumSet
 }
 
 // checksumOnDiskFiles computes checksums for files on disk at the specified paths.
-// For files that don't exist, returns an entry with empty checksum (needed for proper diff calculation).
-// Returns a map where keys are file paths and values contain path + checksum (or just path if missing).
+// For files that don't exist, returns an entry with empty checksum.
+// This handles edge cases like files being deleted between discovery and checksum computation.
 func checksumOnDiskFiles(files []string) (dirchecksum.ChecksumSet, error) {
 	set := dirchecksum.ChecksumSet{
 		Checksums: map[string]dirchecksum.FileChecksumInfo{},

@@ -72,7 +72,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return errors.Wrapf(err, "failed to list existing conjure files in %s", outputConf.OutputDir)
 		}
 
-		// Compute checksums for all files currently on disk.
+		// Compute checksums for the existing conjure-generated files on disk.
 		// Files that don't exist get an empty checksum.
 		onDiskChecksums, err := checksumOnDiskFiles(allConjureGoFiles)
 		if err != nil {
