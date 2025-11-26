@@ -96,9 +96,9 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		if currParam.SkipDeleteGeneratedFiles {
 			// When configured to skip deletion, filter out "extra" files from the diff.
 			// This means we won't report them in verify mode or delete them in write mode.
-			for k, v := range diff.Diffs {
-				if v == "extra" {
-					delete(diff.Diffs, k)
+			for path, msg := range diff.Diffs {
+				if msg == "extra" {
+					delete(diff.Diffs, path)
 				}
 			}
 		}
