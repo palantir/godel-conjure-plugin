@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,50 +60,56 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return errors.Wrap(err, "failed to generate conjure output files")
 		}
 
-		var extraConjureGoFiles []string
-		if !currParam.SkipDeleteGeneratedFiles {
-			extraConjureGoFiles, err = getAllConjureGoFiles(outputConf.OutputDir)
-			if err != nil {
-				return err
+		checksumsOfFilesToBeCreated, err := getChecksumsFromConjureGoFiles(files)
+		if err != nil {
+			return err
+		}
+
+		allConjureGoFiles, err := getAllConjureGoFiles(outputConf.OutputDir)
+		if err != nil {
+			return err
+		}
+
+		onDiskChecksums, err := getCheckSumsFromOnDiskFiles(allConjureGoFiles)
+		if err != nil {
+			return err
+		}
+
+		diff := (&dirchecksum.ChecksumSet{Checksums: checksumsOfFilesToBeCreated}).Diff(dirchecksum.ChecksumSet{Checksums: onDiskChecksums})
+		if currParam.SkipDeleteGeneratedFiles {
+			// When skipping delete, remove "extra" files from diff since we don't care about them
+			for k, v := range diff.Diffs {
+				if v == "extra" {
+					delete(diff.Diffs, k)
+				}
 			}
 		}
 
 		if verify {
-			checksumsOfFilesToBeCreated, err := getChecksumsFromConjureGoFiles(files)
-			if err != nil {
-				return err
-			}
-
-			checksumsOfOnDiskFiles := make(map[string]dirchecksum.FileChecksumInfo)
-			for _, conjureGoFile := range extraConjureGoFiles {
-				checksumsOfOnDiskFiles[conjureGoFile] = dirchecksum.FileChecksumInfo{Path: conjureGoFile}
-			}
-
-			var genFilePaths []string
-			for _, file := range files {
-				genFilePaths = append(genFilePaths, file.AbsPath())
-			}
-
-			onDiskChecksums, err := getCheckSumsFromOnDiskFiles(genFilePaths)
-			if err != nil {
-				return err
-			}
-
-			maps.Copy(checksumsOfOnDiskFiles, onDiskChecksums)
-
-			diff := (&dirchecksum.ChecksumSet{Checksums: checksumsOfFilesToBeCreated}).Diff(dirchecksum.ChecksumSet{Checksums: checksumsOfOnDiskFiles})
 			if len(diff.Diffs) > 0 {
 				verifyFailedFn(k, diff.String())
 			}
 		} else {
-			for _, conjureGoFile := range extraConjureGoFiles {
-				if err := os.Remove(conjureGoFile); err != nil {
+			requiresUpdating := make(map[string]bool)
+			var requiresDeleting []string
+			for k, v := range diff.Diffs {
+				if v == "extra" {
+					requiresDeleting = append(requiresDeleting, k)
+				} else {
+					requiresUpdating[k] = true
+				}
+			}
+
+			for _, f := range requiresDeleting {
+				if err := os.Remove(f); err != nil {
 					return err
 				}
 			}
 			for _, file := range files {
-				if err := file.Write(); err != nil {
-					return err
+				if requiresUpdating[file.AbsPath()] {
+					if err := file.Write(); err != nil {
+						return err
+					}
 				}
 			}
 		}
