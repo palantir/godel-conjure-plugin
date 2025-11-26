@@ -61,6 +61,14 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			return errors.Wrap(err, "failed to generate conjure output files")
 		}
 
+		var extraConjureGoFiles []string
+		if !currParam.SkipDeleteGeneratedFiles {
+			extraConjureGoFiles, err = getAllConjureGoFiles(outputConf.OutputDir)
+			if err != nil {
+				return err
+			}
+		}
+
 		if verify {
 			checksumsOfFilesToBeCreated, err := getChecksumsFromConjureGoFiles(files)
 			if err != nil {
@@ -68,14 +76,8 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			}
 
 			checksumsOfOnDiskFiles := make(map[string]dirchecksum.FileChecksumInfo)
-			if !currParam.SkipDeleteGeneratedFiles {
-				abs, err := getAllConjureGoFiles(outputConf.OutputDir)
-				if err != nil {
-					return err
-				}
-				for _, ab := range abs {
-					checksumsOfOnDiskFiles[ab] = dirchecksum.FileChecksumInfo{Path: ab}
-				}
+			for _, conjureGoFile := range extraConjureGoFiles {
+				checksumsOfOnDiskFiles[conjureGoFile] = dirchecksum.FileChecksumInfo{Path: conjureGoFile}
 			}
 
 			onDiskChecksums, err := getCheckSumsFromOnDiskFiles(files)
@@ -89,15 +91,9 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				verifyFailedFn(k, diff.String())
 			}
 		} else {
-			if !currParam.SkipDeleteGeneratedFiles {
-				allGeneratedFilePaths_Abs, err := getAllConjureGoFiles(outputConf.OutputDir)
-				if err != nil {
+			for _, conjureGoFile := range extraConjureGoFiles {
+				if err := os.Remove(conjureGoFile); err != nil {
 					return err
-				}
-				for _, abs := range allGeneratedFilePaths_Abs {
-					if err := os.Remove(abs); err != nil {
-						return err
-					}
 				}
 			}
 			for _, file := range files {
