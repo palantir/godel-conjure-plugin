@@ -9,6 +9,7 @@ require (
 	github.com/palantir/distgo v1.86.0
 	github.com/palantir/godel/v2 v2.144.0
 	github.com/palantir/pkg/cobracli v1.3.0
+	github.com/palantir/pkg/matcher v1.3.0
 	github.com/palantir/pkg/safehttp v1.2.0
 	github.com/palantir/pkg/safejson v1.2.0
 	github.com/pkg/errors v0.9.1
@@ -40,7 +41,6 @@ require (
 	github.com/palantir/distgo/pkg/git v1.0.0 // indirect
 	github.com/palantir/go-ptimports/v2 v2.47.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
-	github.com/palantir/pkg/matcher v1.3.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.2.0 // indirect
 	github.com/palantir/pkg/specdir v1.3.0 // indirect
