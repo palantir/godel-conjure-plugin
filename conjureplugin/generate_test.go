@@ -32,7 +32,7 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 		createFile(t, filepath.Join(tmpDir, "regular.go"), "package test")
 		createFile(t, filepath.Join(tmpDir, "conjure.go"), "package test")
 
-		files, err := getAllGeneratedFiles(tmpDir)
+		files, err := getAllConjureGoFilesInOutputDir(tmpDir)
 		require.NoError(t, err)
 		require.Len(t, files, 2)
 
@@ -53,7 +53,7 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 		createFile(t, filepath.Join(tmpDir, "extensions.conjure.json"), "{}")
 		createFile(t, filepath.Join(tmpDir, "config.json"), "{}")
 
-		files, err := getAllGeneratedFiles(tmpDir)
+		files, err := getAllConjureGoFilesInOutputDir(tmpDir)
 		require.NoError(t, err)
 		require.Len(t, files, 1)
 
@@ -72,7 +72,7 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 		createFile(t, filepath.Join(subDir1, "pkg1.conjure.go"), "package pkg1")
 		createFile(t, filepath.Join(subDir2, "nested.conjure.go"), "package nested")
 
-		files, err := getAllGeneratedFiles(tmpDir)
+		files, err := getAllConjureGoFilesInOutputDir(tmpDir)
 		require.NoError(t, err)
 		assert.Len(t, files, 3)
 	})
@@ -80,7 +80,7 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 	t.Run("handles missing directory", func(t *testing.T) {
 		tmpDir := t.TempDir()
 
-		files, err := getAllGeneratedFiles(filepath.Join(tmpDir, "does-not-exist"))
+		files, err := getAllConjureGoFilesInOutputDir(filepath.Join(tmpDir, "does-not-exist"))
 		require.NoError(t, err)
 		assert.Empty(t, files)
 	})
@@ -89,7 +89,7 @@ func TestGetAllGeneratedFiles(t *testing.T) {
 		tmpDir := t.TempDir()
 		createFile(t, filepath.Join(tmpDir, "test.conjure.go"), "package test")
 
-		files, err := getAllGeneratedFiles(tmpDir)
+		files, err := getAllConjureGoFilesInOutputDir(tmpDir)
 		require.NoError(t, err)
 		require.Len(t, files, 1)
 

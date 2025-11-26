@@ -17,94 +17,80 @@ package conjureplugin
 import (
 	"crypto/sha256"
 	"fmt"
-	"io"
+	"io/fs"
 	"os"
-	"path/filepath"
 
 	"github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/godel/v2/pkg/dirchecksum"
 	"github.com/pkg/errors"
 )
 
-func diffOnDisk(projectDir string, files []*conjure.OutputFile, filesToDelete []string) (dirchecksum.ChecksumsDiff, error) {
-	originalChecksums, err := checksumOnDiskFiles(files, projectDir, filesToDelete)
-	if err != nil {
-		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute on-disk checksums")
-	}
-	newChecksums, err := checksumRenderedFiles(files, projectDir)
-	if err != nil {
-		return dirchecksum.ChecksumsDiff{}, errors.Wrap(err, "failed to compute generated checksums")
-	}
-
-	return newChecksums.Diff(originalChecksums), nil
-}
-
-func checksumRenderedFiles(files []*conjure.OutputFile, projectDir string) (dirchecksum.ChecksumSet, error) {
+// checksumRenderedFiles computes checksums for generated conjure files.
+// Takes in-memory OutputFile objects, renders each one to bytes, and computes SHA256 checksums.
+// Returns a map where keys are absolute file paths and values contain path + checksum.
+func checksumRenderedFiles(files []*conjure.OutputFile) (dirchecksum.ChecksumSet, error) {
 	set := dirchecksum.ChecksumSet{
-		RootDir:   projectDir,
 		Checksums: map[string]dirchecksum.FileChecksumInfo{},
 	}
 	for _, file := range files {
-		relPath, err := filepath.Rel(projectDir, file.AbsPath())
-		if err != nil {
-			return dirchecksum.ChecksumSet{}, err
-		}
+		// Render the file content to output (this is the generated code).
 		output, err := file.Render()
 		if err != nil {
-			return dirchecksum.ChecksumSet{}, err
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to render file %s", file.AbsPath())
 		}
-		h := sha256.New()
-		_, err = h.Write(output)
+		// Compute SHA256 hash of the content.
+		checksum, err := computeSHA256Hash(output)
 		if err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to checksum generated content for %s", file.AbsPath())
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to compute checksum for file %s", file.AbsPath())
 		}
-		set.Checksums[relPath] = dirchecksum.FileChecksumInfo{
-			Path:           relPath,
-			IsDir:          false,
-			SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
+		set.Checksums[file.AbsPath()] = dirchecksum.FileChecksumInfo{
+			Path:           file.AbsPath(),
+			SHA256checksum: checksum,
 		}
 	}
 	return set, nil
 }
 
-func checksumOnDiskFiles(files []*conjure.OutputFile, projectDir string, filesToDelete []string) (dirchecksum.ChecksumSet, error) {
+// checksumOnDiskFiles computes checksums for files on disk at the specified paths.
+// For files that don't exist, returns an entry with empty checksum (needed for proper diff calculation).
+// Returns a map where keys are file paths and values contain path + checksum (or just path if missing).
+func checksumOnDiskFiles(files []string) (dirchecksum.ChecksumSet, error) {
 	set := dirchecksum.ChecksumSet{
-		RootDir:   projectDir,
 		Checksums: map[string]dirchecksum.FileChecksumInfo{},
 	}
 	for _, file := range files {
-		relPath, err := filepath.Rel(projectDir, file.AbsPath())
-		if err != nil {
-			return dirchecksum.ChecksumSet{}, err
-		}
-
-		f, err := os.Open(file.AbsPath())
-		if os.IsNotExist(err) {
-			// skip nonexistent files
+		// Read the file from disk.
+		bytes, err := os.ReadFile(file)
+		if errors.Is(err, fs.ErrNotExist) {
+			// File doesn't exist - include entry with empty checksum.
+			// The diff algorithm uses empty checksums to detect "missing" files.
+			set.Checksums[file] = dirchecksum.FileChecksumInfo{Path: file}
 			continue
-		} else if err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to open file for checksum %s", file.AbsPath())
 		}
-		defer func() {
-			// file is opened for reading only, so safe to ignore errors on close
-			_ = f.Close()
-		}()
-		h := sha256.New()
-		if _, err := io.Copy(h, f); err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to checksum on-disk content for %s", file.AbsPath())
-		}
-		set.Checksums[relPath] = dirchecksum.FileChecksumInfo{
-			Path:           relPath,
-			SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
-		}
-	}
-	for _, fileToDelete := range filesToDelete {
-		relPath, err := filepath.Rel(projectDir, fileToDelete)
 		if err != nil {
-			return dirchecksum.ChecksumSet{}, err
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to read file %s", file)
 		}
-		set.Checksums[relPath] = dirchecksum.FileChecksumInfo{}
+		// Compute SHA256 hash of the file content.
+		checksum, err := computeSHA256Hash(bytes)
+		if err != nil {
+			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to compute checksum for file %s", file)
+		}
+		set.Checksums[file] = dirchecksum.FileChecksumInfo{
+			Path:           file,
+			SHA256checksum: checksum,
+		}
 	}
-
 	return set, nil
+}
+
+// computeSHA256Hash computes the SHA256 hash of the given bytes and returns it as a hex string.
+// Example output: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
+func computeSHA256Hash(data []byte) (string, error) {
+	h := sha256.New()
+	// Write() on a hash.Hash never returns an error, but we check anyway for safety.
+	if _, err := h.Write(data); err != nil {
+		return "", err
+	}
+	// Format the hash as a lowercase hexadecimal string.
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }

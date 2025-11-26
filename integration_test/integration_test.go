@@ -27,6 +27,7 @@ import (
 	"testing"
 
 	"github.com/nmiyake/pkg/dirs"
+	_ "github.com/palantir/godel-conjure-plugin/v6/cmd"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/palantir/godel/v2/framework/pluginapitester"
 	"github.com/palantir/godel/v2/pkg/products"

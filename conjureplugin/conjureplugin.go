@@ -40,49 +40,94 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 
 	k := 0
 	for _, currParam := range params.OrderedParams() {
-		outputDir := currParam.OutputDir
 		conjureDef, err := conjureDefinitionFromParam(currParam)
 		if err != nil {
 			return err
 		}
 
 		outputConf := conjure.OutputConfiguration{
-			OutputDir:            filepath.Join(projectDir, outputDir),
+			OutputDir:            filepath.Join(projectDir, currParam.OutputDir),
 			GenerateServer:       currParam.Server,
 			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
 		}
 
+		// Generate the conjure output files in memory (not written to disk yet).
 		files, err := conjure.GenerateOutputFiles(conjureDef, outputConf)
 		if err != nil {
 			return errors.Wrap(err, "failed to generate conjure output files")
 		}
 
-		var filesToDelete []string
-		if !currParam.SkipDeleteGeneratedFiles {
-			filesToDelete, err = computeObsoleteFiles(outputConf.OutputDir, files)
-			if err != nil {
-				return err
+		// Compute checksums for the files we're about to create/update.
+		// These are computed from the in-memory generated content.
+		checksumsOfFilesToBeCreated, err := checksumRenderedFiles(files)
+		if err != nil {
+			return errors.Wrap(err, "failed to compute checksums for generated files")
+		}
+
+		// Find all existing conjure-generated files in the output directory
+		// (files ending in .conjure.go or .conjure.json).
+		allConjureGoFiles, err := getAllConjureGoFilesInOutputDir(outputConf.OutputDir)
+		if err != nil {
+			return errors.Wrapf(err, "failed to list existing conjure files in %s", outputConf.OutputDir)
+		}
+
+		// Compute checksums for all files currently on disk.
+		// Files that don't exist get an empty checksum.
+		onDiskChecksums, err := checksumOnDiskFiles(allConjureGoFiles)
+		if err != nil {
+			return errors.Wrap(err, "failed to compute checksums for on-disk files")
+		}
+
+		// Compare expected vs actual checksums to find differences.
+		// The diff will contain entries like:
+		//   "checksum changed..."	- file exists but content differs
+		//   "missing"				- file should exist but doesn't
+		//   "extra"				- file exists but shouldn't (stale file to delete)
+		diff := checksumsOfFilesToBeCreated.Diff(onDiskChecksums)
+		if currParam.SkipDeleteGeneratedFiles {
+			// When configured to skip deletion, filter out "extra" files from the diff.
+			// This means we won't report them in verify mode or delete them in write mode.
+			for k, v := range diff.Diffs {
+				if v == "extra" {
+					delete(diff.Diffs, k)
+				}
 			}
 		}
 
 		if verify {
-			diff, err := diffOnDisk(projectDir, files, filesToDelete)
-			if err != nil {
-				return err
-			}
+			// Verify mode: report any differences but don't modify files.
 			if len(diff.Diffs) > 0 {
 				verifyFailedFn(k, diff.String())
 			}
 		} else {
-			for _, file := range filesToDelete {
-				if err := os.Remove(file); err != nil {
-					return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
+			// Write mode: apply the changes to disk.
+
+			// Categorize files by what action is needed.
+			requiresUpdating := make(map[string]bool) // Files that need to be written (changed or missing)
+			var requiresDeleting []string             // Files that need to be deleted (extra/stale)
+			for k, v := range diff.Diffs {
+				if v == "extra" {
+					requiresDeleting = append(requiresDeleting, k)
+				} else {
+					// "changed" or "missing" both require writing
+					requiresUpdating[k] = true
 				}
 			}
+
+			// Delete stale files first.
+			for _, f := range requiresDeleting {
+				if err := os.Remove(f); err != nil {
+					return errors.Wrapf(err, "failed to delete stale file %s", f)
+				}
+			}
+
+			// Write only the files that need updating (optimization: skip unchanged files).
 			for _, file := range files {
-				if err := file.Write(); err != nil {
-					return err
+				if requiresUpdating[file.AbsPath()] {
+					if err := file.Write(); err != nil {
+						return errors.Wrapf(err, "failed to write file %s", file.AbsPath())
+					}
 				}
 			}
 		}
@@ -114,52 +159,32 @@ func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefiniti
 	return conjureDefinition, nil
 }
 
-// computeObsoleteFiles identifies existing generated files that are no longer part of the
-// current generation output and should be deleted. It compares all Conjure-generated files
-// currently on disk in the output directory against the set of files that will be generated,
-// returning those that exist but won't be regenerated.
-func computeObsoleteFiles(outputDir string, filesToGenerate []*conjure.OutputFile) ([]string, error) {
-	existingFiles, err := getAllGeneratedFiles(outputDir)
-	if err != nil {
-		return nil, err
-	}
-
-	// Build a set of file paths that will be generated
-	generatedPaths := make(map[string]struct{}, len(filesToGenerate))
-	for _, file := range filesToGenerate {
-		generatedPaths[file.AbsPath()] = struct{}{}
-	}
-
-	// Find files that exist but won't be regenerated
-	var obsoleteFiles []string
-	for _, existingFile := range existingFiles {
-		if _, willBeGenerated := generatedPaths[existingFile]; !willBeGenerated {
-			obsoleteFiles = append(obsoleteFiles, existingFile)
-		}
-	}
-
-	return obsoleteFiles, nil
-}
-
-// getAllGeneratedFiles returns the absolute paths of all Conjure-generated files
+// getAllConjureGoFilesInOutputDir returns the absolute paths of all Conjure-generated files
 // (files ending in .conjure.go or .conjure.json) within the specified output directory.
-func getAllGeneratedFiles(outputDir string) ([]string, error) {
+// Returns an empty slice if the directory doesn't exist (not an error - directory may not exist yet).
+// This is used to find all existing generated files so we can detect stale ones that need deletion.
+func getAllConjureGoFilesInOutputDir(outputDir string) ([]string, error) {
+	// Check if the output directory exists.
 	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		// Directory doesn't exist - not an error, just means no files to find.
 		return nil, nil
 	} else if err != nil {
 		return nil, errors.Wrapf(err, "failed to stat output directory %s", outputDir)
 	}
 
-	// Match files ending in .conjure.go or .conjure.json
+	// Match files ending in .conjure.go or .conjure.json.
+	// These are the suffixes we use for all conjure-generated code.
 	include := matcher.Name(`.*\.conjure\.(go|json)$`)
 
+	// List all matching files (returns paths relative to outputDir).
 	relPaths, err := matcher.ListFiles(outputDir, include, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to list files in output directory %s", outputDir)
 	}
 
-	// Convert to absolute paths, filtering out directories
-	// (matcher.ListFiles can return both files and directories that match)
+	// Convert relative paths to absolute paths, filtering out directories.
+	// matcher.ListFiles can return both files and directories that match the pattern,
+	// so we need to filter to only actual files.
 	var absPaths []string
 	for _, relPath := range relPaths {
 		absPath := filepath.Join(outputDir, relPath)
