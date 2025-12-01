@@ -17,7 +17,6 @@ package integration_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -905,10 +904,10 @@ projects:
 	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
-	err = ioutil.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
 	require.NoError(t, err)
 
-	err = ioutil.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
 	require.NoError(t, err)
 
 	outputBuf := &bytes.Buffer{}
