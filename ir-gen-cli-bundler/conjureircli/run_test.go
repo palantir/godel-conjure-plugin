@@ -24,11 +24,13 @@ import (
 
 func TestYAMLtoIR(t *testing.T) {
 	for i, tc := range []struct {
+		name   string
 		in     string
 		params []conjureircli.Param
 		want   string
 	}{
 		{
+			name: "Generates IR",
 			in: `
 types:
   definitions:
@@ -60,6 +62,7 @@ types:
 }`,
 		},
 		{
+			name: "Generates IR with provided extensions map",
 			in: `
 types:
   definitions:
@@ -110,9 +113,11 @@ types:
 }`,
 		},
 	} {
-		got, err := conjureircli.YAMLtoIRWithParams([]byte(tc.in), tc.params...)
-		require.NoError(t, err, "Case %d", i)
-		assert.Equal(t, tc.want, string(got), "Case %d\nGot:\n%s", i, got)
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := conjureircli.YAMLtoIRWithParams([]byte(tc.in), tc.params...)
+			require.NoError(t, err, "Case %d", i)
+			assert.Equal(t, tc.want, string(got), "Case %d\nGot:\n%s", i, got)
+		})
 	}
 }
 

@@ -91,27 +91,52 @@ type runArgs struct {
 }
 
 type Param interface {
-	apply(*runArgs)
+	apply(*runArgs) error
 }
 
-type paramFn func(*runArgs)
+type paramFn func(*runArgs) error
 
-func (fn paramFn) apply(r *runArgs) {
-	fn(r)
+func (fn paramFn) apply(r *runArgs) error {
+	return fn(r)
 }
 
 // ExtensionsParam returns a parameter that sets the extensions of the generated Conjure IR to be the JSON-marshalled
-// content of the provided map if it is non-empty. Returns a no-op parameter if the provided map is nil or empty.
-func ExtensionsParam(extensionsContent map[string]interface{}) (Param, error) {
-	if len(extensionsContent) == 0 {
+// content of the provided map if it is non-empty. Returns a ExtensionsProviderParam that returns the provided map:
+// see the documentation for that function for details.
+func ExtensionsParam(extensionsContent map[string]any) (Param, error) {
+	return ExtensionsProviderParam(func() (map[string]any, error) {
+		return extensionsContent, nil
+	})
+}
+
+// ExtensionsProvider is a function that generates an extensions map.
+type ExtensionsProvider func() (map[string]any, error)
+
+// ExtensionsProviderParam returns a parameter that sets the extensions of the generated Conjure IR to be the
+// JSON-marshalled content of the map returned by the provider. If the returned map does not have any elements, does not
+// set the extensions field. The provider is invoked when the parameter is applied. The map returned by the provider is
+// marshalled using the safejson.Marshal function, so the returned map should be compatible with being marshalled by
+// that function (for example, any nested maps must have a key type that can be marshalled by the JSON marshaller).
+func ExtensionsProviderParam(provider ExtensionsProvider) (Param, error) {
+	if provider == nil {
 		return nil, nil
 	}
-	extensionBytes, err := safejson.Marshal(extensionsContent)
-	if err != nil {
-		return nil, err
-	}
-	return paramFn(func(r *runArgs) {
+	return paramFn(func(r *runArgs) error {
+		extensions, err := provider()
+		if err != nil {
+			return errors.Wrap(err, "failed to get extensions from provider")
+		}
+		// noop if map does not have any entries
+		if len(extensions) == 0 {
+			return nil
+		}
+
+		extensionBytes, err := safejson.Marshal(extensions)
+		if err != nil {
+			return errors.Wrapf(err, "failed to marshal extensions")
+		}
 		r.extensionsContent = extensionBytes
+		return nil
 	}), nil
 }
 
@@ -128,11 +153,13 @@ func RunWithParams(inPath, outPath string, params ...Param) error {
 
 	// apply provided params
 	var runArgCollector runArgs
-	for _, param := range params {
+	for idx, param := range params {
 		if param == nil {
 			continue
 		}
-		param.apply(&runArgCollector)
+		if err := param.apply(&runArgCollector); err != nil {
+			return errors.Wrapf(err, "failed to apply param at index %d", idx)
+		}
 	}
 
 	// invoke the "compile" command
