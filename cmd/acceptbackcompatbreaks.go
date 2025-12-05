@@ -34,8 +34,8 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackCompatCommand(
 			cmd,
-			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
-				return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, irFile, projectDirFlagVal)
+			func(project string, param conjureplugin.ConjureProjectParam, irFile string, cmdParams conjureplugin.CmdParams) error {
+				return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, irFile, projectDirFlagVal, cmdParams)
 			},
 			func(failedProjects map[string]error) error {
 				projects := slices.Collect(maps.Keys(failedProjects))
