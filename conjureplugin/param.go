@@ -14,6 +14,18 @@
 
 package conjureplugin
 
+import (
+	"io"
+)
+
+// CmdParams specifies the parameters for executing logic within the context of a command. Specifies the output streams
+// and debug configuration.
+type CmdParams struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Debug  bool
+}
+
 type ConjureProjectParams struct {
 	SortedKeys []string
 	Params     map[string]ConjureProjectParam

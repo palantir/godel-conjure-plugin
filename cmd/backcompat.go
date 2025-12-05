@@ -38,8 +38,8 @@ var backcompatCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackCompatCommand(
 			cmd,
-			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
-				return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal)
+			func(project string, param conjureplugin.ConjureProjectParam, irFile string, cmdParams conjureplugin.CmdParams) error {
+				return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal, cmdParams)
 			},
 			func(failedProjects map[string]error) error {
 				projects := slices.Collect(maps.Keys(failedProjects))
@@ -60,9 +60,19 @@ func init() {
 	rootCmd.AddCommand(backcompatCmd)
 }
 
-func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param conjureplugin.ConjureProjectParam, irFile string) error, errorHandler func(map[string]error) error) error {
+func runBackCompatCommand(
+	cmd *cobra.Command,
+	runCmd func(project string, param conjureplugin.ConjureProjectParam, irFile string, cmdParams conjureplugin.CmdParams) error,
+	errorHandler func(map[string]error) error,
+) error {
 	if loadedAssets.ConjureBackcompat == nil {
 		return nil
+	}
+
+	cmdParams := conjureplugin.CmdParams{
+		Stdout: cmd.OutOrStdout(),
+		Stderr: cmd.OutOrStderr(),
+		Debug:  debugFlagVal,
 	}
 
 	projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
@@ -91,7 +101,7 @@ func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param 
 			return errors.Wrapf(err, "failed to create temporary IR file for project %q", project)
 		}
 
-		return runCmd(project, param, file)
+		return runCmd(project, param, file, cmdParams)
 	}); len(errs) > 0 {
 		return errorHandler(errs)
 	}
