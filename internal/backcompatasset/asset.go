@@ -20,36 +20,36 @@ import (
 	"os/exec"
 
 	"github.com/palantir/godel-conjure-plugin/v6/backcompatasset"
+	"github.com/pkg/errors"
 )
 
-// BackCompatChecker represents a wrapper around a backcompat asset executable.
+// ExecParam specifies the parameters for executing a command. Specifies stdout, stderr, and debug mode.
+type ExecParam struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Debug  bool
+}
+
 type BackCompatChecker interface {
 	// CheckBackCompat runs the asset's backcompat check for the specified project.
-	// It executes the asset as a command-line tool with the relevant arguments.
-	// If the command exits with code 1, it indicates backcompat breaks were found and returns an error specific to that case.
-	// Any other execution errors are wrapped and returned.
-	CheckBackCompat(groupID, project string, currentIR string, godelProjectDir string) error
+	// Returns true if the backwards compatibility check passes, false otherwise.
+	// Returns an error only if the operation fails to execute, not based on the presence of breaks.
+	// If there are any details about the failure, they are written to the Stdout of the provided ExecParam.
+	CheckBackCompat(groupID, project string, currentIR string, godelProjectDir string, execParam ExecParam) (bool, error)
 
 	// AcceptBackCompatBreaks runs the asset's accept operation for the specified project.
 	// This records/accepts the current state as the baseline for future backcompat checks.
 	// Returns an error only if the operation fails to execute, not based on the presence of breaks.
-	AcceptBackCompatBreaks(groupID, project string, currentIR string, godelProjectDir string) error
+	AcceptBackCompatBreaks(groupID, project string, currentIR string, godelProjectDir string, execParam ExecParam) error
 }
 
 type backCompatCheckerImpl struct {
-	asset  string
-	stdout io.Writer
-	stderr io.Writer
+	asset string
 }
 
-func New(
-	asset string,
-	stdout, stderr io.Writer,
-) BackCompatChecker {
+func New(asset string) BackCompatChecker {
 	return &backCompatCheckerImpl{
-		asset:  asset,
-		stdout: stdout,
-		stderr: stderr,
+		asset: asset,
 	}
 }
 
@@ -57,51 +57,61 @@ func (b *backCompatCheckerImpl) CheckBackCompat(
 	groupID, project string,
 	currentIR string,
 	godelProjectDir string,
-) error {
-	cmd := exec.Command(b.asset,
+	execParam ExecParam,
+) (bool, error) {
+	execCmd := exec.Command(b.asset,
 		backcompatasset.CheckBackCompatCommand,
 		"--"+backcompatasset.GroupIDFlagName, groupID,
 		"--"+backcompatasset.ProjectFlagName, project,
 		"--"+backcompatasset.CurrentIRFlagName, currentIR,
 		"--"+backcompatasset.GodelProjectDirFlagName, godelProjectDir,
 	)
-	cmd.Stdout = b.stdout
-	cmd.Stderr = b.stderr
+	execCmd.Stdout = execParam.Stdout
+	execCmd.Stderr = execParam.Stderr
 
-	err := cmd.Run()
+	if execParam.Debug {
+		_, _ = fmt.Fprintf(execCmd.Stderr, "CheckBackCompat: running command %v\n", execCmd)
+	}
+	err := execCmd.Run()
+
+	// command executed successfully: compatible
 	if err == nil {
-		return nil
+		return true, nil
 	}
 
-	if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
-		_, _ = fmt.Fprintf(b.stderr, "Conjure breaks found in project %q\n", project)
-		return fmt.Errorf("conjure breaks found in project %q", project)
+	// if command exited with exit code 1, indicates that IR is not backwards compatible:
+	// return false, but no error
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+		return false, nil
 	}
 
-	_, _ = fmt.Fprintf(b.stderr, "Failed to execute check conjure backcompat on project %q\n", project)
-	return fmt.Errorf("failed to execute check conjure backcompat on project %q", project)
+	// treat any other error or exit code as an error
+	return false, errors.Wrapf(err, "failed to check back compatibility for project %v", project)
 }
 
 func (b *backCompatCheckerImpl) AcceptBackCompatBreaks(
 	groupID, project string,
 	currentIR string,
 	godelProjectDir string,
+	execParam ExecParam,
 ) error {
-	cmd := exec.Command(b.asset,
+	execCmd := exec.Command(b.asset,
 		backcompatasset.AcceptBackCompatBreaksCommand,
 		"--"+backcompatasset.GroupIDFlagName, groupID,
 		"--"+backcompatasset.ProjectFlagName, project,
 		"--"+backcompatasset.CurrentIRFlagName, currentIR,
 		"--"+backcompatasset.GodelProjectDirFlagName, godelProjectDir,
 	)
-	cmd.Stdout = b.stdout
-	cmd.Stderr = b.stderr
+	execCmd.Stdout = execParam.Stdout
+	execCmd.Stderr = execParam.Stderr
 
-	err := cmd.Run()
-	if err != nil {
-		_, _ = fmt.Fprintf(b.stderr, "Failed to accept conjure backcompat breaks for project %q\n", project)
-		return fmt.Errorf("failed to execute accept conjure backcompat breaks on project %q", project)
+	if execParam.Debug {
+		_, _ = fmt.Fprintf(execCmd.Stderr, "AcceptBackCompatBreaks: running command %v\n", execCmd)
 	}
 
+	if err := execCmd.Run(); err != nil {
+		return errors.Wrapf(err, "failed to execute accept conjure backcompat breaks for project %q", project)
+	}
 	return nil
 }

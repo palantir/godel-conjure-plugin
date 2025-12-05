@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompatasset"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -38,19 +39,23 @@ var backcompatCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackCompatCommand(
 			cmd,
-			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
-				return loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal)
+			func(project string, param conjureplugin.ConjureProjectParam, irFile string, execParam backcompatasset.ExecParam) error {
+				isBackwardsCompatible, err := loadedAssets.ConjureBackcompat.CheckBackCompat(param.GroupID, project, irFile, projectDirFlagVal, execParam)
+				if err != nil {
+					return err
+				}
+				if !isBackwardsCompatible {
+					return fmt.Errorf("Conjure definition for project %q is not backwards compatible with latest published version", project)
+				}
+				return nil
 			},
 			func(failedProjects map[string]error) error {
 				projects := slices.Collect(maps.Keys(failedProjects))
-
-				if len(projects) == 1 {
-					return fmt.Errorf("Conjure project had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", projects[0], conjureAcceptBackCompatBreaksTaskName)
-				}
-
 				sort.Strings(projects)
 
-				return fmt.Errorf("Conjure projects had backwards compatibility issues: %s\nIf the breaks are intentional please run `./godelw %s` to accept them", strings.Join(projects, ", "), conjureAcceptBackCompatBreaksTaskName)
+				errorMsg := fmt.Sprintf("Conjure projects had backwards compatibility issues: %s\n", strings.Join(projects, ", "))
+				errorMsg += fmt.Sprintf("If the breaks are intentional please run `./godelw %s` to accept them", conjureAcceptBackCompatBreaksTaskName)
+				return fmt.Errorf("%s", errorMsg)
 			},
 		)
 	},
@@ -60,9 +65,19 @@ func init() {
 	rootCmd.AddCommand(backcompatCmd)
 }
 
-func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param conjureplugin.ConjureProjectParam, irFile string) error, errorHandler func(map[string]error) error) error {
+func runBackCompatCommand(
+	cmd *cobra.Command,
+	runCmd func(project string, param conjureplugin.ConjureProjectParam, irFile string, execParam backcompatasset.ExecParam) error,
+	errorHandler func(map[string]error) error,
+) error {
 	if loadedAssets.ConjureBackcompat == nil {
 		return nil
+	}
+
+	execParam := backcompatasset.ExecParam{
+		Stdout: cmd.OutOrStdout(),
+		Stderr: cmd.OutOrStderr(),
+		Debug:  debugFlagVal,
 	}
 
 	projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
@@ -91,7 +106,7 @@ func runBackCompatCommand(cmd *cobra.Command, runCmd func(project string, param 
 			return errors.Wrapf(err, "failed to create temporary IR file for project %q", project)
 		}
 
-		return runCmd(project, param, file)
+		return runCmd(project, param, file, execParam)
 	}); len(errs) > 0 {
 		return errorHandler(errs)
 	}

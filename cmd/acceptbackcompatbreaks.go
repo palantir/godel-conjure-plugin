@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"maps"
 	"slices"
-	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompatasset"
 	"github.com/spf13/cobra"
 )
 
@@ -34,19 +34,18 @@ var acceptBackcompatBreaksCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runBackCompatCommand(
 			cmd,
-			func(project string, param conjureplugin.ConjureProjectParam, irFile string) error {
-				return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, irFile, projectDirFlagVal)
+			func(project string, param conjureplugin.ConjureProjectParam, irFile string, execParam backcompatasset.ExecParam) error {
+				return loadedAssets.ConjureBackcompat.AcceptBackCompatBreaks(param.GroupID, project, irFile, projectDirFlagVal, execParam)
 			},
 			func(failedProjects map[string]error) error {
 				projects := slices.Collect(maps.Keys(failedProjects))
-
-				if len(projects) == 1 {
-					return fmt.Errorf("failed to accept conjure breaks for project %q", projects[0])
-				}
-
 				slices.Sort(projects)
 
-				return fmt.Errorf("failed to accept conjure breaks for projects: %s", strings.Join(projects, ", "))
+				msg := "failed to accept conjure breaks for projects:\n"
+				for _, project := range projects {
+					msg += fmt.Sprintf("  %q: %v\n", project, failedProjects[project])
+				}
+				return fmt.Errorf("%s", msg)
 			},
 		)
 	},

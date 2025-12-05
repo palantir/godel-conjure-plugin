@@ -29,6 +29,8 @@ var (
 	configFileFlagVal string
 	assetsFlagVal     []string
 
+	// loadedAssets is the global set of loaded assets initialized by the PersistentPreRunE
+	// function of the root command.
 	loadedAssets assetloader.LoadedAssets
 )
 
