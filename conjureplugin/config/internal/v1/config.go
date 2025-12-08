@@ -26,8 +26,74 @@ import (
 type ConjurePluginConfig struct {
 	versionedconfig.ConfigWithVersion `yaml:",inline,omitempty"`
 	// GroupID is the default group ID for all projects. Individual projects can override this.
-	GroupID        string                         `yaml:"group-id,omitempty"`
-	ProjectConfigs map[string]SingleConjureConfig `yaml:"projects"`
+	GroupID        string                `yaml:"group-id,omitempty"`
+	ProjectConfigs ConjureProjectConfigs `yaml:"projects"`
+}
+
+// ConjureProjectConfigs is a type defined to support an ordered map. Its serialized form is a
+// map[string]SingleConjureConfig.
+//
+// Implements MarshalYAML and UnmarshalYAML in a manner that supports writing and reading a map that maintains ordering.
+type ConjureProjectConfigs []NamedConjureProjectConfig
+
+type NamedConjureProjectConfig struct {
+	Name   string
+	Config SingleConjureConfig
+}
+
+func (c *ConjureProjectConfigs) ToV2() *v2.ConjureProjectConfigs {
+	if c == nil {
+		return nil
+	}
+	var v2Config v2.ConjureProjectConfigs
+	for _, project := range *c {
+		v2Config = append(v2Config, v2.NamedConjureProjectConfig{
+			Name:   project.Name,
+			Config: *project.Config.ToV2(project.Name),
+		})
+	}
+	return &v2Config
+}
+
+func (c ConjureProjectConfigs) MarshalYAML() (any, error) {
+	var mapSlice yaml.MapSlice
+	for _, project := range c {
+		mapSlice = append(mapSlice, yaml.MapItem{
+			Key:   project.Name,
+			Value: project.Config,
+		})
+	}
+	return mapSlice, nil
+}
+
+func (c *ConjureProjectConfigs) UnmarshalYAML(unmarshal func(any) error) error {
+	if c == nil {
+		return errors.Errorf("cannot unmarshal into nil ConjureProjectConfigs")
+	}
+
+	// unmarshal projects into map so that full type-based unmarshal is performed
+	var projects map[string]SingleConjureConfig
+	if err := unmarshal(&projects); err != nil {
+		return err
+	}
+
+	// unmarshal into MapSlice to get ordered keys
+	var mapSlice yaml.MapSlice
+	if err := unmarshal(&mapSlice); err != nil {
+		return err
+	}
+
+	var configs []NamedConjureProjectConfig
+	for _, mapItem := range mapSlice {
+		key := mapItem.Key.(string)
+		configs = append(configs, NamedConjureProjectConfig{
+			Name:   key,
+			Config: projects[key],
+		})
+	}
+
+	*c = configs
+	return nil
 }
 
 type SingleConjureConfig struct {
@@ -71,6 +137,9 @@ type IRLocatorConfig struct {
 }
 
 func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	if cfg == nil {
+		return errors.Errorf("cannot unmarshal into nil IRLocatorConfig")
+	}
 	var strInput string
 	if err := unmarshal(&strInput); err == nil && strInput != "" {
 		// input was specified as a string: use string as value of locator with "auto" type
@@ -88,7 +157,10 @@ func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) err
 	return nil
 }
 
-func (v1proj *SingleConjureConfig) ToV2(projectName string) v2.SingleConjureConfig {
+func (v1proj *SingleConjureConfig) ToV2(projectName string) *v2.SingleConjureConfig {
+	if v1proj == nil {
+		return nil
+	}
 	v2proj := v2.SingleConjureConfig{
 		IRLocator: v2.IRLocatorConfig{
 			Type:    v2.LocatorType(v1proj.IRLocator.Type),
@@ -125,36 +197,35 @@ func (v1proj *SingleConjureConfig) ToV2(projectName string) v2.SingleConjureConf
 		v2proj.OmitTopLevelProjectDir = true
 	}
 
-	return v2proj
+	return &v2proj
 }
 
 // ToV2 intelligently converts a v1 config to v2, attempting to use v2 defaults when possible.
 // This is the conversion logic used by UpgradeConfig.
-func (v1cfg *ConjurePluginConfig) ToV2() v2.ConjurePluginConfig {
+func (v1cfg *ConjurePluginConfig) ToV2() *v2.ConjurePluginConfig {
+	if v1cfg == nil {
+		return nil
+	}
+
 	// Create v2 config with intelligent field mapping
 	v2cfg := v2.ConjurePluginConfig{
 		ConfigWithVersion: versionedconfig.ConfigWithVersion{Version: "2"},
 		GroupID:           v1cfg.GroupID,
-		ProjectConfigs:    make(map[string]v2.SingleConjureConfig),
-	}
-
-	// Convert each project using the per-project conversion logic
-	for projectName, v1proj := range v1cfg.ProjectConfigs {
-		v2cfg.ProjectConfigs[projectName] = v1proj.ToV2(projectName)
+		ProjectConfigs:    *v1cfg.ProjectConfigs.ToV2(),
 	}
 
 	// Check if we need to allow conflicting output directories.
 	// We detect conflicts the same way ToParams does: exact same directory AND parent-child relationships.
 	// Calculate the actual output directories for each project
 	outputDirs := make(map[string][]string)
-	for projectName, proj := range v2cfg.ProjectConfigs {
-		resolvedOutputDir := proj.ResolvedOutputDir(projectName)
-		outputDirs[resolvedOutputDir] = append(outputDirs[resolvedOutputDir], projectName)
+	for _, project := range v2cfg.ProjectConfigs {
+		resolvedOutputDir := project.Config.ResolvedOutputDir(project.Name)
+		outputDirs[resolvedOutputDir] = append(outputDirs[resolvedOutputDir], project.Name)
 	}
 
 	v2cfg.AllowConflictingOutputDirs = len(v2cfg.OutputDirConflicts()) > 0
 
-	return v2cfg
+	return &v2cfg
 }
 
 func UpgradeConfig(cfgBytes []byte) ([]byte, error) {

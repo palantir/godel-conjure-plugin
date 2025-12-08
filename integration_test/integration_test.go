@@ -805,18 +805,18 @@ projects:
 					"godel/config/conjure-plugin.yml": `version: "2"
 allow-conflicting-output-dirs: true
 projects:
-  child-project:
-    output-dir: parent/child
-    ir-locator:
-      type: auto
-      locator: https://example.com/child.json
-    omit-top-level-project-dir: true
-    skip-delete-generated-files: true
   parent-project:
     output-dir: parent
     ir-locator:
       type: auto
       locator: https://example.com/parent.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+  child-project:
+    output-dir: parent/child
+    ir-locator:
+      type: auto
+      locator: https://example.com/child.json
     omit-top-level-project-dir: true
     skip-delete-generated-files: true
 `,

@@ -38,12 +38,15 @@ projects:
     ir-locator: local/yaml-dir
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
 						},
 					},
 				},
@@ -58,14 +61,17 @@ projects:
    publish: false
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							Publish: toPtr(false),
 						},
-						Publish: toPtr(false),
 					},
 				},
 			},
@@ -80,12 +86,15 @@ projects:
      locator: explicit/yaml-dir
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeYAML,
-							Locator: "explicit/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeYAML,
+								Locator: "explicit/yaml-dir",
+							},
 						},
 					},
 				},
@@ -99,12 +108,15 @@ projects:
    ir-locator: http://foo.com/ir.json
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "http://foo.com/ir.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "http://foo.com/ir.json",
+							},
 						},
 					},
 				},
@@ -119,14 +131,17 @@ projects:
    publish: true
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "http://foo.com/ir.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "http://foo.com/ir.json",
+							},
+							Publish: toPtr(true),
 						},
-						Publish: toPtr(true),
 					},
 				},
 			},
@@ -141,12 +156,15 @@ projects:
      locator: localhost:8080/ir.json
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeRemote,
-							Locator: "localhost:8080/ir.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeRemote,
+								Locator: "localhost:8080/ir.json",
+							},
 						},
 					},
 				},
@@ -160,12 +178,15 @@ projects:
    ir-locator: local/nonexistent-ir-file.json
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/nonexistent-ir-file.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/nonexistent-ir-file.json",
+							},
 						},
 					},
 				},
@@ -181,12 +202,15 @@ projects:
      locator: local/nonexistent-ir-file.json
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeIRFile,
-							Locator: "local/nonexistent-ir-file.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeIRFile,
+								Locator: "local/nonexistent-ir-file.json",
+							},
 						},
 					},
 				},
@@ -204,15 +228,18 @@ projects:
    cli: true
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeRemote,
-							Locator: "localhost:8080/ir.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeRemote,
+								Locator: "localhost:8080/ir.json",
+							},
+							Server: true,
+							CLI:    true,
 						},
-						Server: true,
-						CLI:    true,
 					},
 				},
 			},
@@ -228,15 +255,18 @@ projects:
    accept-funcs: true
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeRemote,
-							Locator: "localhost:8080/ir.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeRemote,
+								Locator: "localhost:8080/ir.json",
+							},
+							Server:      false,
+							AcceptFuncs: toPtr(true),
 						},
-						Server:      false,
-						AcceptFuncs: toPtr(true),
 					},
 				},
 			},
@@ -259,19 +289,22 @@ projects:
        key: value
 `,
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeRemote,
-							Locator: "localhost:8080/ir.json",
-						},
-						Server:      false,
-						AcceptFuncs: toPtr(true),
-						Extensions: map[string]any{
-							"foo":  "bar",
-							"baz":  []any{1, 2},
-							"blah": map[any]any{"key": "value"},
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeRemote,
+								Locator: "localhost:8080/ir.json",
+							},
+							Server:      false,
+							AcceptFuncs: toPtr(true),
+							Extensions: map[string]any{
+								"foo":  "bar",
+								"baz":  []any{1, 2},
+								"blah": map[any]any{"key": "value"},
+							},
 						},
 					},
 				},
@@ -292,108 +325,104 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 	}{
 		{
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:     true,
-						AcceptFuncs: true,
-					},
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 			},
 		},
 		{
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "input.yml",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "input.yml",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input.yml"),
-						Publish:     true,
-						AcceptFuncs: true,
-					},
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input.yml"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 			},
 		},
 		{
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "input.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "input.json",
+							},
+							AcceptFuncs:            toPtr(true),
+							OmitTopLevelProjectDir: true,
 						},
-						AcceptFuncs:            toPtr(true),
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
-						AcceptFuncs: true,
-					},
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
+					AcceptFuncs: true,
 				},
 			},
 		},
 		{
 			config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "input.json",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "input.json",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
-						AcceptFuncs: true,
-					},
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
+					AcceptFuncs: true,
 				},
 			},
 		},
@@ -414,28 +443,27 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "No warnings for single project",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:     true,
-						AcceptFuncs: true,
-					},
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 			},
 			wantWarnings: nil,
@@ -443,43 +471,45 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 		{
 			name: "No warnings for multiple projects with different output directories",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
-					"project-2": {
-						OutputDir: "outputDir-2",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir-2",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-					"project-2",
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:     true,
-						AcceptFuncs: true,
-					},
-					"project-2": {
-						OutputDir:   "outputDir-2",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
-						Publish:     true,
-						AcceptFuncs: true,
-					},
+				{
+					ProjectName: "project-2",
+					OutputDir:   "outputDir-2",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 			},
 			wantWarnings: nil,
@@ -488,47 +518,49 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 			name: "Warning for multiple projects with the same output directory",
 			in: config.ConjurePluginConfig{
 				AllowConflictingOutputDirs: true,
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-2": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-					"project-2",
+				{
+					ProjectName:              "project-1",
+					OutputDir:                "outputDir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:                "outputDir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
-					"project-2": {
-						OutputDir:                "outputDir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
+				{
+					ProjectName:              "project-2",
+					OutputDir:                "outputDir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
 			},
 			wantWarnings: []string{
@@ -540,47 +572,49 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 			name: "Warning for multiple projects with the same output directory after normalization",
 			in: config.ConjurePluginConfig{
 				AllowConflictingOutputDirs: true,
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-2": {
-						OutputDir: "./outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "./outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-					"project-2",
+				{
+					ProjectName:              "project-1",
+					OutputDir:                "outputDir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:                "outputDir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
-					"project-2": {
-						OutputDir:                "outputDir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
+				{
+					ProjectName:              "project-2",
+					OutputDir:                "outputDir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
 			},
 			wantWarnings: []string{
@@ -592,81 +626,89 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 			name: "Multiple warnings for multiple projects with the same output directory after normalization",
 			in: config.ConjurePluginConfig{
 				AllowConflictingOutputDirs: true,
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-2": {
-						OutputDir: "./outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "./outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-3": {
-						OutputDir: "outputDir-other",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-3/yaml-dir",
+					{
+						Name: "project-3",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir-other",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-3/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-4": {
-						OutputDir: "outputDir-other/",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-4/yaml-dir",
+					{
+						Name: "project-4",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir-other/",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-4/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-					"project-2",
-					"project-3",
-					"project-4",
+				{
+					ProjectName:              "project-1",
+					OutputDir:                "outputDir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:                "outputDir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
-					"project-2": {
-						OutputDir:                "outputDir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
-					"project-3": {
-						OutputDir:                "outputDir-other",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-3/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
-					"project-4": {
-						OutputDir:                "outputDir-other",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-4/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
+				{
+					ProjectName:              "project-2",
+					OutputDir:                "outputDir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
+				},
+				{
+					ProjectName:              "project-3",
+					OutputDir:                "outputDir-other",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-3/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
+				},
+				{
+					ProjectName:              "project-4",
+					OutputDir:                "outputDir-other",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-4/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
 			},
 			wantWarnings: []string{
@@ -680,47 +722,49 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 			name: "Warning for parent-child directory relationship",
 			in: config.ConjurePluginConfig{
 				AllowConflictingOutputDirs: true,
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-2": {
-						OutputDir: "outputDir/subdir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir/subdir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-					"project-2",
+				{
+					ProjectName:              "project-1",
+					OutputDir:                "outputDir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:                "outputDir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
-					"project-2": {
-						OutputDir:                "outputDir/subdir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
+				{
+					ProjectName:              "project-2",
+					OutputDir:                "outputDir/subdir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
 			},
 			wantWarnings: []string{
@@ -731,47 +775,49 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 			name: "Warning for parent-child directory relationship with normalization",
 			in: config.ConjurePluginConfig{
 				AllowConflictingOutputDirs: true,
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "base/dir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "base/dir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-2": {
-						OutputDir: "./base/dir/../dir/nested",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "./base/dir/../dir/nested",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-					"project-2",
+				{
+					ProjectName:              "project-1",
+					OutputDir:                "base/dir",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:                "base/dir",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
-					"project-2": {
-						OutputDir:                "base/dir/nested",
-						IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
-						Publish:                  true,
-						AcceptFuncs:              true,
-						SkipDeleteGeneratedFiles: true,
-					},
+				{
+					ProjectName:              "project-2",
+					OutputDir:                "base/dir/nested",
+					IRProvider:               conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+					Publish:                  true,
+					AcceptFuncs:              true,
+					SkipDeleteGeneratedFiles: true,
 				},
 			},
 			wantWarnings: []string{
@@ -802,24 +848,30 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 			name: "Error for same output directory when conflicts not allowed",
 			in: config.ConjurePluginConfig{
 				AllowConflictingOutputDirs: false,
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-2": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -829,24 +881,30 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 			name: "Error for parent-child directory relationship when conflicts not allowed",
 			in: config.ConjurePluginConfig{
 				AllowConflictingOutputDirs: false,
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "base/dir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "base/dir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project-2": {
-						OutputDir: "base/dir/nested",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "base/dir/nested",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -855,24 +913,30 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error when attempting to delete with same output directory",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: false,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: false,
 					},
-					"project-2": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: false,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: false,
 					},
 				},
 			},
@@ -881,24 +945,30 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error when attempting to delete with nested output directory",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "base/dir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "base/dir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: false,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: false,
 					},
-					"project-2": {
-						OutputDir: "base/dir/nested",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "base/dir/nested",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: false,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: false,
 					},
 				},
 			},
@@ -907,24 +977,30 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error when attempting to delete with one project having skip=false and conflicts exist",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: false,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: false,
 					},
-					"project-2": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local-2/yaml-dir",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local-2/yaml-dir",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -933,14 +1009,17 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error for invalid project name with forward slash",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project/invalid": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project/invalid",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
@@ -949,14 +1028,17 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error for invalid project name with backslash",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project\\invalid": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project\\invalid",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
@@ -965,14 +1047,17 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error for project name that is dot",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					".": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: ".",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
@@ -981,14 +1066,17 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error for project name that is double dot",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"..": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "..",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
@@ -1000,7 +1088,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 			require.Error(t, err, "Case %d", i)
 			assert.EqualError(t, err, tc.wantError, "Case %d", i)
 			assert.Empty(t, gotWarnings, "Case %d", i)
-			assert.Empty(t, got.Params, "Case %d", i)
+			assert.Empty(t, got, "Case %d", i)
 		})
 	}
 }
@@ -1022,12 +1110,15 @@ projects:
 `,
 			want: config.ConjurePluginConfig{
 				GroupID: "com.palantir.signals",
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
 						},
 					},
 				},
@@ -1043,14 +1134,17 @@ projects:
     group-id: com.palantir.project
 `,
 			want: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							GroupID: "com.palantir.project",
 						},
-						GroupID: "com.palantir.project",
 					},
 				},
 			},
@@ -1070,21 +1164,27 @@ projects:
 `,
 			want: config.ConjurePluginConfig{
 				GroupID: "com.palantir.default",
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir1",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir1",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir1",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir1",
+							},
 						},
 					},
-					"project-2": {
-						OutputDir: "outputDir2",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir2",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir2",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir2",
+							},
+							GroupID: "com.palantir.override",
 						},
-						GroupID: "com.palantir.override",
 					},
 				},
 			},
@@ -1107,29 +1207,28 @@ func TestGroupIDToParams(t *testing.T) {
 			name: "top-level group-id is inherited by project",
 			in: config.ConjurePluginConfig{
 				GroupID: "com.palantir.signals",
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:     true,
-						AcceptFuncs: true,
-						GroupID:     "com.palantir.signals",
-					},
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "com.palantir.signals",
 				},
 			},
 		},
@@ -1137,59 +1236,57 @@ func TestGroupIDToParams(t *testing.T) {
 			name: "per-project group-id overrides top-level",
 			in: config.ConjurePluginConfig{
 				GroupID: "com.palantir.default",
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							GroupID:                "com.palantir.override",
+							OmitTopLevelProjectDir: true,
 						},
-						GroupID:                "com.palantir.override",
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:     true,
-						AcceptFuncs: true,
-						GroupID:     "com.palantir.override",
-					},
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "com.palantir.override",
 				},
 			},
 		},
 		{
 			name: "no group-id specified",
 			in: config.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "local/yaml-dir",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-						Publish:     true,
-						AcceptFuncs: true,
-						GroupID:     "",
-					},
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "",
 				},
 			},
 		},
@@ -1197,46 +1294,48 @@ func TestGroupIDToParams(t *testing.T) {
 			name: "multiple projects with different group-ids",
 			in: config.ConjurePluginConfig{
 				GroupID: "com.palantir.default",
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project-1": {
-						OutputDir: "outputDir1",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "input1.yml",
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir1",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "input1.yml",
+							},
+							OmitTopLevelProjectDir: true,
 						},
-						OmitTopLevelProjectDir: true,
 					},
-					"project-2": {
-						OutputDir: "outputDir2",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "input2.yml",
+					{
+						Name: "project-2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir2",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "input2.yml",
+							},
+							GroupID:                "com.palantir.custom",
+							OmitTopLevelProjectDir: true,
 						},
-						GroupID:                "com.palantir.custom",
-						OmitTopLevelProjectDir: true,
 					},
 				},
 			},
 			want: conjureplugin.ConjureProjectParams{
-				SortedKeys: []string{
-					"project-1",
-					"project-2",
+				{
+					ProjectName: "project-1",
+					OutputDir:   "outputDir1",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input1.yml"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "com.palantir.default",
 				},
-				Params: map[string]conjureplugin.ConjureProjectParam{
-					"project-1": {
-						OutputDir:   "outputDir1",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input1.yml"),
-						Publish:     true,
-						AcceptFuncs: true,
-						GroupID:     "com.palantir.default",
-					},
-					"project-2": {
-						OutputDir:   "outputDir2",
-						IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input2.yml"),
-						Publish:     true,
-						AcceptFuncs: true,
-						GroupID:     "com.palantir.custom",
-					},
+				{
+					ProjectName: "project-2",
+					OutputDir:   "outputDir2",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input2.yml"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "com.palantir.custom",
 				},
 			},
 		},

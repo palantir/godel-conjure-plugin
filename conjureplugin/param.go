@@ -14,20 +14,11 @@
 
 package conjureplugin
 
-type ConjureProjectParams struct {
-	SortedKeys []string
-	Params     map[string]ConjureProjectParam
-}
-
-func (p *ConjureProjectParams) OrderedParams() []ConjureProjectParam {
-	var out []ConjureProjectParam
-	for _, k := range p.SortedKeys {
-		out = append(out, p.Params[k])
-	}
-	return out
-}
+type ConjureProjectParams []ConjureProjectParam
 
 type ConjureProjectParam struct {
+	// The name of the Conjure project. Must be unique across projects.
+	ProjectName  string
 	OutputDir    string
 	IRProvider   IRProvider
 	IROutputPath string
@@ -47,20 +38,4 @@ type ConjureProjectParam struct {
 	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
 	// When true, preserves v1 behavior (no cleanup).
 	SkipDeleteGeneratedFiles bool
-}
-
-// ForEach iterates over all project parameters in the order specified by SortedKeys,
-// invoking the provided function for each project name and its associated parameter.
-// It returns a map of project names to their errors (only includes projects that errored).
-// Returns an empty map if all projects succeeded.
-func (p *ConjureProjectParams) ForEach(fn func(project string, param ConjureProjectParam) error) map[string]error {
-	errs := make(map[string]error)
-
-	for _, project := range p.SortedKeys {
-		if err := fn(project, p.Params[project]); err != nil {
-			errs[project] = err
-		}
-	}
-
-	return errs
 }

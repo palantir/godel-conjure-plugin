@@ -169,7 +169,7 @@ func TestSingleConjureConfigToV2(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got := tc.v1proj.ToV2(tc.projectName)
+			got := *tc.v1proj.ToV2(tc.projectName)
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -185,12 +185,15 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 			name: "single project with clean upgrade",
 			v1cfg: v1.ConjurePluginConfig{
 				GroupID: "com.palantir.test",
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
-					"api": {
-						OutputDir: "internal/generated/conjure/api",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./api.yml",
+				ProjectConfigs: []v1.NamedConjureProjectConfig{
+					{
+						Name: "api",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "internal/generated/conjure/api",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./api.yml",
+							},
 						},
 					},
 				},
@@ -198,14 +201,17 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 			want: v2.ConjurePluginConfig{
 				ConfigWithVersion: versionedconfig.ConfigWithVersion{Version: "2"},
 				GroupID:           "com.palantir.test",
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"api": {
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeYAML,
-							Locator: "./api.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "api",
+						Config: v2.SingleConjureConfig{
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeYAML,
+								Locator: "./api.yml",
+							},
+							// Always skip delete when converting from v1 to preserve v1 behavior
+							SkipDeleteGeneratedFiles: true,
 						},
-						// Always skip delete when converting from v1 to preserve v1 behavior
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 				// No AllowConflictingOutputDirs (no conflicts)
@@ -214,19 +220,25 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 		{
 			name: "multiple projects with conflicts",
 			v1cfg: v1.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
-					"api-v1": {
-						OutputDir: "shared",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./api-v1.yml",
+				ProjectConfigs: []v1.NamedConjureProjectConfig{
+					{
+						Name: "api-v1",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "shared",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./api-v1.yml",
+							},
 						},
 					},
-					"api-v2": {
-						OutputDir: "shared",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./api-v2.yml",
+					{
+						Name: "api-v2",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "shared",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./api-v2.yml",
+							},
 						},
 					},
 				},
@@ -234,24 +246,30 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 			want: v2.ConjurePluginConfig{
 				ConfigWithVersion:          versionedconfig.ConfigWithVersion{Version: "2"},
 				AllowConflictingOutputDirs: true, // Conflict detected
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"api-v1": {
-						OutputDir: "shared",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeYAML,
-							Locator: "./api-v1.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "api-v1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "shared",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeYAML,
+								Locator: "./api-v1.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"api-v2": {
-						OutputDir: "shared",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeYAML,
-							Locator: "./api-v2.yml",
+					{
+						Name: "api-v2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "shared",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeYAML,
+								Locator: "./api-v2.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -259,41 +277,53 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 		{
 			name: "multiple projects without conflicts",
 			v1cfg: v1.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
-					"api": {
-						OutputDir: "internal/generated/conjure/api",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./api.yml",
+				ProjectConfigs: []v1.NamedConjureProjectConfig{
+					{
+						Name: "api",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "internal/generated/conjure/api",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./api.yml",
+							},
 						},
 					},
-					"backend": {
-						OutputDir: "internal/generated/conjure/backend",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./backend.yml",
+					{
+						Name: "backend",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "internal/generated/conjure/backend",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./backend.yml",
+							},
 						},
 					},
 				},
 			},
 			want: v2.ConjurePluginConfig{
 				ConfigWithVersion: versionedconfig.ConfigWithVersion{Version: "2"},
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"api": {
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeYAML,
-							Locator: "./api.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "api",
+						Config: v2.SingleConjureConfig{
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeYAML,
+								Locator: "./api.yml",
+							},
+							// Always skip delete when converting from v1 to preserve v1 behavior
+							SkipDeleteGeneratedFiles: true,
 						},
-						// Always skip delete when converting from v1 to preserve v1 behavior
-						SkipDeleteGeneratedFiles: true,
 					},
-					"backend": {
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeYAML,
-							Locator: "./backend.yml",
+					{
+						Name: "backend",
+						Config: v2.SingleConjureConfig{
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeYAML,
+								Locator: "./backend.yml",
+							},
+							// Always skip delete when converting from v1 to preserve v1 behavior
+							SkipDeleteGeneratedFiles: true,
 						},
-						// Always skip delete when converting from v1 to preserve v1 behavior
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 				// No AllowConflictingOutputDirs (no conflicts)
@@ -302,19 +332,25 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 		{
 			name: "multiple projects with parent-child directory relationship",
 			v1cfg: v1.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
-					"parent": {
-						OutputDir: "generated",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./parent.yml",
+				ProjectConfigs: []v1.NamedConjureProjectConfig{
+					{
+						Name: "parent",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "generated",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./parent.yml",
+							},
 						},
 					},
-					"child": {
-						OutputDir: "generated/subdir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./child.yml",
+					{
+						Name: "child",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "generated/subdir",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./child.yml",
+							},
 						},
 					},
 				},
@@ -322,31 +358,37 @@ func TestConjurePluginConfigToV2(t *testing.T) {
 			want: v2.ConjurePluginConfig{
 				ConfigWithVersion:          versionedconfig.ConfigWithVersion{Version: "2"},
 				AllowConflictingOutputDirs: true, // Parent-child conflict detected
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"parent": {
-						OutputDir: "generated",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeYAML,
-							Locator: "./parent.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "parent",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "generated",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeYAML,
+								Locator: "./parent.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"child": {
-						OutputDir: "generated/subdir",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeYAML,
-							Locator: "./child.yml",
+					{
+						Name: "child",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "generated/subdir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeYAML,
+								Locator: "./child.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got := tc.v1cfg.ToV2()
+			got := *tc.v1cfg.ToV2()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -361,12 +403,15 @@ func TestConjurePluginConfigToV2_AllowConflictingOutputDirs(t *testing.T) {
 		{
 			name: "single project - no conflicts, defaults to false",
 			v1cfg: v1.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
-					"api": {
-						OutputDir: "internal/generated/conjure/api",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./api.yml",
+				ProjectConfigs: []v1.NamedConjureProjectConfig{
+					{
+						Name: "api",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "internal/generated/conjure/api",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./api.yml",
+							},
 						},
 					},
 				},
@@ -376,19 +421,25 @@ func TestConjurePluginConfigToV2_AllowConflictingOutputDirs(t *testing.T) {
 		{
 			name: "multiple projects with different output dirs - no conflicts, defaults to false",
 			v1cfg: v1.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
-					"api": {
-						OutputDir: "internal/generated/conjure/api",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./api.yml",
+				ProjectConfigs: []v1.NamedConjureProjectConfig{
+					{
+						Name: "api",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "internal/generated/conjure/api",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./api.yml",
+							},
 						},
 					},
-					"backend": {
-						OutputDir: "internal/generated/conjure/backend",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./backend.yml",
+					{
+						Name: "backend",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "internal/generated/conjure/backend",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./backend.yml",
+							},
 						},
 					},
 				},
@@ -398,19 +449,25 @@ func TestConjurePluginConfigToV2_AllowConflictingOutputDirs(t *testing.T) {
 		{
 			name: "multiple projects with same output dir - has conflicts, sets to true",
 			v1cfg: v1.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
-					"api-v1": {
-						OutputDir: "shared",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./api-v1.yml",
+				ProjectConfigs: []v1.NamedConjureProjectConfig{
+					{
+						Name: "api-v1",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "shared",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./api-v1.yml",
+							},
 						},
 					},
-					"api-v2": {
-						OutputDir: "shared",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./api-v2.yml",
+					{
+						Name: "api-v2",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "shared",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./api-v2.yml",
+							},
 						},
 					},
 				},
@@ -420,19 +477,25 @@ func TestConjurePluginConfigToV2_AllowConflictingOutputDirs(t *testing.T) {
 		{
 			name: "multiple projects with parent-child dirs - has conflicts, sets to true",
 			v1cfg: v1.ConjurePluginConfig{
-				ProjectConfigs: map[string]v1.SingleConjureConfig{
-					"parent": {
-						OutputDir: "generated",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./parent.yml",
+				ProjectConfigs: []v1.NamedConjureProjectConfig{
+					{
+						Name: "parent",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "generated",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./parent.yml",
+							},
 						},
 					},
-					"child": {
-						OutputDir: "generated/subdir",
-						IRLocator: v1.IRLocatorConfig{
-							Type:    v1.LocatorTypeYAML,
-							Locator: "./child.yml",
+					{
+						Name: "child",
+						Config: v1.SingleConjureConfig{
+							OutputDir: "generated/subdir",
+							IRLocator: v1.IRLocatorConfig{
+								Type:    v1.LocatorTypeYAML,
+								Locator: "./child.yml",
+							},
 						},
 					},
 				},
@@ -462,15 +525,18 @@ projects:
     ir-locator: ./conjure/api.yml
 `,
 			want: v2.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"myproject": {
-						OutputDir: "custom/output",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./conjure/api.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "myproject",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "custom/output",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./conjure/api.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -484,16 +550,19 @@ projects:
     ir-locator: ./conjure/api.yml
 `,
 			want: v2.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"api": {
-						// OutputDir is empty, which defaults to v2.DefaultOutputDir
-						// and project name will be appended
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./conjure/api.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "api",
+						Config: v2.SingleConjureConfig{
+							// OutputDir is empty, which defaults to v2.DefaultOutputDir
+							// and project name will be appended
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./conjure/api.yml",
+							},
+							// Always skip delete when converting from v1 to preserve v1 behavior
+							SkipDeleteGeneratedFiles: true,
 						},
-						// Always skip delete when converting from v1 to preserve v1 behavior
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -507,16 +576,19 @@ projects:
     ir-locator: ./conjure/myservice.yml
 `,
 			want: v2.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"myservice": {
-						// OutputDir empty (defaults to v2.DefaultOutputDir)
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./conjure/myservice.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "myservice",
+						Config: v2.SingleConjureConfig{
+							// OutputDir empty (defaults to v2.DefaultOutputDir)
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./conjure/myservice.yml",
+							},
+							// Escape valves to preserve v1 behavior (generate directly to internal/generated/conjure)
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						// Escape valves to preserve v1 behavior (generate directly to internal/generated/conjure)
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -530,15 +602,18 @@ projects:
     ir-locator: ./api.yml
 `,
 			want: v2.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"legacy": {
-						OutputDir: ".",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./api.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "legacy",
+						Config: v2.SingleConjureConfig{
+							OutputDir: ".",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./api.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -552,15 +627,18 @@ projects:
     ir-locator: ./api.yml
 `,
 			want: v2.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"myproject": {
-						OutputDir: ".",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./api.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "myproject",
+						Config: v2.SingleConjureConfig{
+							OutputDir: ".",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./api.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -574,15 +652,18 @@ projects:
     ir-locator: ./api.yml
 `,
 			want: v2.ConjurePluginConfig{
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"mag-api": {
-						OutputDir: ".",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./api.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "mag-api",
+						Config: v2.SingleConjureConfig{
+							OutputDir: ".",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./api.yml",
+							},
+							// Skip delete for safety, but allow project name appending
+							SkipDeleteGeneratedFiles: true,
 						},
-						// Skip delete for safety, but allow project name appending
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -600,24 +681,30 @@ projects:
 `,
 			want: v2.ConjurePluginConfig{
 				AllowConflictingOutputDirs: true,
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"project1": {
-						OutputDir: "shared",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./api1.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "project1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "shared",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./api1.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
-					"project2": {
-						OutputDir: "shared",
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./api2.yml",
+					{
+						Name: "project2",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "shared",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./api2.yml",
+							},
+							OmitTopLevelProjectDir:   true,
+							SkipDeleteGeneratedFiles: true,
 						},
-						OmitTopLevelProjectDir:   true,
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},
@@ -640,22 +727,25 @@ projects:
 `,
 			want: v2.ConjurePluginConfig{
 				GroupID: "com.palantir.test",
-				ProjectConfigs: map[string]v2.SingleConjureConfig{
-					"api": {
-						IRLocator: v2.IRLocatorConfig{
-							Type:    v2.LocatorTypeAuto,
-							Locator: "./api.yml",
+				ProjectConfigs: []v2.NamedConjureProjectConfig{
+					{
+						Name: "api",
+						Config: v2.SingleConjureConfig{
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "./api.yml",
+							},
+							GroupID:     "com.palantir.override",
+							Publish:     boolPtr(true),
+							Server:      true,
+							CLI:         true,
+							AcceptFuncs: boolPtr(false),
+							Extensions: map[string]any{
+								"foo": "bar",
+							},
+							// Always skip delete when converting from v1 to preserve v1 behavior
+							SkipDeleteGeneratedFiles: true,
 						},
-						GroupID:     "com.palantir.override",
-						Publish:     boolPtr(true),
-						Server:      true,
-						CLI:         true,
-						AcceptFuncs: boolPtr(false),
-						Extensions: map[string]any{
-							"foo": "bar",
-						},
-						// Always skip delete when converting from v1 to preserve v1 behavior
-						SkipDeleteGeneratedFiles: true,
 					},
 				},
 			},

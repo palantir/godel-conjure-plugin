@@ -30,13 +30,11 @@ import (
 func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{},
 	dryRun bool, stdout io.Writer, extensionsProvider extensionsprovider.ExtensionsProvider,
 	cliGroupID string) error {
-	var paramsToPublishKeys []string
 	var paramsToPublish []ConjureProjectParam
-	for i, param := range params.OrderedParams() {
+	for _, param := range params {
 		if !param.Publish {
 			continue
 		}
-		paramsToPublishKeys = append(paramsToPublishKeys, params.SortedKeys[i])
 		paramsToPublish = append(paramsToPublish, param)
 	}
 	// nothing to publish
@@ -61,11 +59,11 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		_ = os.RemoveAll(tmpDir)
 	}()
 
-	for i, param := range paramsToPublish {
-		key := paramsToPublishKeys[i]
-		currDir := filepath.Join(tmpDir, fmt.Sprintf("conjure-%s", key))
-		irFileName := fmt.Sprintf("%s-%s.conjure.json", key, version)
-		keyAsDistID := distgo.DistID(key)
+	for _, param := range paramsToPublish {
+		conjureProjectName := param.ProjectName
+		currDir := filepath.Join(tmpDir, fmt.Sprintf("conjure-%s", conjureProjectName))
+		irFileName := fmt.Sprintf("%s-%s.conjure.json", conjureProjectName, version)
+		keyAsDistID := distgo.DistID(conjureProjectName)
 		if err := os.Mkdir(currDir, 0755); err != nil {
 			return errors.WithStack(err)
 		}
@@ -83,8 +81,8 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			Version:    version,
 		}
 		productOutputInfo := distgo.ProductOutputInfo{
-			ID:   distgo.ProductID(key),
-			Name: key,
+			ID:   distgo.ProductID(conjureProjectName),
+			Name: conjureProjectName,
 			DistOutputInfos: &distgo.DistOutputInfos{
 				DistIDs: []distgo.DistID{keyAsDistID},
 				DistInfos: map[distgo.DistID]distgo.DistOutputInfo{
@@ -113,7 +111,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return err
 		}
 
-		irBytes, err = addExtensionsToIRBytes(irBytes, extensionsProvider, groupID, key, version)
+		irBytes, err = addExtensionsToIRBytes(irBytes, extensionsProvider, groupID, conjureProjectName, version)
 		if err != nil {
 			return errors.WithStack(err)
 		}
