@@ -31,15 +31,13 @@ import (
 const indentLen = 2
 
 func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.Writer) error {
-	var verifyFailedIndex []int
-	verifyFailedErrors := make(map[int]string)
-	verifyFailedFn := func(name int, errStr string) {
-		verifyFailedIndex = append(verifyFailedIndex, name)
-		verifyFailedErrors[name] = errStr
+	type verifyFailedInfo struct {
+		name       string
+		diffOutput string
 	}
+	var verifyFailedInfos []verifyFailedInfo
 
-	k := 0
-	for _, currParam := range params.OrderedParams() {
+	for _, currParam := range params {
 		outputDir := currParam.OutputDir
 		conjureDef, err := conjureDefinitionFromParam(currParam)
 		if err != nil {
@@ -74,7 +72,10 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				return err
 			}
 			if len(diff.Diffs) > 0 {
-				verifyFailedFn(k, diff.String())
+				verifyFailedInfos = append(verifyFailedInfos, verifyFailedInfo{
+					name:       currParam.ProjectName,
+					diffOutput: diff.String(),
+				})
 			}
 		} else {
 			// Delete old generated conjureFilesToGenerate before regeneration unless skipped
@@ -87,15 +88,14 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				return err
 			}
 		}
-		k++
 	}
 
-	if verify && len(verifyFailedIndex) > 0 {
-		_, _ = fmt.Fprintf(stdout, "Conjure output differs from what currently exists: %v\n", verifyFailedIndex)
-		for _, currKey := range verifyFailedIndex {
-			_, _ = fmt.Fprintf(stdout, "%s%d:\n", strings.Repeat(" ", indentLen), currKey)
-			for _, currErrLine := range strings.Split(verifyFailedErrors[currKey], "\n") {
-				_, _ = fmt.Fprintf(stdout, "%s%s\n", strings.Repeat(" ", indentLen*2), currErrLine)
+	if verify && len(verifyFailedInfos) > 0 {
+		_, _ = fmt.Fprintf(stdout, "Conjure output differs from what currently exists for %d project(s)\n", len(verifyFailedInfos))
+		for _, currVerifyFailedInfo := range verifyFailedInfos {
+			_, _ = fmt.Fprintf(stdout, "%s%s:\n", strings.Repeat(" ", indentLen), currVerifyFailedInfo.name)
+			for _, currDiffOutputLine := range strings.Split(currVerifyFailedInfo.diffOutput, "\n") {
+				_, _ = fmt.Fprintf(stdout, "%s%s\n", strings.Repeat(" ", indentLen*2), currDiffOutputLine)
 			}
 		}
 		return fmt.Errorf("conjure verify failed")
