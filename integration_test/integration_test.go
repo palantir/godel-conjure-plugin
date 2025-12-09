@@ -479,8 +479,6 @@ projects:
 	assert.Error(t, err, "verify should fail when stale files exist")
 	stdout := outputBuf.String()
 
-	fmt.Println(stdout)
-
 	assert.Contains(t, stdout, "Conjure output differs from what currently exists: [0]", "verify should mention files to be deleted")
 	assert.Contains(t, stdout, "internal/generated/conjure/project-1/base/api/oldfile.conjure.go: extra", "verify should list the stale file")
 }

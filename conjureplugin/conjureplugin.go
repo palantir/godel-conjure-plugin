@@ -55,7 +55,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 
 		conjureFilesToGenerate, err := conjure.GenerateOutputFiles(conjureDef, outputConf)
 		if err != nil {
-			return errors.Wrap(err, "failed to generate conjure output conjureFilesToGenerate")
+			return errors.Wrapf(err, "failed to generate conjure output")
 		}
 
 		var filesToDelete []string
