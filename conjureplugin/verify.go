@@ -64,8 +64,7 @@ func checksumRenderedFiles(projectDir string, files []*conjure.OutputFile) (dirc
 			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to render file %s", fileAbsPath)
 		}
 		h := sha256.New()
-		_, err = h.Write(output)
-		if err != nil {
+		if _, err := h.Write(output); err != nil {
 			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to checksum generated content for %s", fileAbsPath)
 		}
 		set.Checksums[relPath] = dirchecksum.FileChecksumInfo{
@@ -101,25 +100,36 @@ func checksumOnDiskFiles(projectDir string, filePathsToChecksum []string) (dirch
 			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to make path %s relative to projectDir %s", fileAbsPath, projectDir)
 		}
 
-		f, err := os.Open(fileAbsPath)
-		if os.IsNotExist(err) {
-			// skip nonexistent files
-			continue
-		} else if err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to open file for checksum %s", fileAbsPath)
+		checksumBytes, err := computeChecksum(fileAbsPath)
+		if err != nil {
+			return dirchecksum.ChecksumSet{}, err
 		}
-		defer func() {
-			// file is opened for reading only, so safe to ignore errors on close
-			_ = f.Close()
-		}()
-		h := sha256.New()
-		if _, err := io.Copy(h, f); err != nil {
-			return dirchecksum.ChecksumSet{}, errors.Wrapf(err, "failed to checksum on-disk content for %s", fileAbsPath)
+		if checksumBytes == nil {
+			continue
 		}
 		set.Checksums[relPath] = dirchecksum.FileChecksumInfo{
 			Path:           relPath,
-			SHA256checksum: fmt.Sprintf("%x", h.Sum(nil)),
+			SHA256checksum: fmt.Sprintf("%x", checksumBytes),
 		}
 	}
 	return set, nil
+}
+
+func computeChecksum(filePath string) ([]byte, error) {
+	f, err := os.Open(filePath)
+	if os.IsNotExist(err) {
+		// skip nonexistent files
+		return nil, nil
+	} else if err != nil {
+		return nil, errors.Wrapf(err, "failed to open file for checksum %s", filePath)
+	}
+	defer func() {
+		// file is opened for reading only, so safe to ignore errors on close
+		_ = f.Close()
+	}()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return nil, errors.Wrapf(err, "failed to checksum on-disk content for %s", filePath)
+	}
+	return h.Sum(nil), nil
 }
