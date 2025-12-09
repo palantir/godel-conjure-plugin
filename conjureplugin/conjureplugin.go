@@ -24,6 +24,7 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure"
 	conjurego "github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/pkg/matcher"
 	"github.com/pkg/errors"
 )
 
@@ -51,8 +52,24 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
 		}
+
+		conjureFilesToGenerate, err := conjure.GenerateOutputFiles(conjureDef, outputConf)
+		if err != nil {
+			return errors.Wrapf(err, "failed to generate conjure output")
+		}
+
+		var filesToDelete []string
+		if !currParam.SkipDeleteGeneratedFiles {
+			filesToDelete, err = computeObsoleteFiles(outputConf.OutputDir, conjureFilesToGenerate)
+			if err != nil {
+				return err
+			}
+		}
+
 		if verify {
-			diff, err := diffOnDisk(conjureDef, projectDir, outputConf)
+			// get files to checksum, which is combination of files that will be generated and files that will be deleted
+			filesToChecksum := append(getOutputFileAbsPaths(conjureFilesToGenerate), filesToDelete...)
+			diff, err := diffOnDisk(projectDir, filesToChecksum, conjureFilesToGenerate)
 			if err != nil {
 				return err
 			}
@@ -60,10 +77,10 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 				verifyFailedFn(k, diff.String())
 			}
 		} else {
-			// Delete old generated files before regeneration unless skipped
+			// Delete old generated conjureFilesToGenerate before regeneration unless skipped
 			if !currParam.SkipDeleteGeneratedFiles {
 				if err := deleteGeneratedFiles(outputConf.OutputDir); err != nil {
-					return errors.Wrapf(err, "failed to delete old generated files in %s", outputConf.OutputDir)
+					return errors.Wrapf(err, "failed to delete old generated conjureFilesToGenerate in %s", outputConf.OutputDir)
 				}
 			}
 			if err := conjure.Generate(conjureDef, outputConf); err != nil {
@@ -84,6 +101,14 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		return fmt.Errorf("conjure verify failed")
 	}
 	return nil
+}
+
+func getOutputFileAbsPaths(files []*conjure.OutputFile) []string {
+	var out []string
+	for _, currFile := range files {
+		out = append(out, currFile.AbsPath())
+	}
+	return out
 }
 
 func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefinition, error) {
@@ -132,4 +157,66 @@ func deleteConjureFile(path string, d os.DirEntry, err error) error {
 	}
 
 	return nil
+}
+
+// computeObsoleteFiles returns the absolute paths to Conjure-generated files within outputDir that are not contained
+// within filesToGenerate.
+//
+// It does so by getting the absolute paths of all Conjure-generated files currently on disk in the output directory
+// and removing all the absolute paths returned by the AbsPath function of the files in filesToGenerate.
+func computeObsoleteFiles(outputDir string, filesToGenerate []*conjure.OutputFile) ([]string, error) {
+	existingFiles, err := getAllGeneratedFiles(outputDir)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build a set of file paths that will be generated
+	generatedPaths := make(map[string]struct{}, len(filesToGenerate))
+	for _, file := range filesToGenerate {
+		generatedPaths[file.AbsPath()] = struct{}{}
+	}
+
+	// Find files that exist but won't be regenerated
+	var obsoleteFiles []string
+	for _, existingFile := range existingFiles {
+		if _, willBeGenerated := generatedPaths[existingFile]; !willBeGenerated {
+			obsoleteFiles = append(obsoleteFiles, existingFile)
+		}
+	}
+
+	return obsoleteFiles, nil
+}
+
+// getAllGeneratedFiles returns the absolute paths of all Conjure-generated files
+// (files ending in .conjure.go or .conjure.json) within the specified output directory.
+func getAllGeneratedFiles(outputDir string) ([]string, error) {
+	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		return nil, nil
+	} else if err != nil {
+		return nil, errors.Wrapf(err, "failed to stat output directory %s", outputDir)
+	}
+
+	// Match files ending in .conjure.go or .conjure.json
+	include := matcher.Name(`.*\.conjure\.(go|json)$`)
+
+	relPaths, err := matcher.ListFiles(outputDir, include, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to list files in output directory %s", outputDir)
+	}
+
+	// Convert to absolute paths, filtering out directories
+	// (matcher.ListFiles can return both files and directories that match)
+	var absPaths []string
+	for _, relPath := range relPaths {
+		absPath := filepath.Join(outputDir, relPath)
+		fileInfo, err := os.Stat(absPath)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to stat %s", absPath)
+		}
+		if !fileInfo.IsDir() {
+			absPaths = append(absPaths, absPath)
+		}
+	}
+
+	return absPaths, nil
 }
