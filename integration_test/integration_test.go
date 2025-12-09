@@ -478,8 +478,11 @@ projects:
 	assert.Error(t, err, "verify should fail when stale files exist")
 	stdout := outputBuf.String()
 
-	assert.Contains(t, stdout, "Conjure output differs from what currently exists: [0]", "verify should mention files to be deleted")
-	assert.Contains(t, stdout, "internal/generated/conjure/project-1/base/api/oldfile.conjure.go: extra", "verify should list the stale file")
+	assert.Equal(t, stdout, `Conjure output differs from what currently exists for 1 project(s)
+  project-1:
+    internal/generated/conjure/project-1/base/api/oldfile.conjure.go: extra
+Error: conjure verify failed
+`)
 }
 
 func TestConjurePluginPublish(t *testing.T) {
