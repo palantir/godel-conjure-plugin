@@ -83,26 +83,32 @@ func runBackCompatCommand(
 		return errors.Wrapf(err, "failed to set working directory")
 	}
 
-	if errs := projectParams.ForEach(func(project string, param conjureplugin.ConjureProjectParam) error {
+	errs := make(map[string]error)
+	for _, param := range projectParams {
 		if param.SkipConjureBackcompat {
-			return nil
+			continue
 		}
 		if !param.IRProvider.GeneratedFromYAML() {
-			return nil
+			continue
 		}
 
 		bytes, err := param.IRProvider.IRBytes()
 		if err != nil {
-			return errors.Wrapf(err, "failed to generate IR bytes for project %q", project)
+			errs[param.ProjectName] = errors.Wrapf(err, "failed to generate IR bytes for project %q", param.ProjectName)
+			continue
 		}
 
 		file, err := tempfilecreator.WriteBytesToTempFile(bytes)
 		if err != nil {
-			return errors.Wrapf(err, "failed to create temporary IR file for project %q", project)
+			errs[param.ProjectName] = errors.Wrapf(err, "failed to create temporary IR file for project %q", param.ProjectName)
+			continue
 		}
 
-		return runCmd(project, param, file, cmdParams)
-	}); len(errs) > 0 {
+		if err := runCmd(param.ProjectName, param, file, cmdParams); err != nil {
+			errs[param.ProjectName] = err
+		}
+	}
+	if len(errs) > 0 {
 		return errorHandler(errs)
 	}
 	return nil

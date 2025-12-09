@@ -17,10 +17,8 @@ package config
 import (
 	"errors"
 	"fmt"
-	"maps"
 	"net/url"
 	"os"
-	"slices"
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -47,30 +45,29 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
 // this is considered to be warning. The returned warning is an error created using errors.Join that contains one error
 // per output path shared by multiple projects.
 func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, _ error) {
-	sortedKeys := slices.Sorted(maps.Keys(c.ProjectConfigs))
-
 	conflicts := ToConjurePluginConfig(c).OutputDirConflicts()
 
-	params := make(map[string]conjureplugin.ConjureProjectParam)
-	for _, key := range sortedKeys {
-		if err := validate.ValidateProjectName(key); err != nil {
-			return conjureplugin.ConjureProjectParams{}, nil, err
+	var params conjureplugin.ConjureProjectParams
+	for _, project := range c.ProjectConfigs {
+		projectName := project.Name
+		if err := validate.ValidateProjectName(projectName); err != nil {
+			return nil, nil, err
 		}
 
-		currConfig := c.ProjectConfigs[key]
+		currConfig := project.Config
 
-		outputDir := currConfig.ResolvedOutputDir(key)
+		outputDir := currConfig.ResolvedOutputDir(projectName)
 
-		if !currConfig.SkipDeleteGeneratedFiles && len(conflicts[key]) > 0 {
-			return conjureplugin.ConjureProjectParams{}, nil, errors.Join(append(
-				[]error{fmt.Errorf("project %q cannot delete generated files when output directories conflict", key)},
-				conflicts[key]...,
+		if !currConfig.SkipDeleteGeneratedFiles && len(conflicts[projectName]) > 0 {
+			return nil, nil, errors.Join(append(
+				[]error{fmt.Errorf("project %q cannot delete generated files when output directories conflict", projectName)},
+				conflicts[projectName]...,
 			)...)
 		}
 
 		irProvider, err := (*IRLocatorConfig)(&currConfig.IRLocator).ToIRProvider()
 		if err != nil {
-			return conjureplugin.ConjureProjectParams{}, nil, pkgerror.Wrapf(err, "failed to convert configuration for %s to provider", key)
+			return nil, nil, pkgerror.Wrapf(err, "failed to convert configuration for %s to provider", projectName)
 		}
 
 		groupID := c.GroupID
@@ -89,7 +86,8 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
-		params[key] = conjureplugin.ConjureProjectParam{
+		params = append(params, conjureplugin.ConjureProjectParam{
+			ProjectName:              projectName,
 			OutputDir:                outputDir,
 			IRProvider:               irProvider,
 			AcceptFuncs:              acceptFuncsFlag,
@@ -99,27 +97,24 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			GroupID:                  groupID,
 			SkipConjureBackcompat:    currConfig.SkipBackCompat,
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
-		}
+		})
 	}
 
 	var err error
 	if !c.AllowConflictingOutputDirs {
-		for _, key := range sortedKeys {
-			err = errors.Join(append([]error{err}, conflicts[key]...)...)
+		for _, project := range c.ProjectConfigs {
+			err = errors.Join(append([]error{err}, conflicts[project.Name]...)...)
 		}
 		if err != nil {
-			return conjureplugin.ConjureProjectParams{}, nil, fmt.Errorf("output directory conflicts detected: %w", err)
+			return nil, nil, fmt.Errorf("output directory conflicts detected: %w", err)
 		}
 	}
 
-	for _, key := range sortedKeys {
-		warnings = append(warnings, conflicts[key]...)
+	for _, project := range c.ProjectConfigs {
+		warnings = append(warnings, conflicts[project.Name]...)
 	}
 
-	return conjureplugin.ConjureProjectParams{
-		SortedKeys: sortedKeys,
-		Params:     params,
-	}, warnings, nil
+	return params, warnings, nil
 }
 
 type SingleConjureConfig v2.SingleConjureConfig
