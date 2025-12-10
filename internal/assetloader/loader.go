@@ -48,7 +48,7 @@ func LoadAssets(assets []string, stdout, stderr io.Writer) (LoadedAssets, error)
 	case 0:
 		// Do nothing
 	case 1:
-		conjureBackCompat = backcompatasset.New(backcompatAssets[0], stdout, stderr)
+		conjureBackCompat = backcompatasset.New(backcompatAssets[0])
 	default:
 		return LoadedAssets{}, pkgerrors.Errorf(`only 0 or 1 "backcompat" can be configured, detected %d: %v`, len(backcompatAssets), backcompatAssets)
 	}
