@@ -47,6 +47,16 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
 func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, _ error) {
 	conflicts := ToConjurePluginConfig(c).OutputDirConflicts()
 
+	// CGR / WGS module version for all projects (only 2 and 3 are allowed)
+	cgrModuleVersion := 2
+	if c.CGRModuleVersion == 2 || c.CGRModuleVersion == 3 {
+		cgrModuleVersion = c.CGRModuleVersion
+	}
+	wgsModuleVersion := 2
+	if c.WGSModuleVersion == 2 || c.WGSModuleVersion == 3 {
+		wgsModuleVersion = c.WGSModuleVersion
+	}
+
 	var params conjureplugin.ConjureProjectParams
 	for _, project := range c.ProjectConfigs {
 		projectName := project.Name
@@ -97,6 +107,8 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			GroupID:                  groupID,
 			SkipConjureBackcompat:    currConfig.SkipBackCompat,
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
+			CGRModuleVersion:         cgrModuleVersion,
+			WGSModuleVersion:         wgsModuleVersion,
 		})
 	}
 

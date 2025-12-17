@@ -32,8 +32,14 @@ type ConjurePluginConfig struct {
 	GroupID string `yaml:"group-id,omitempty"`
 	// AllowConflictingOutputDirs downgrades output directory conflicts from errors to warnings.
 	// Defaults to false (conflicts are errors).
-	AllowConflictingOutputDirs bool                  `yaml:"allow-conflicting-output-dirs,omitempty"`
-	ProjectConfigs             ConjureProjectConfigs `yaml:"projects"`
+	AllowConflictingOutputDirs bool `yaml:"allow-conflicting-output-dirs,omitempty"`
+	// CGRModuleVersion specifies which module version of conjure-go-runtime to use in generated code.
+	// Defaults to 2 if not specified.
+	CGRModuleVersion int `yaml:"cgr-module-version,omitempty"`
+	// WGSModuleVersion specifies which module version of witchcraft-go-server to use in generated code.
+	// Defaults to 2 if not specified.
+	WGSModuleVersion int                   `yaml:"wgs-module-version,omitempty"`
+	ProjectConfigs   ConjureProjectConfigs `yaml:"projects"`
 }
 
 // ConjureProjectConfigs is a type defined to support an ordered map. Its serialized form is a

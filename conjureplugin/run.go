@@ -49,6 +49,8 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			GenerateServer:       currParam.Server,
 			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
+			CGRModuleVersion:     currParam.CGRModuleVersion,
+			WGSModuleVersion:     currParam.WGSModuleVersion,
 		}
 
 		conjureFilesToGenerate, err := conjure.GenerateOutputFiles(conjureDef, outputConf)
