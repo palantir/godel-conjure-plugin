@@ -6,13 +6,14 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v6 v6.81.0
-	github.com/palantir/distgo v1.86.0
-	github.com/palantir/godel/v2 v2.144.0
+	github.com/palantir/distgo v1.87.0
+	github.com/palantir/godel/v2 v2.145.0
 	github.com/palantir/pkg/cobracli v1.3.0
+	github.com/palantir/pkg/matcher v1.3.0
 	github.com/palantir/pkg/safehttp v1.2.0
 	github.com/palantir/pkg/safejson v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -30,7 +31,7 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/klauspost/compress v1.18.1 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -40,7 +41,6 @@ require (
 	github.com/palantir/distgo/pkg/git v1.0.0 // indirect
 	github.com/palantir/go-ptimports/v2 v2.47.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
-	github.com/palantir/pkg/matcher v1.3.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.2.0 // indirect
 	github.com/palantir/pkg/specdir v1.3.0 // indirect
@@ -55,10 +55,10 @@ require (
 	github.com/ulikunitz/xz v0.5.15 // indirect
 	github.com/whilp/git-urls v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/mod v0.30.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/tools v0.39.0 // indirect
+	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

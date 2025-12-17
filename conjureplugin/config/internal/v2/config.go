@@ -17,7 +17,6 @@ package v2
 import (
 	"fmt"
 	"path/filepath"
-	"sort"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
@@ -33,8 +32,60 @@ type ConjurePluginConfig struct {
 	GroupID string `yaml:"group-id,omitempty"`
 	// AllowConflictingOutputDirs downgrades output directory conflicts from errors to warnings.
 	// Defaults to false (conflicts are errors).
-	AllowConflictingOutputDirs bool                           `yaml:"allow-conflicting-output-dirs,omitempty"`
-	ProjectConfigs             map[string]SingleConjureConfig `yaml:"projects"`
+	AllowConflictingOutputDirs bool                  `yaml:"allow-conflicting-output-dirs,omitempty"`
+	ProjectConfigs             ConjureProjectConfigs `yaml:"projects"`
+}
+
+// ConjureProjectConfigs is a type defined to support an ordered map. Its serialized form is a
+// map[string]SingleConjureConfig.
+//
+// Implements MarshalYAML and UnmarshalYAML in a manner that supports writing and reading a map that maintains ordering.
+type ConjureProjectConfigs []NamedConjureProjectConfig
+
+type NamedConjureProjectConfig struct {
+	Name   string
+	Config SingleConjureConfig
+}
+
+func (c ConjureProjectConfigs) MarshalYAML() (interface{}, error) {
+	var mapSlice yaml.MapSlice
+	for _, project := range c {
+		mapSlice = append(mapSlice, yaml.MapItem{
+			Key:   project.Name,
+			Value: project.Config,
+		})
+	}
+	return mapSlice, nil
+}
+
+func (c *ConjureProjectConfigs) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	if c == nil {
+		return errors.Errorf("cannot unmarshal into nil ConjureProjectConfigs")
+	}
+
+	// unmarshal projects into map so that full type-based unmarshal is performed
+	var projects map[string]SingleConjureConfig
+	if err := unmarshal(&projects); err != nil {
+		return err
+	}
+
+	// unmarshal into MapSlice to get ordered keys
+	var mapSlice yaml.MapSlice
+	if err := unmarshal(&mapSlice); err != nil {
+		return err
+	}
+
+	var configs []NamedConjureProjectConfig
+	for _, mapItem := range mapSlice {
+		key := mapItem.Key.(string)
+		configs = append(configs, NamedConjureProjectConfig{
+			Name:   key,
+			Config: projects[key],
+		})
+	}
+
+	*c = configs
+	return nil
 }
 
 type SingleConjureConfig struct {
@@ -84,40 +135,22 @@ type SingleConjureConfig struct {
 //   - Identical output directories: Two projects writing to the exact same directory
 //   - Nested output directories: One project's output directory is a subdirectory of another's
 //
-// Projects are compared in sorted order to ensure deterministic error messages.
 // An empty map indicates no conflicts were found.
 func (c *ConjurePluginConfig) OutputDirConflicts() map[string][]error {
-	type Project struct {
-		name   string
-		config SingleConjureConfig
-	}
-
-	var projects []Project
-	for project, config := range c.ProjectConfigs {
-		projects = append(projects, Project{
-			name:   project,
-			config: config,
-		})
-	}
-
-	sort.Slice(projects, func(i, j int) bool {
-		return projects[i].name < projects[j].name
-	})
-
 	result := make(map[string][]error)
-	for i1, p1 := range projects {
-		for i2, p2 := range projects {
+	for i1, p1 := range c.ProjectConfigs {
+		for i2, p2 := range c.ProjectConfigs {
 			if i1 == i2 {
 				continue
 			}
 
-			p1Dir := p1.config.ResolvedOutputDir(p1.name)
-			p2Dir := p2.config.ResolvedOutputDir(p2.name)
+			p1Dir := p1.Config.ResolvedOutputDir(p1.Name)
+			p2Dir := p2.Config.ResolvedOutputDir(p2.Name)
 
 			if p1Dir == p2Dir {
-				result[p1.name] = append(result[p1.name], fmt.Errorf("project %q and %q have the same output directory %q", p1.name, p2.name, p1Dir))
+				result[p1.Name] = append(result[p1.Name], fmt.Errorf("project %q and %q have the same output directory %q", p1.Name, p2.Name, p1Dir))
 			} else if validate.IsSubdirectory(p1Dir, p2Dir) {
-				result[p1.name] = append(result[p1.name], fmt.Errorf("output directory %q of project %q is a subdirectory of output directory %q of project %q", p2Dir, p2.name, p1Dir, p1.name))
+				result[p1.Name] = append(result[p1.Name], fmt.Errorf("output directory %q of project %q is a subdirectory of output directory %q of project %q", p2Dir, p2.Name, p1Dir, p1.Name))
 			}
 		}
 	}
@@ -156,6 +189,10 @@ type IRLocatorConfig struct {
 }
 
 func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	if cfg == nil {
+		return errors.Errorf("cannot unmarshal into nil IRLocatorConfig")
+	}
+
 	var strInput string
 	if err := unmarshal(&strInput); err == nil && strInput != "" {
 		cfg.Type = LocatorTypeAuto

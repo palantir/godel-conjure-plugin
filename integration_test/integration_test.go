@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -464,6 +463,130 @@ projects:
 	assert.Error(t, err, "modified file did not trigger verify fail")
 	stdout := outputBuf.String()
 	assert.True(t, strings.Contains(stdout, structsFile+": checksum changed"), "Unexpected standard out: %s", stdout)
+}
+
+func TestConjurePluginVerifyDoesNotDetectStaleFilesWhenDeleteSkipped(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.base.api
+    objects:
+      BaseType:
+        fields:
+          id: string
+`
+		yamlDir = "yamlDir"
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	// Create a fresh project directory
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	defer cleanup()
+
+	ymlDir := filepath.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+
+	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(`
+version: 2
+projects:
+  project-1:
+    skip-delete-generated-files: true
+    ir-locator: `+yamlDir+`
+`), 0644)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	require.NoError(t, err)
+
+	// Generate initial files
+	outputBuf := &bytes.Buffer{}
+	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+	require.NoError(t, err, outputBuf.String())
+	runPluginCleanup()
+
+	// Create a stale generated file (one that shouldn't exist based on current IR)
+	staleFile := filepath.Join(projectDir, "internal", "generated", "conjure", "project-1", "base", "api", "oldfile.conjure.go")
+	err = os.MkdirAll(filepath.Dir(staleFile), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(staleFile, []byte("// This is an old generated file\npackage api"), 0644)
+	require.NoError(t, err)
+
+	// Run verify - should not fail when stale files exist but delete is skipped
+	outputBuf = &bytes.Buffer{}
+	_, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", []string{"--verify"}, projectDir, false, outputBuf)
+	assert.NoError(t, err, "verify should not fail when stale files exist but delete is skipped")
+}
+
+func TestConjurePluginVerifyDetectsStaleFilesThatShouldBeDeleted(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.base.api
+    objects:
+      BaseType:
+        fields:
+          id: string
+`
+		yamlDir = "yamlDir"
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	// Create a fresh project directory
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	defer cleanup()
+
+	ymlDir := filepath.Join(projectDir, yamlDir)
+	err = os.Mkdir(ymlDir, 0755)
+	require.NoError(t, err)
+
+	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(`
+version: 2
+projects:
+  project-1:
+    ir-locator: `+yamlDir+`
+`), 0644)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	require.NoError(t, err)
+
+	// Generate initial files
+	outputBuf := &bytes.Buffer{}
+	runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, outputBuf)
+	require.NoError(t, err, outputBuf.String())
+	runPluginCleanup()
+
+	// Create a stale generated file (one that shouldn't exist based on current IR)
+	staleFile := filepath.Join(projectDir, "internal", "generated", "conjure", "project-1", "base", "api", "oldfile.conjure.go")
+	err = os.MkdirAll(filepath.Dir(staleFile), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(staleFile, []byte("// This is an old generated file\npackage api"), 0644)
+	require.NoError(t, err)
+
+	// Run verify - should detect the stale file
+	outputBuf = &bytes.Buffer{}
+	_, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", []string{"--verify"}, projectDir, false, outputBuf)
+	assert.Error(t, err, "verify should fail when stale files exist")
+	stdout := outputBuf.String()
+
+	assert.Equal(t, stdout, `Conjure output differs from what currently exists for 1 project(s)
+  project-1:
+    internal/generated/conjure/project-1/base/api/oldfile.conjure.go: extra
+Error: conjure verify failed
+`)
 }
 
 func TestConjurePluginPublish(t *testing.T) {
@@ -1032,18 +1155,18 @@ projects:
 					"godel/config/conjure-plugin.yml": `version: "2"
 allow-conflicting-output-dirs: true
 projects:
-  child-project:
-    output-dir: parent/child
-    ir-locator:
-      type: auto
-      locator: https://example.com/child.json
-    omit-top-level-project-dir: true
-    skip-delete-generated-files: true
   parent-project:
     output-dir: parent
     ir-locator:
       type: auto
       locator: https://example.com/parent.json
+    omit-top-level-project-dir: true
+    skip-delete-generated-files: true
+  child-project:
+    output-dir: parent/child
+    ir-locator:
+      type: auto
+      locator: https://example.com/child.json
     omit-top-level-project-dir: true
     skip-delete-generated-files: true
 `,
@@ -1131,10 +1254,10 @@ projects:
 	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
-	err = ioutil.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
+	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
 	require.NoError(t, err)
 
-	err = ioutil.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+	err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
 	require.NoError(t, err)
 
 	outputBuf := &bytes.Buffer{}
