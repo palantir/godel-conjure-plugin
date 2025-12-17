@@ -26,7 +26,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nmiyake/pkg/dirs"
 	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
 	"github.com/palantir/godel/v2/framework/pluginapitester"
 	"github.com/palantir/godel/v2/pkg/products"
@@ -94,14 +93,12 @@ projects:
 
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
-	fmt.Println("pluginPath:", pluginPath)
 
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	conjureYML := strings.Replace(conjureYMLSubstitute, "SUBSTITUTE_URL", ts.URL, -1)
@@ -333,12 +330,11 @@ projects:
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
 
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
@@ -425,12 +421,11 @@ types:
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
 
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
@@ -484,9 +479,8 @@ types:
 	require.NoError(t, err)
 
 	// Create a fresh project directory
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
-	defer cleanup()
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
@@ -543,9 +537,8 @@ types:
 	require.NoError(t, err)
 
 	// Create a fresh project directory
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
-	defer cleanup()
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
@@ -631,12 +624,11 @@ exit 0
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
 
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
@@ -757,12 +749,11 @@ exit 1
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
 
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
@@ -838,12 +829,11 @@ exit 0
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
 
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
@@ -1247,12 +1237,11 @@ projects:
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
 
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(conjureYML), 0644)
@@ -1290,9 +1279,8 @@ types:
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
 
-	projectDir, cleanup, err := dirs.TempDir(".", "")
-	require.NoError(t, err)
-	defer cleanup()
+	projectDir := t.TempDir()
+	createGoModule(t, projectDir)
 
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
@@ -1436,4 +1424,9 @@ projects:
 		_, err = os.Stat(oldFilePath)
 		assert.True(t, os.IsNotExist(err), "expected old conjure file to be deleted by default")
 	})
+}
+
+func createGoModule(t *testing.T, projectDir string) {
+	err := os.WriteFile(filepath.Join(projectDir, "go.mod"), []byte(`module conjure-test`), 0644)
+	require.NoError(t, err)
 }
