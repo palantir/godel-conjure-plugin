@@ -94,6 +94,7 @@ projects:
 
 	pluginPath, err := products.Bin("conjure-plugin")
 	require.NoError(t, err)
+	fmt.Println("pluginPath:", pluginPath)
 
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
