@@ -17,8 +17,10 @@ package config
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -114,6 +116,23 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			WGSModuleVersion:         wgsVersion,
 		})
 	}
+	var err error
+	if !c.AllowConflictingOutputDirs {
+		for _, project := range c.ProjectConfigs {
+			err = errors.Join(append([]error{err}, conflicts[project.Name]...)...)
+		}
+		if err != nil {
+			return nil, nil, fmt.Errorf("output directory conflicts detected: %w", err)
+		}
+	}
+
+	for _, project := range c.ProjectConfigs {
+		warnings = append(warnings, conflicts[project.Name]...)
+	}
+
+	return params, warnings, nil
+}
+
 func getVersionValueFromConfig(projectName, variableName string, defaultVal int, projectConfigVal, pluginConfigVal *int, validValues []int) (int, error) {
 	validValuesMap := make(map[int]struct{})
 	for _, v := range validValues {
@@ -138,22 +157,6 @@ func getVersionValueFromConfig(projectName, variableName string, defaultVal int,
 	}
 
 	return versionVal, nil
-}
-	var err error
-	if !c.AllowConflictingOutputDirs {
-		for _, project := range c.ProjectConfigs {
-			err = errors.Join(append([]error{err}, conflicts[project.Name]...)...)
-		}
-		if err != nil {
-			return nil, nil, fmt.Errorf("output directory conflicts detected: %w", err)
-		}
-	}
-
-	for _, project := range c.ProjectConfigs {
-		warnings = append(warnings, conflicts[project.Name]...)
-	}
-
-	return params, warnings, nil
 }
 
 type SingleConjureConfig v2.SingleConjureConfig

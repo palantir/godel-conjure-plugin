@@ -1224,7 +1224,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "invalid plugin-level cgr-module-version: 4 (must be 2 or 3)",
+			wantError: "plugin configuration has invalid cgr-module-version value 4: valid values are [2 3]",
 		},
 		{
 			name: "Error for invalid plugin-level wgs-module-version",
@@ -1244,7 +1244,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: "invalid plugin-level wgs-module-version: 5 (must be 2 or 3)",
+			wantError: "plugin configuration has invalid wgs-module-version value 5: valid values are [2 3]",
 		},
 		{
 			name: "Error for invalid project-level cgr-module-version",
@@ -1264,7 +1264,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: `project "project-1" has invalid cgr-module-version: 1 (must be 2 or 3)`,
+			wantError: `project "project-1" configuration has invalid cgr-module-version value 1: valid values are [2 3]`,
 		},
 		{
 			name: "Error for invalid project-level wgs-module-version",
@@ -1284,7 +1284,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 					},
 				},
 			},
-			wantError: `project "project-1" has invalid wgs-module-version: 10 (must be 2 or 3)`,
+			wantError: `project "project-1" configuration has invalid wgs-module-version value 10: valid values are [2 3]`,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
