@@ -88,35 +88,15 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		}
 
 		// Resolve CGR module version: project-override > plugin-level > default
-		cgrVersion := 2
-		if currConfig.CGRModuleVersion != nil {
-			if *currConfig.CGRModuleVersion != 2 && *currConfig.CGRModuleVersion != 3 {
-				return nil, nil, fmt.Errorf("project %q has invalid cgr-module-version: %d (must be 2 or 3)",
-					projectName, *currConfig.CGRModuleVersion)
-			}
-			cgrVersion = *currConfig.CGRModuleVersion
-		} else if c.CGRModuleVersion != nil {
-			if *c.CGRModuleVersion != 2 && *c.CGRModuleVersion != 3 {
-				return nil, nil, fmt.Errorf("invalid plugin-level cgr-module-version: %d (must be 2 or 3)",
-					*c.CGRModuleVersion)
-			}
-			cgrVersion = *c.CGRModuleVersion
+		cgrVersion, err := getVersionValueFromConfig(projectName, "cgr-module-version", 2, currConfig.CGRModuleVersion, c.CGRModuleVersion, []int{2, 3})
+		if err != nil {
+			return nil, nil, err
 		}
 
 		// Resolve WGS module version: project-override > plugin-level > default
-		wgsVersion := 2
-		if currConfig.WGSModuleVersion != nil {
-			if *currConfig.WGSModuleVersion != 2 && *currConfig.WGSModuleVersion != 3 {
-				return nil, nil, fmt.Errorf("project %q has invalid wgs-module-version: %d (must be 2 or 3)",
-					projectName, *currConfig.WGSModuleVersion)
-			}
-			wgsVersion = *currConfig.WGSModuleVersion
-		} else if c.WGSModuleVersion != nil {
-			if *c.WGSModuleVersion != 2 && *c.WGSModuleVersion != 3 {
-				return nil, nil, fmt.Errorf("invalid plugin-level wgs-module-version: %d (must be 2 or 3)",
-					*c.WGSModuleVersion)
-			}
-			wgsVersion = *c.WGSModuleVersion
+		wgsVersion, err := getVersionValueFromConfig(projectName, "wgs-module-version", 2, currConfig.WGSModuleVersion, c.WGSModuleVersion, []int{2, 3})
+		if err != nil {
+			return nil, nil, err
 		}
 
 		params = append(params, conjureplugin.ConjureProjectParam{
@@ -134,7 +114,31 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			WGSModuleVersion:         wgsVersion,
 		})
 	}
+func getVersionValueFromConfig(projectName, variableName string, defaultVal int, projectConfigVal, pluginConfigVal *int, validValues []int) (int, error) {
+	validValuesMap := make(map[int]struct{})
+	for _, v := range validValues {
+		validValuesMap[v] = struct{}{}
+	}
 
+	versionVal := defaultVal
+	source := "builtin default"
+
+	// get value from project config or plugin config if specified (in that order)
+	if projectConfigVal != nil {
+		versionVal = *projectConfigVal
+		source = fmt.Sprintf("project %q configuration", projectName)
+	} else if pluginConfigVal != nil {
+		versionVal = *pluginConfigVal
+		source = "plugin configuration"
+	}
+
+	// if version value is not valid, return error
+	if _, ok := validValuesMap[versionVal]; !ok {
+		return 0, fmt.Errorf("%s has invalid %s value %d: valid values are %v", source, variableName, versionVal, slices.Sorted(maps.Keys(validValuesMap)))
+	}
+
+	return versionVal, nil
+}
 	var err error
 	if !c.AllowConflictingOutputDirs {
 		for _, project := range c.ProjectConfigs {
