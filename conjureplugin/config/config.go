@@ -17,8 +17,10 @@ package config
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
@@ -86,6 +88,19 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+
+		// Resolve CGR module version: project-override > plugin-level > default
+		cgrVersion, err := getVersionValueFromConfig(projectName, "cgr-module-version", 2, currConfig.CGRModuleVersion, c.CGRModuleVersion, []int{2, 3})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		// Resolve WGS module version: project-override > plugin-level > default
+		wgsVersion, err := getVersionValueFromConfig(projectName, "wgs-module-version", 2, currConfig.WGSModuleVersion, c.WGSModuleVersion, []int{2, 3})
+		if err != nil {
+			return nil, nil, err
+		}
+
 		params = append(params, conjureplugin.ConjureProjectParam{
 			ProjectName:              projectName,
 			OutputDir:                outputDir,
@@ -97,9 +112,10 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			GroupID:                  groupID,
 			SkipConjureBackcompat:    currConfig.SkipBackCompat,
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
+			CGRModuleVersion:         cgrVersion,
+			WGSModuleVersion:         wgsVersion,
 		})
 	}
-
 	var err error
 	if !c.AllowConflictingOutputDirs {
 		for _, project := range c.ProjectConfigs {
@@ -115,6 +131,32 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 	}
 
 	return params, warnings, nil
+}
+
+func getVersionValueFromConfig(projectName, variableName string, defaultVal int, projectConfigVal, pluginConfigVal *int, validValues []int) (int, error) {
+	validValuesMap := make(map[int]struct{})
+	for _, v := range validValues {
+		validValuesMap[v] = struct{}{}
+	}
+
+	versionVal := defaultVal
+	source := "builtin default"
+
+	// get value from project config or plugin config if specified (in that order)
+	if projectConfigVal != nil {
+		versionVal = *projectConfigVal
+		source = fmt.Sprintf("project %q configuration", projectName)
+	} else if pluginConfigVal != nil {
+		versionVal = *pluginConfigVal
+		source = "plugin configuration"
+	}
+
+	// if version value is not valid, return error
+	if _, ok := validValuesMap[versionVal]; !ok {
+		return 0, fmt.Errorf("%s has invalid %s value %d: valid values are %v", source, variableName, versionVal, slices.Sorted(maps.Keys(validValuesMap)))
+	}
+
+	return versionVal, nil
 }
 
 type SingleConjureConfig v2.SingleConjureConfig

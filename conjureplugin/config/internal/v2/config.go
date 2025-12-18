@@ -32,8 +32,16 @@ type ConjurePluginConfig struct {
 	GroupID string `yaml:"group-id,omitempty"`
 	// AllowConflictingOutputDirs downgrades output directory conflicts from errors to warnings.
 	// Defaults to false (conflicts are errors).
-	AllowConflictingOutputDirs bool                  `yaml:"allow-conflicting-output-dirs,omitempty"`
-	ProjectConfigs             ConjureProjectConfigs `yaml:"projects"`
+	AllowConflictingOutputDirs bool `yaml:"allow-conflicting-output-dirs,omitempty"`
+	// CGRModuleVersion defines the default conjure-go-runtime module version to use in generated code for all projects.
+	// Individual projects can override this value via [SingleConjureConfig].
+	// Defaults to 2 if not specified.
+	CGRModuleVersion *int `yaml:"cgr-module-version,omitempty"`
+	// WGSModuleVersion defines the default witchcraft-go-server module version to use in generated code for all projects.
+	// Individual projects can override this value via [SingleConjureConfig].
+	// Defaults to 2 if not specified.
+	WGSModuleVersion *int                  `yaml:"wgs-module-version,omitempty"`
+	ProjectConfigs   ConjureProjectConfigs `yaml:"projects"`
 }
 
 // ConjureProjectConfigs is a type defined to support an ordered map. Its serialized form is a
@@ -120,6 +128,12 @@ type SingleConjureConfig struct {
 	// SkipBackCompat indicates if backcompat operations should be skipped for this project.
 	// Defaults to false (backcompat operations will run). Only valid for projects that generate IR from YAML: config validation will fail if this is set to true for projects that do not generate IR from YAML.
 	SkipBackCompat bool `yaml:"skip-backcompat,omitempty"`
+	// CGRModuleVersion specifies which module version of conjure-go-runtime to use in generated code for this project.
+	// If not specified, defaults to the [ConjurePluginConfig] value.
+	CGRModuleVersion *int `yaml:"cgr-module-version,omitempty"`
+	// WGSModuleVersion specifies which module version of witchcraft-go-server to use in generated code for this project.
+	// If not specified, defaults to the [ConjurePluginConfig] value.
+	WGSModuleVersion *int `yaml:"wgs-module-version,omitempty"`
 }
 
 // OutputDirConflicts detects output directory conflicts between projects.
