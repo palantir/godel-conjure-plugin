@@ -62,8 +62,8 @@ projects:
     ir-locator: local/yaml-dir
 `,
 			config.ConjurePluginConfig{
-				CGRModuleVersion: 3,
-				WGSModuleVersion: 3,
+				CGRModuleVersion: toPtr(3),
+				WGSModuleVersion: toPtr(3),
 				ProjectConfigs: v2.ConjureProjectConfigs{
 					{
 						Name: "project",
@@ -462,8 +462,8 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 		},
 		{
 			config.ConjurePluginConfig{
-				CGRModuleVersion: 3,
-				WGSModuleVersion: 3,
+				CGRModuleVersion: toPtr(3),
+				WGSModuleVersion: toPtr(3),
 				ProjectConfigs: v2.ConjureProjectConfigs{
 					{
 						Name: "project-1",
@@ -491,13 +491,15 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 		},
 		{
 			config.ConjurePluginConfig{
-				CGRModuleVersion: 4,
-				WGSModuleVersion: 4,
+				CGRModuleVersion: toPtr(2),
+				WGSModuleVersion: toPtr(2),
 				ProjectConfigs: v2.ConjureProjectConfigs{
 					{
 						Name: "project-1",
 						Config: v2.SingleConjureConfig{
-							OutputDir: "outputDir",
+							OutputDir:        "outputDir",
+							CGRModuleVersion: toPtr(3),
+							WGSModuleVersion: toPtr(3),
 							IRLocator: v2.IRLocatorConfig{
 								Type:    v2.LocatorTypeAuto,
 								Locator: "input.json",
@@ -513,8 +515,8 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 					OutputDir:        "outputDir",
 					IRProvider:       conjureplugin.NewLocalFileIRProvider("input.json"),
 					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
+					CGRModuleVersion: 3,
+					WGSModuleVersion: 3,
 				},
 			},
 		},
@@ -1203,6 +1205,86 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 				},
 			},
 			wantError: `project name cannot be ".."`,
+		},
+		{
+			name: "Error for invalid plugin-level cgr-module-version",
+			in: config.ConjurePluginConfig{
+				CGRModuleVersion: toPtr(4),
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
+						},
+					},
+				},
+			},
+			wantError: "invalid plugin-level cgr-module-version: 4 (must be 2 or 3)",
+		},
+		{
+			name: "Error for invalid plugin-level wgs-module-version",
+			in: config.ConjurePluginConfig{
+				WGSModuleVersion: toPtr(5),
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
+						},
+					},
+				},
+			},
+			wantError: "invalid plugin-level wgs-module-version: 5 (must be 2 or 3)",
+		},
+		{
+			name: "Error for invalid project-level cgr-module-version",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir:        "outputDir",
+							CGRModuleVersion: toPtr(1),
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
+						},
+					},
+				},
+			},
+			wantError: `project "project-1" has invalid cgr-module-version: 1 (must be 2 or 3)`,
+		},
+		{
+			name: "Error for invalid project-level wgs-module-version",
+			in: config.ConjurePluginConfig{
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project-1",
+						Config: v2.SingleConjureConfig{
+							OutputDir:        "outputDir",
+							WGSModuleVersion: toPtr(10),
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							OmitTopLevelProjectDir: true,
+						},
+					},
+				},
+			},
+			wantError: `project "project-1" has invalid wgs-module-version: 10 (must be 2 or 3)`,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

@@ -47,16 +47,6 @@ func ToConjurePluginConfig(in *ConjurePluginConfig) *v2.ConjurePluginConfig {
 func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, warnings []error, _ error) {
 	conflicts := ToConjurePluginConfig(c).OutputDirConflicts()
 
-	// CGR / WGS module version for all projects (only 2 and 3 are allowed)
-	cgrModuleVersion := 2
-	if c.CGRModuleVersion == 2 || c.CGRModuleVersion == 3 {
-		cgrModuleVersion = c.CGRModuleVersion
-	}
-	wgsModuleVersion := 2
-	if c.WGSModuleVersion == 2 || c.WGSModuleVersion == 3 {
-		wgsModuleVersion = c.WGSModuleVersion
-	}
-
 	var params conjureplugin.ConjureProjectParams
 	for _, project := range c.ProjectConfigs {
 		projectName := project.Name
@@ -96,6 +86,39 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+
+		// Resolve CGR module version: project-override > plugin-level > default
+		cgrVersion := 2
+		if currConfig.CGRModuleVersion != nil {
+			if *currConfig.CGRModuleVersion != 2 && *currConfig.CGRModuleVersion != 3 {
+				return nil, nil, fmt.Errorf("project %q has invalid cgr-module-version: %d (must be 2 or 3)",
+					projectName, *currConfig.CGRModuleVersion)
+			}
+			cgrVersion = *currConfig.CGRModuleVersion
+		} else if c.CGRModuleVersion != nil {
+			if *c.CGRModuleVersion != 2 && *c.CGRModuleVersion != 3 {
+				return nil, nil, fmt.Errorf("invalid plugin-level cgr-module-version: %d (must be 2 or 3)",
+					*c.CGRModuleVersion)
+			}
+			cgrVersion = *c.CGRModuleVersion
+		}
+
+		// Resolve WGS module version: project-override > plugin-level > default
+		wgsVersion := 2
+		if currConfig.WGSModuleVersion != nil {
+			if *currConfig.WGSModuleVersion != 2 && *currConfig.WGSModuleVersion != 3 {
+				return nil, nil, fmt.Errorf("project %q has invalid wgs-module-version: %d (must be 2 or 3)",
+					projectName, *currConfig.WGSModuleVersion)
+			}
+			wgsVersion = *currConfig.WGSModuleVersion
+		} else if c.WGSModuleVersion != nil {
+			if *c.WGSModuleVersion != 2 && *c.WGSModuleVersion != 3 {
+				return nil, nil, fmt.Errorf("invalid plugin-level wgs-module-version: %d (must be 2 or 3)",
+					*c.WGSModuleVersion)
+			}
+			wgsVersion = *c.WGSModuleVersion
+		}
+
 		params = append(params, conjureplugin.ConjureProjectParam{
 			ProjectName:              projectName,
 			OutputDir:                outputDir,
@@ -107,8 +130,8 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			GroupID:                  groupID,
 			SkipConjureBackcompat:    currConfig.SkipBackCompat,
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
-			CGRModuleVersion:         cgrModuleVersion,
-			WGSModuleVersion:         wgsModuleVersion,
+			CGRModuleVersion:         cgrVersion,
+			WGSModuleVersion:         wgsVersion,
 		})
 	}
 
