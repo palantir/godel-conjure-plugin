@@ -1,4 +1,4 @@
-// Copyright 2016 Palantir Technologies, Inc.
+// Copyright 2026 Palantir Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,19 +16,75 @@ package assetapi
 
 import (
 	"encoding/json"
+	"maps"
 	"os/exec"
+	"slices"
 
+	"github.com/palantir/distgo/distgotaskprovider"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
+// AssetType is the name of the type of asset.
 type AssetType string
 
+// Asset types supported by distgo.
 const (
 	Dister        AssetType = "dister"
 	Publisher     AssetType = "publisher"
 	DockerBuilder AssetType = "docker-builder"
 )
+
+// Asset represents a distgo asset.
+type Asset struct {
+	// AssetPath is the path to the asset.
+	AssetPath string
+
+	// AssetType is the type of asset.
+	AssetType AssetType
+
+	// TaskInfos is the information for asset-provided tasks. nil if the asset does not have any asset-provided tasks.
+	TaskInfos *TaskInfos
+}
+
+// AssetTaskInfo represents a single TaskInfo provided by an asset. Packages together information from the Asset and
+// AssetInfos structs for a particular TaskInfo.
+type AssetTaskInfo struct {
+	AssetPath string
+	AssetType AssetType
+	AssetName string
+	TaskInfo  distgotaskprovider.TaskInfo
+}
+
+// Assets represents a collection of distgo assets.
+type Assets struct {
+	assets map[AssetType][]Asset
+}
+
+// GetAssetPathsForType returns the paths to the asset of the provided type.
+func (a *Assets) GetAssetPathsForType(assetType AssetType) []string {
+	var out []string
+	for _, asset := range a.assets[assetType] {
+		out = append(out, asset.AssetPath)
+	}
+	return out
+}
+
+// AssetsWithTaskInfos returns all the Assets that have a non-nil TaskInfos field. The assets in the returned slice are
+// ordered by the natural ordering of AssetType and, within a type, occur in the same order as they occur in the value
+// slice of the assets map.
+func (a *Assets) AssetsWithTaskInfos() []Asset {
+	var out []Asset
+	for _, assetType := range slices.Sorted(maps.Keys(a.assets)) {
+		for _, asset := range a.assets[assetType] {
+			if asset.TaskInfos == nil {
+				continue
+			}
+			out = append(out, asset)
+		}
+	}
+	return out
+}
 
 const AssetTypeCommand = "asset-type"
 
@@ -45,18 +101,6 @@ func NewAssetTypeCmd(assetType AssetType) *cobra.Command {
 			return nil
 		},
 	}
-}
-
-func LoadAssets(assets []string) (map[AssetType][]string, error) {
-	loadedAssets := make(map[AssetType][]string)
-	for _, currAsset := range assets {
-		assetType, err := getAssetType(currAsset)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get asset type for asset %s", currAsset)
-		}
-		loadedAssets[assetType] = append(loadedAssets[assetType], currAsset)
-	}
-	return loadedAssets, nil
 }
 
 func getAssetType(assetPath string) (AssetType, error) {

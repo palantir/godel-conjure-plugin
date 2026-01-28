@@ -87,10 +87,11 @@ github.com/palantir/conjure-go/v6/conjure/snip
 github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
 github.com/palantir/conjure-go/v6/cycles
-# github.com/palantir/distgo v1.88.0
+# github.com/palantir/distgo v1.89.0
 ## explicit; go 1.25.0
-github.com/palantir/distgo/assetapi
 github.com/palantir/distgo/distgo
+github.com/palantir/distgo/distgotaskprovider
+github.com/palantir/distgo/internal/assetapi
 github.com/palantir/distgo/projectversioner/git
 github.com/palantir/distgo/publisher
 github.com/palantir/distgo/publisher/artifactory
