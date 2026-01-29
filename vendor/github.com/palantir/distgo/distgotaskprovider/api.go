@@ -14,10 +14,6 @@
 
 package distgotaskprovider
 
-import (
-	"github.com/palantir/godel/v2/framework/godellauncher"
-)
-
 // TaskInfo is the information needed to create a distgo task.
 // Based on the godel TaskInfo definition at https://github.com/palantir/godel/blob/8537d0ea9067d3bdd36d5db06069b71fde92188b/framework/pluginapi/v2/pluginapi/taskinfo.go#L44.
 type TaskInfo struct {
@@ -32,6 +28,10 @@ type TaskInfo struct {
 	// different from the command used to invoke the task on the asset.
 	Command []string `json:"command"`
 
+	// GlobalFlagOptions specifies the configuration for the global flag options. If any of the fields are non-nil, the
+	// global flag value is provided to the task as a flag.
+	GlobalFlagOptions GlobalFlagOptions `json:"globalFlagOptions"`
+
 	// VerifyOptions specifies the configuration for the "verify" operation for the task. If nil, indicates that the
 	// task is not a "verify" task.
 	VerifyOptions *VerifyOptions `json:"verifyOptions"`
@@ -43,18 +43,14 @@ type TaskInfo struct {
 	RegisterAsTopLevelDistgoTaskCommand bool `json:"registerAsTopLevelDistgoTaskCommand"`
 }
 
-// VerifyOptions specifies how the task should be run in "verify" mode.
-// Based on the godel VerifyOptions definition at https://github.com/palantir/godel/blob/8537d0ea9067d3bdd36d5db06069b71fde92188b/framework/pluginapi/v2/pluginapi/verifyopts.go#L35
-type VerifyOptions struct {
-	VerifyTaskFlags []VerifyFlag `json:"verifyTaskFlags"`
-	ApplyTrueArgs   []string     `json:"applyTrueArgs"`
-	ApplyFalseArgs  []string     `json:"applyFalseArgs"`
+// GlobalFlagOptions specifies how the task should interact with global flags.
+// Based on the godel globalFlagOptionsImpl definition at https://github.com/palantir/godel/blob/8537d0ea9067d3bdd36d5db06069b71fde92188b/framework/pluginapi/v2/pluginapi/globalflagopts.go#L34
+type GlobalFlagOptions struct {
+	DebugFlagName      string `json:"debugFlag"`
+	ProjectDirFlagName string `json:"projectDirFlag"`
 }
 
-// VerifyFlag specifies the settings for the verify flag for distgo TaskProvider tasks.
-// Based on the godel VerifyFlag definition at https://github.com/palantir/godel/blob/429e630ed3d426c324ab6929ceb11f9aca553669/framework/pluginapi/verifyopts.go#L143
-type VerifyFlag struct {
-	NameVar        string                 `json:"name"`
-	DescriptionVar string                 `json:"description"`
-	TypeVar        godellauncher.FlagType `json:"type"`
+type VerifyOptions struct {
+	ApplyTrueArgs  []string `json:"applyTrueArgs"`
+	ApplyFalseArgs []string `json:"applyFalseArgs"`
 }
