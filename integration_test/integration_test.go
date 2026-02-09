@@ -17,6 +17,7 @@ package integration_test
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -301,6 +302,95 @@ func NewTestUnionFromTestCase(v TestCase) TestUnion {
 `
 		assert.Equal(t, wantContent, string(contentBytes), "Got:\n%s", string(contentBytes))
 	}
+}
+
+func TestConjurePluginExportErrorDecoder(t *testing.T) {
+	const (
+		conjureSpecYML = `
+types:
+  definitions:
+    default-package: com.palantir.conjure.test.api
+    errors:
+      MyNotFound:
+        code: NOT_FOUND
+        namespace: TestNamespace
+`
+		yamlDir = "yamlDir"
+	)
+
+	pluginPath, err := products.Bin("conjure-plugin")
+	require.NoError(t, err)
+
+	t.Run("export-error-decoder generates decoder file", func(t *testing.T) {
+		projectDir, cleanup, err := dirs.TempDir(".", "")
+		require.NoError(t, err)
+		defer cleanup()
+
+		ymlDir := filepath.Join(projectDir, yamlDir)
+		err = os.Mkdir(ymlDir, 0755)
+		require.NoError(t, err)
+		err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+		require.NoError(t, err)
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(`
+version: 2
+projects:
+  test-project:
+    output-dir: conjure-output
+    omit-top-level-project-dir: true
+    ir-locator: `+yamlDir+`
+    export-error-decoder: true
+`), 0644)
+		require.NoError(t, err)
+		err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+		require.NoError(t, err)
+
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, io.Discard)
+		defer runPluginCleanup()
+		require.NoError(t, err)
+
+		// Internal error registry should exist
+		registryPath := filepath.Join(projectDir, "conjure-output", "internal", "conjureerrors", "error_registry.conjure.go")
+		assert.FileExists(t, registryPath)
+
+		// Top-level decoder export file should exist
+		decoderPath := filepath.Join(projectDir, "conjure-output", "conjureerrors", "decoder.conjure.go")
+		assert.FileExists(t, decoderPath)
+	})
+
+	t.Run("without export-error-decoder only generates internal registry", func(t *testing.T) {
+		projectDir, cleanup, err := dirs.TempDir(".", "")
+		require.NoError(t, err)
+		defer cleanup()
+
+		ymlDir := filepath.Join(projectDir, yamlDir)
+		err = os.Mkdir(ymlDir, 0755)
+		require.NoError(t, err)
+		err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
+		require.NoError(t, err)
+		err = os.WriteFile(filepath.Join(projectDir, "godel", "config", "conjure-plugin.yml"), []byte(`
+version: 2
+projects:
+  test-project:
+    output-dir: conjure-output
+    omit-top-level-project-dir: true
+    ir-locator: `+yamlDir+`
+`), 0644)
+		require.NoError(t, err)
+		err = os.WriteFile(filepath.Join(ymlDir, "conjure.yml"), []byte(conjureSpecYML), 0644)
+		require.NoError(t, err)
+
+		runPluginCleanup, err := pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", nil, projectDir, false, io.Discard)
+		defer runPluginCleanup()
+		require.NoError(t, err)
+
+		// Internal error registry should still exist
+		registryPath := filepath.Join(projectDir, "conjure-output", "internal", "conjureerrors", "error_registry.conjure.go")
+		assert.FileExists(t, registryPath)
+
+		// Top-level decoder export file should NOT exist
+		decoderPath := filepath.Join(projectDir, "conjure-output", "conjureerrors", "decoder.conjure.go")
+		assert.NoFileExists(t, decoderPath)
+	})
 }
 
 func TestConjurePluginVerify(t *testing.T) {
