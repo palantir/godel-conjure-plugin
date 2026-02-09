@@ -114,6 +114,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
 			CGRModuleVersion:         cgrVersion,
 			WGSModuleVersion:         wgsVersion,
+			ExportErrorDecoder:       currConfig.ExportErrorDecoder,
 		})
 	}
 	var err error

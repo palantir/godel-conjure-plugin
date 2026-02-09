@@ -134,6 +134,9 @@ type SingleConjureConfig struct {
 	// WGSModuleVersion specifies which module version of witchcraft-go-server to use in generated code for this project.
 	// If not specified, defaults to the [ConjurePluginConfig] value.
 	WGSModuleVersion *int `yaml:"wgs-module-version,omitempty"`
+	// ExportErrorDecoder generates a top-level conjureerrors package that re-exports
+	// the Decoder function from the internal conjureerrors package.
+	ExportErrorDecoder bool `yaml:"export-error-decoder,omitempty"`
 }
 
 // OutputDirConflicts detects output directory conflicts between projects.
