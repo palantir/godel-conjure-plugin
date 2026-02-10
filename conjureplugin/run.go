@@ -51,6 +51,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
 			CGRModuleVersion:     currParam.CGRModuleVersion,
 			WGSModuleVersion:     currParam.WGSModuleVersion,
+			ExportErrorDecoder:   currParam.ExportErrorDecoder,
 		}
 
 		conjureFilesToGenerate, err := conjure.GenerateOutputFiles(conjureDef, outputConf)

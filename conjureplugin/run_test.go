@@ -16,6 +16,7 @@ package conjureplugin
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -158,4 +159,70 @@ func (o *BaseType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 			assert.Equal(t, tc.wantOutput, out.String())
 		})
 	}
+}
+
+func Test_Run_ExportErrorDecoder(t *testing.T) {
+	const (
+		goModFileContent = `module conjure-test-module
+`
+		testConjureYAML = `types:
+  definitions:
+    default-package: com.palantir.test.api
+    errors:
+      MyNotFound:
+        code: NOT_FOUND
+        namespace: TestNamespace`
+	)
+
+	tmpDir := t.TempDir()
+	err := os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goModFileContent), 0644)
+	require.NoError(t, err)
+	conjureFilePath := filepath.Join(tmpDir, "conjure.yml")
+	err = os.WriteFile(conjureFilePath, []byte(testConjureYAML), 0644)
+	require.NoError(t, err)
+
+	t.Run("export error decoder generates decoder.conjure.go", func(t *testing.T) {
+		projectDir, err := os.MkdirTemp(tmpDir, "project-*")
+		require.NoError(t, err)
+
+		err = Run(ConjureProjectParams{
+			{
+				ProjectName:        "test-project",
+				OutputDir:          "output",
+				IRProvider:         NewLocalYAMLIRProvider(conjureFilePath),
+				ExportErrorDecoder: true,
+			},
+		}, false, projectDir, io.Discard)
+		require.NoError(t, err)
+
+		// Internal error registry should always be generated when errors exist.
+		registryPath := filepath.Join(projectDir, "output", "internal", "conjureerrors", "error_registry.conjure.go")
+		assert.FileExists(t, registryPath)
+
+		// Top-level decoder export file should exist
+		decoderPath := filepath.Join(projectDir, "output", "conjureerrors", "decoder.conjure.go")
+		assert.FileExists(t, decoderPath)
+	})
+
+	t.Run("no export error decoder omits decoder.conjure.go", func(t *testing.T) {
+		projectDir, err := os.MkdirTemp(tmpDir, "project-*")
+		require.NoError(t, err)
+
+		err = Run(ConjureProjectParams{
+			{
+				ProjectName: "test-project",
+				OutputDir:   "output",
+				IRProvider:  NewLocalYAMLIRProvider(conjureFilePath),
+			},
+		}, false, projectDir, io.Discard)
+		require.NoError(t, err)
+
+		// Internal error registry should always be generated when errors exist.
+		registryPath := filepath.Join(projectDir, "output", "internal", "conjureerrors", "error_registry.conjure.go")
+		assert.FileExists(t, registryPath)
+
+		// Top-level decoder export file should be omitted
+		decoderPath := filepath.Join(projectDir, "output", "conjureerrors", "decoder.conjure.go")
+		assert.NoFileExists(t, decoderPath)
+	})
 }
