@@ -17,66 +17,20 @@
 package main
 
 import (
-	"crypto/sha256"
 	"fmt"
-	"io"
-	"net/http"
-	"os"
 
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
+	"github.com/palantir/pkg/clipackager"
 )
 
-const conjureTgzPath = "../internal/conjure.tgz"
+const conjureTGZPath = "../internal/conjure.tgz"
 
 var conjureURL = fmt.Sprintf(
 	"https://search.maven.org/remotecontent?filepath=com/palantir/conjure/conjure/%s/conjure-%s.tgz",
 	internal.Version, internal.Version)
 
 func main() {
-	if err := downloadFile(conjureTgzPath, conjureURL); err != nil {
+	if err := clipackager.EnsureFileWithSHA256ChecksumExists(conjureTGZPath, conjureURL, internal.SHA256); err != nil {
 		panic(err)
 	}
-}
-
-func downloadFile(filepath string, url string) error {
-	if _, err := os.Stat(filepath); err == nil {
-		hash := sha256.New()
-		existing, err := os.OpenFile(filepath, os.O_RDONLY, 0)
-		if err != nil {
-			return err
-		}
-		if _, err := io.Copy(hash, existing); err != nil {
-			return err
-		}
-		if sha := fmt.Sprintf("%x", hash.Sum(nil)); sha == internal.SHA256 {
-			// existing file up to date
-			return nil
-		}
-	}
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = out.Close()
-	}()
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	hash := sha256.New()
-	reader := io.TeeReader(resp.Body, hash)
-	if _, err := io.Copy(out, reader); err != nil {
-		return err
-	}
-
-	if sha := fmt.Sprintf("%x", hash.Sum(nil)); sha != internal.SHA256 {
-		return fmt.Errorf("unexpected download sha256 %s", sha)
-	}
-	return nil
 }
