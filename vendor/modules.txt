@@ -127,7 +127,7 @@ github.com/palantir/conjure-go/v6/conjure/snip
 github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
 github.com/palantir/conjure-go/v6/cycles
-# github.com/palantir/distgo v1.93.0
+# github.com/palantir/distgo v1.94.0
 ## explicit; go 1.25.0
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/distgotaskprovider
@@ -144,7 +144,7 @@ github.com/palantir/distgo/pkg/git
 # github.com/palantir/go-ptimports/v2 v2.47.0
 ## explicit; go 1.25.0
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel/v2 v2.147.0
+# github.com/palantir/godel/v2 v2.149.0
 ## explicit; go 1.25.0
 github.com/palantir/godel/v2/framework/artifactresolver
 github.com/palantir/godel/v2/framework/builtintasks
