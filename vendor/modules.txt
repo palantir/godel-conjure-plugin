@@ -34,7 +34,7 @@ github.com/bodgit/windows
 ## explicit; go 1.18
 github.com/cheggaaa/pb/v3
 github.com/cheggaaa/pb/v3/termutil
-# github.com/clipperhouse/uax29/v2 v2.6.0
+# github.com/clipperhouse/uax29/v2 v2.7.0
 ## explicit; go 1.18
 github.com/clipperhouse/uax29/v2/graphemes
 # github.com/dave/jennifer v1.7.1
@@ -91,7 +91,7 @@ github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
-# github.com/mattn/go-runewidth v0.0.19
+# github.com/mattn/go-runewidth v0.0.20
 ## explicit; go 1.20
 github.com/mattn/go-runewidth
 # github.com/mholt/archiver/v3 v3.5.1
@@ -127,8 +127,8 @@ github.com/palantir/conjure-go/v6/conjure/snip
 github.com/palantir/conjure-go/v6/conjure/transforms
 github.com/palantir/conjure-go/v6/conjure/types
 github.com/palantir/conjure-go/v6/cycles
-# github.com/palantir/distgo v1.94.0
-## explicit; go 1.25.0
+# github.com/palantir/distgo v1.95.0
+## explicit; go 1.26.0
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/distgotaskprovider
 github.com/palantir/distgo/internal/assetapi
