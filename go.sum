@@ -74,8 +74,8 @@ github.com/nmiyake/pkg/gofiles v1.2.0/go.mod h1:aPXiVvXPwxNanRNuFIRVPYn6eTC4qxjD
 github.com/nwaples/rardecode v1.1.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
 github.com/nwaples/rardecode v1.1.3 h1:cWCaZwfM5H7nAD6PyEdcVnczzV8i/JtotnyW/dD9lEc=
 github.com/nwaples/rardecode v1.1.3/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
-github.com/nwaples/rardecode/v2 v2.2.0 h1:4ufPGHiNe1rYJxYfehALLjup4Ls3ck42CWwjKiOqu0A=
-github.com/nwaples/rardecode/v2 v2.2.0/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
+github.com/nwaples/rardecode/v2 v2.2.2 h1:/5oL8dzYivRM/tqX9VcTSWfbpwcbwKG1QtSJr3b3KcU=
+github.com/nwaples/rardecode/v2 v2.2.2/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
 github.com/palantir/conjure-go/v6 v6.83.0 h1:12cxIuEyurB+PPw+Lnyx3epMzmLAL+yFfO7gtA0Qfs0=
 github.com/palantir/conjure-go/v6 v6.83.0/go.mod h1:nIdZRaWxLNcxaLync6p0nvuoY02qqVJczDTeMRN1K90=
 github.com/palantir/distgo v1.95.0 h1:JTE29QvExNSrqoEGvKvLpmjqw+LUjMwtfKwDo5WzBOE=
