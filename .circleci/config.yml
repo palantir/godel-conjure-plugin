@@ -65,6 +65,7 @@ workflows:
             - build
           <<: *all-tags-filter
           setup_steps:
+            - go-jobs/default_setup_steps
             - run:
                 name: Install OpenJDK 17
                 command: |
