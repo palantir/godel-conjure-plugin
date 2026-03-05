@@ -64,7 +64,7 @@ workflows:
           requires:
             - build
           <<: *all-tags-filter
-          pre_steps:
+          setup_steps:
             - run:
                 name: Install OpenJDK 17
                 command: |
