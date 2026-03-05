@@ -25,4 +25,4 @@ exclude:
     - vendor
   paths:
     - godel
-    - ir-gen-cli-bundler/conjureircli/internal
+    - ir-gen-cli-bundler/conjureircli/asset

@@ -17,20 +17,20 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
 	"github.com/palantir/pkg/clipackager"
 )
 
-const conjureTGZPath = "../internal/conjure.tgz"
-
-var conjureURL = fmt.Sprintf(
-	"https://search.maven.org/remotecontent?filepath=com/palantir/conjure/conjure/%s/conjure-%s.tgz",
-	internal.Version, internal.Version)
+const conjureTGZVersion = "4.35.0"
 
 func main() {
-	if err := clipackager.EnsureFileWithSHA256ChecksumExists(conjureTGZPath, conjureURL, internal.SHA256); err != nil {
+	if err := clipackager.RunGenerate(
+		"conjureircli",
+		"ir-gen-cli-bundler/conjureircli/generator",
+		"../asset/version.go",
+		conjureTGZVersion,
+		"../asset/conjure.tgz",
+		"https://search.maven.org/remotecontent?filepath=com/palantir/conjure/conjure/"+conjureTGZVersion+"/conjure-"+conjureTGZVersion+".tgz",
+	); err != nil {
 		panic(err)
 	}
 }
