@@ -20,7 +20,7 @@ import (
 	"github.com/palantir/pkg/clipackager"
 )
 
-const conjureTGZVersion = "4.35.0"
+const conjureTGZVersion = "4.51.0"
 
 func main() {
 	if err := clipackager.RunGenerate(
