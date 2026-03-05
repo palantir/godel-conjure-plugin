@@ -7,7 +7,7 @@ require (
 	github.com/palantir/conjure-go/v6 v6.83.0
 	github.com/palantir/distgo v1.96.0
 	github.com/palantir/godel/v2 v2.153.0
-	github.com/palantir/pkg/clipackager v1.0.0
+	github.com/palantir/pkg/clipackager v1.0.1-0.20260305013448-af8f2838104f
 	github.com/palantir/pkg/cobracli v1.3.0
 	github.com/palantir/pkg/matcher v1.3.0
 	github.com/palantir/pkg/safehttp v1.2.0
