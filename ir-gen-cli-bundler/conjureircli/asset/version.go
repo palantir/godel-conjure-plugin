@@ -2,4 +2,4 @@
 // To update this file, run the generator in ir-gen-cli-bundler/conjureircli/generator.
 package asset
 
-const Version = "4.35.0"
+const Version = "4.51.0"
