@@ -12,19 +12,6 @@ image-version: &image-version "cimg/go:1.26.0-browsers"
 go-version: &go-version
   go_version: go1.26.0
 
-java-version-setup_steps: &java-version-setup_steps
-  setup_steps:
-    - go-jobs/default_setup_steps
-    - run:
-        name: Install OpenJDK 17
-        command: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk
-          sudo rm -rf /var/lib/apt/lists/*
-    - run:
-        name: Verify Java installation
-        command: java --version
-
 executors:
   standard-executor:
     docker:
@@ -61,13 +48,11 @@ workflows:
           name: "build"
           executor: "standard-executor"
           <<: *go-version
-          <<: *java-version-setup_steps
           <<: *all-tags-filter
       - go-jobs/godel_verify:
           name: "verify"
           executor: "standard-executor"
           <<: *go-version
-          <<: *java-version-setup_steps
           skip_tests: true
           requires:
             - build
@@ -76,7 +61,6 @@ workflows:
           name: "test"
           executor: "standard-executor"
           <<: *go-version
-          <<: *java-version-setup_steps
           requires:
             - build
           <<: *all-tags-filter
@@ -84,7 +68,6 @@ workflows:
           name: "dist"
           executor: "standard-executor"
           <<: *go-version
-          <<: *java-version-setup_steps
           requires:
             - build
           <<: *all-tags-filter
