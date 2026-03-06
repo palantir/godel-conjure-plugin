@@ -16,15 +16,10 @@ java-version-setup_steps: &java-version-setup_steps
   setup_steps:
     - go-jobs/default_setup_steps
     - run:
-        name: Install Amazon Corretto 17
+        name: Set JAVA_HOME
         command: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -
-          sudo add-apt-repository 'deb https://apt.corretto.aws stable main'
-          sudo apt-get update
-          sudo apt-get install -y java-17-amazon-corretto-jdk
-          sudo rm -rf /var/lib/apt/lists/*
+          export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto
+          echo 'export PATH=$JAVA_HOME/bin:$PATH' >> "${BASH_ENV}"
     - run:
         name: Verify Java installation
         command: java --version
@@ -33,6 +28,7 @@ executors:
   standard-executor:
     docker:
       - image: *image-version
+      - image: amazoncorretto:17
     working_directory: /home/circleci/go/src/github.com/palantir/godel-conjure-plugin
     resource_class: medium
 
