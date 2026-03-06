@@ -12,27 +12,11 @@ image-version: &image-version "cimg/go:1.26.0-browsers"
 go-version: &go-version
   go_version: go1.26.0
 
-java-version-setup_steps: &java-version-setup_steps
-  setup_steps:
-    - go-jobs/default_setup_steps
-    - run:
-        name: Install Amazon Corretto 17
-        command: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -
-          sudo add-apt-repository 'deb https://apt.corretto.aws stable main'
-          sudo apt-get update
-          sudo apt-get install -y java-17-amazon-corretto-jdk
-          sudo rm -rf /var/lib/apt/lists/*
-    - run:
-        name: Verify Java installation
-        command: java --version
-
 executors:
   standard-executor:
     docker:
       - image: *image-version
+      - image: public.ecr.aws/amazoncorretto/amazoncorretto:17-al2023-jdk
     working_directory: /home/circleci/go/src/github.com/palantir/godel-conjure-plugin
     resource_class: medium
 
@@ -65,13 +49,11 @@ workflows:
           name: "build"
           executor: "standard-executor"
           <<: *go-version
-          <<: *java-version-setup_steps
           <<: *all-tags-filter
       - go-jobs/godel_verify:
           name: "verify"
           executor: "standard-executor"
           <<: *go-version
-          <<: *java-version-setup_steps
           skip_tests: true
           requires:
             - build
@@ -80,7 +62,6 @@ workflows:
           name: "test"
           executor: "standard-executor"
           <<: *go-version
-          <<: *java-version-setup_steps
           requires:
             - build
           <<: *all-tags-filter
@@ -88,7 +69,6 @@ workflows:
           name: "dist"
           executor: "standard-executor"
           <<: *go-version
-          <<: *java-version-setup_steps
           requires:
             - build
           <<: *all-tags-filter
