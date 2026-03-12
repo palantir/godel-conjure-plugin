@@ -205,8 +205,8 @@ github.com/palantir/pkg/transform
 ## explicit; go 1.25.0
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.39.0
-## explicit; go 1.25.0
+# github.com/palantir/witchcraft-go-params v1.40.0
+## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-params
 # github.com/pierrec/lz4/v4 v4.1.26
 ## explicit; go 1.17
