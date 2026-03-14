@@ -27,7 +27,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]interface{},
+func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]any,
 	dryRun bool, stdout io.Writer, extensionsProvider extensionsprovider.ExtensionsProvider,
 	cliGroupID string) error {
 	var paramsToPublish []ConjureProjectParam
