@@ -71,7 +71,7 @@ projects:
 	require.NoError(t, err, "failed to parse config set")
 
 	outputBuf := &bytes.Buffer{}
-	err = conjureplugin.Publish(params, tmpDir, map[distgo.PublisherFlagName]interface{}{
+	err = conjureplugin.Publish(params, tmpDir, map[distgo.PublisherFlagName]any{
 		publisher.ConnectionInfoURLFlag.Name:     "http://artifactory.domain.com",
 		publisher.GroupIDFlag.Name:               "com.palantir.foo",
 		artifactory.PublisherRepositoryFlag.Name: "repo",

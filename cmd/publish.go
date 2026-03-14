@@ -58,7 +58,7 @@ var publishCmd = &cobra.Command{
 			return err
 		}
 
-		flagVals := make(map[distgo.PublisherFlagName]interface{})
+		flagVals := make(map[distgo.PublisherFlagName]any)
 		for _, currFlag := range publisherFlags {
 			// if flag was not explicitly provided, don't add it to the flagVals map
 			if !cmd.Flags().Changed(string(currFlag.Name)) {

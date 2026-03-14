@@ -107,7 +107,7 @@ func (fn paramFn) apply(r *runArgs) {
 
 // ExtensionsParam returns a parameter that sets the extensions of the generated Conjure IR to be the JSON-marshalled
 // content of the provided map if it is non-empty. Returns a no-op parameter if the provided map is nil or empty.
-func ExtensionsParam(extensionsContent map[string]interface{}) (Param, error) {
+func ExtensionsParam(extensionsContent map[string]any) (Param, error) {
 	if len(extensionsContent) == 0 {
 		return nil, nil
 	}
