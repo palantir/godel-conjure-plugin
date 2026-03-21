@@ -99,7 +99,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		_, _ = fmt.Fprintf(stdout, "Conjure output differs from what currently exists for %d project(s)\n", len(verifyFailedInfos))
 		for _, currVerifyFailedInfo := range verifyFailedInfos {
 			_, _ = fmt.Fprintf(stdout, "%s%s:\n", strings.Repeat(" ", indentLen), currVerifyFailedInfo.name)
-			for _, currDiffOutputLine := range strings.Split(currVerifyFailedInfo.diffOutput, "\n") {
+			for currDiffOutputLine := range strings.SplitSeq(currVerifyFailedInfo.diffOutput, "\n") {
 				_, _ = fmt.Fprintf(stdout, "%s%s\n", strings.Repeat(" ", indentLen*2), currDiffOutputLine)
 			}
 		}

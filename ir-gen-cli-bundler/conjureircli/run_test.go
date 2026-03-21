@@ -68,8 +68,8 @@ types:
       BooleanExample: { fields: { value: boolean } }
 `,
 			params: []conjureircli.Param{
-				mustExtensionsParam(map[string]interface{}{
-					"recommended-product-dependencies": []map[string]interface{}{
+				mustExtensionsParam(map[string]any{
+					"recommended-product-dependencies": []map[string]any{
 						{
 							"product-group":   "com.palantir.assetserver",
 							"product-name":    "asset-server",
@@ -116,7 +116,7 @@ types:
 	}
 }
 
-func mustExtensionsParam(in map[string]interface{}) conjureircli.Param {
+func mustExtensionsParam(in map[string]any) conjureircli.Param {
 	param, err := conjureircli.ExtensionsParam(in)
 	if err != nil {
 		panic(err)

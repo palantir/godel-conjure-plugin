@@ -32,7 +32,7 @@ type Config struct {
 
 type conjureProjectConfig yaml.MapSlice
 
-func (a *conjureProjectConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *conjureProjectConfig) UnmarshalYAML(unmarshal func(any) error) error {
 	var mapSlice yaml.MapSlice
 	if err := unmarshal(&mapSlice); err != nil {
 		return err

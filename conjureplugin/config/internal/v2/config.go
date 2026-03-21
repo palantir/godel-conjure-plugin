@@ -55,7 +55,7 @@ type NamedConjureProjectConfig struct {
 	Config SingleConjureConfig
 }
 
-func (c ConjureProjectConfigs) MarshalYAML() (interface{}, error) {
+func (c ConjureProjectConfigs) MarshalYAML() (any, error) {
 	var mapSlice yaml.MapSlice
 	for _, project := range c {
 		mapSlice = append(mapSlice, yaml.MapItem{
@@ -66,7 +66,7 @@ func (c ConjureProjectConfigs) MarshalYAML() (interface{}, error) {
 	return mapSlice, nil
 }
 
-func (c *ConjureProjectConfigs) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *ConjureProjectConfigs) UnmarshalYAML(unmarshal func(any) error) error {
 	if c == nil {
 		return errors.Errorf("cannot unmarshal into nil ConjureProjectConfigs")
 	}
@@ -199,7 +199,7 @@ type IRLocatorConfig struct {
 	Locator string      `yaml:"locator"`
 }
 
-func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(any) error) error {
 	if cfg == nil {
 		return errors.Errorf("cannot unmarshal into nil IRLocatorConfig")
 	}
