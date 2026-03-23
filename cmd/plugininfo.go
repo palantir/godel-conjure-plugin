@@ -71,6 +71,7 @@ var (
 	)
 )
 
+//go:fix inline
 func intVar(val int) *int {
-	return &val
+	return new(val)
 }

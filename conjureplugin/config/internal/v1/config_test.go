@@ -141,10 +141,10 @@ func TestSingleConjureConfigToV2(t *testing.T) {
 					Locator: "https://example.com/ir.json",
 				},
 				GroupID:     "com.palantir.test",
-				Publish:     boolPtr(true),
+				Publish:     new(true),
 				Server:      true,
 				CLI:         true,
-				AcceptFuncs: boolPtr(false),
+				AcceptFuncs: new(false),
 				Extensions: map[string]any{
 					"foo": "bar",
 				},
@@ -156,10 +156,10 @@ func TestSingleConjureConfigToV2(t *testing.T) {
 					Locator: "https://example.com/ir.json",
 				},
 				GroupID:     "com.palantir.test",
-				Publish:     boolPtr(true),
+				Publish:     new(true),
 				Server:      true,
 				CLI:         true,
-				AcceptFuncs: boolPtr(false),
+				AcceptFuncs: new(false),
 				Extensions: map[string]any{
 					"foo": "bar",
 				},
@@ -736,10 +736,10 @@ projects:
 								Locator: "./api.yml",
 							},
 							GroupID:     "com.palantir.override",
-							Publish:     boolPtr(true),
+							Publish:     new(true),
 							Server:      true,
 							CLI:         true,
-							AcceptFuncs: boolPtr(false),
+							AcceptFuncs: new(false),
 							Extensions: map[string]any{
 								"foo": "bar",
 							},
@@ -769,8 +769,4 @@ projects:
 			assert.Equal(t, tc.want, got)
 		})
 	}
-}
-
-func boolPtr(b bool) *bool {
-	return &b
 }

@@ -136,7 +136,7 @@ type IRLocatorConfig struct {
 	Locator string      `yaml:"locator"`
 }
 
-func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (cfg *IRLocatorConfig) UnmarshalYAML(unmarshal func(any) error) error {
 	if cfg == nil {
 		return errors.Errorf("cannot unmarshal into nil IRLocatorConfig")
 	}

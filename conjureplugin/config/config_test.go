@@ -62,8 +62,8 @@ projects:
     ir-locator: local/yaml-dir
 `,
 			config.ConjurePluginConfig{
-				CGRModuleVersion: toPtr(3),
-				WGSModuleVersion: toPtr(3),
+				CGRModuleVersion: new(3),
+				WGSModuleVersion: new(3),
 				ProjectConfigs: v2.ConjureProjectConfigs{
 					{
 						Name: "project",
@@ -96,7 +96,7 @@ projects:
 								Type:    v2.LocatorTypeAuto,
 								Locator: "local/yaml-dir",
 							},
-							Publish: toPtr(false),
+							Publish: new(false),
 						},
 					},
 				},
@@ -166,7 +166,7 @@ projects:
 								Type:    v2.LocatorTypeAuto,
 								Locator: "http://foo.com/ir.json",
 							},
-							Publish: toPtr(true),
+							Publish: new(true),
 						},
 					},
 				},
@@ -291,7 +291,7 @@ projects:
 								Locator: "localhost:8080/ir.json",
 							},
 							Server:      false,
-							AcceptFuncs: toPtr(true),
+							AcceptFuncs: new(true),
 						},
 					},
 				},
@@ -325,7 +325,7 @@ projects:
 								Locator: "localhost:8080/ir.json",
 							},
 							Server:      false,
-							AcceptFuncs: toPtr(true),
+							AcceptFuncs: new(true),
 							Extensions: map[string]any{
 								"foo":  "bar",
 								"baz":  []any{1, 2},
@@ -442,7 +442,7 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 								Type:    v2.LocatorTypeAuto,
 								Locator: "input.json",
 							},
-							AcceptFuncs:            toPtr(true),
+							AcceptFuncs:            new(true),
 							OmitTopLevelProjectDir: true,
 						},
 					},
@@ -488,8 +488,8 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 		},
 		{
 			config.ConjurePluginConfig{
-				CGRModuleVersion: toPtr(3),
-				WGSModuleVersion: toPtr(3),
+				CGRModuleVersion: new(3),
+				WGSModuleVersion: new(3),
 				ProjectConfigs: v2.ConjureProjectConfigs{
 					{
 						Name: "project-1",
@@ -517,15 +517,15 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 		},
 		{
 			config.ConjurePluginConfig{
-				CGRModuleVersion: toPtr(2),
-				WGSModuleVersion: toPtr(2),
+				CGRModuleVersion: new(2),
+				WGSModuleVersion: new(2),
 				ProjectConfigs: v2.ConjureProjectConfigs{
 					{
 						Name: "project-1",
 						Config: v2.SingleConjureConfig{
 							OutputDir:        "outputDir",
-							CGRModuleVersion: toPtr(3),
-							WGSModuleVersion: toPtr(3),
+							CGRModuleVersion: new(3),
+							WGSModuleVersion: new(3),
 							IRLocator: v2.IRLocatorConfig{
 								Type:    v2.LocatorTypeAuto,
 								Locator: "input.json",
@@ -1264,7 +1264,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error for invalid plugin-level cgr-module-version",
 			in: config.ConjurePluginConfig{
-				CGRModuleVersion: toPtr(4),
+				CGRModuleVersion: new(4),
 				ProjectConfigs: v2.ConjureProjectConfigs{
 					{
 						Name: "project-1",
@@ -1284,7 +1284,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 		{
 			name: "Error for invalid plugin-level wgs-module-version",
 			in: config.ConjurePluginConfig{
-				WGSModuleVersion: toPtr(5),
+				WGSModuleVersion: new(5),
 				ProjectConfigs: v2.ConjureProjectConfigs{
 					{
 						Name: "project-1",
@@ -1309,7 +1309,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 						Name: "project-1",
 						Config: v2.SingleConjureConfig{
 							OutputDir:        "outputDir",
-							CGRModuleVersion: toPtr(1),
+							CGRModuleVersion: new(1),
 							IRLocator: v2.IRLocatorConfig{
 								Type:    v2.LocatorTypeAuto,
 								Locator: "local/yaml-dir",
@@ -1329,7 +1329,7 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 						Name: "project-1",
 						Config: v2.SingleConjureConfig{
 							OutputDir:        "outputDir",
-							WGSModuleVersion: toPtr(10),
+							WGSModuleVersion: new(10),
 							IRLocator: v2.IRLocatorConfig{
 								Type:    v2.LocatorTypeAuto,
 								Locator: "local/yaml-dir",
@@ -1613,8 +1613,4 @@ func TestGroupIDToParams(t *testing.T) {
 		require.NoError(t, err, "Case %d: %s", i, tc.name)
 		assert.Equal(t, tc.want, got, "Case %d: %s", i, tc.name)
 	}
-}
-
-func toPtr[T any](in T) *T {
-	return &in
 }
