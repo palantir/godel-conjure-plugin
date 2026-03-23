@@ -1614,8 +1614,3 @@ func TestGroupIDToParams(t *testing.T) {
 		assert.Equal(t, tc.want, got, "Case %d: %s", i, tc.name)
 	}
 }
-
-//go:fix inline
-func toPtr[T any](in T) *T {
-	return new(in)
-}

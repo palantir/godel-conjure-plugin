@@ -770,8 +770,3 @@ projects:
 		})
 	}
 }
-
-//go:fix inline
-func boolPtr(b bool) *bool {
-	return new(b)
-}
