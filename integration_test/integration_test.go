@@ -412,10 +412,10 @@ types:
 
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
+	defer cleanup()
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
