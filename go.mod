@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v6 v6.83.0
+	github.com/palantir/conjure-go/v6 v6.84.0
 	github.com/palantir/distgo v1.96.0
 	github.com/palantir/godel/v2 v2.154.0
 	github.com/palantir/pkg/clipackager v1.1.0

@@ -119,8 +119,8 @@ github.com/nwaples/rardecode
 # github.com/nwaples/rardecode/v2 v2.2.2
 ## explicit; go 1.21
 github.com/nwaples/rardecode/v2
-# github.com/palantir/conjure-go/v6 v6.83.0
-## explicit; go 1.25.0
+# github.com/palantir/conjure-go/v6 v6.84.0
+## explicit; go 1.26.0
 github.com/palantir/conjure-go/v6/conjure
 github.com/palantir/conjure-go/v6/conjure-api/conjure/spec
 github.com/palantir/conjure-go/v6/conjure/snip
