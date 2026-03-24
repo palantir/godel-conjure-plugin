@@ -34,6 +34,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// pluginPath is resolved once in TestMain before any tests create temp directories in the repo.
+var pluginPath string
+
+func TestMain(m *testing.M) {
+	var err error
+	pluginPath, err = products.Bin("conjure-plugin")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to build plugin: %v\n", err)
+		os.Exit(1)
+	}
+	os.Exit(m.Run())
+}
+
 func TestConjurePlugin(t *testing.T) {
 	const (
 		conjureSpecYML = `
@@ -92,15 +105,12 @@ projects:
 	}))
 	defer ts.Close()
 
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
-
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
+	defer cleanup()
 	ymlDir := filepath.Join(projectDir, yamlDir)
 	err = os.Mkdir(ymlDir, 0755)
 	require.NoError(t, err)
-	defer cleanup()
 	err = os.MkdirAll(filepath.Join(projectDir, "godel", "config"), 0755)
 	require.NoError(t, err)
 	conjureYML := strings.Replace(conjureYMLSubstitute, "SUBSTITUTE_URL", ts.URL, -1)
@@ -318,9 +328,6 @@ types:
 		yamlDir = "yamlDir"
 	)
 
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
-
 	t.Run("export-error-decoder generates decoder file", func(t *testing.T) {
 		projectDir, cleanup, err := dirs.TempDir(".", "")
 		require.NoError(t, err)
@@ -407,9 +414,6 @@ types:
 		yamlDir = "yamlDir"
 	)
 
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
-
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
 	defer cleanup()
@@ -464,9 +468,6 @@ types:
 `
 		yamlDir = "yamlDir"
 	)
-
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
 
 	// Create a fresh project directory
 	projectDir, cleanup, err := dirs.TempDir(".", "")
@@ -523,9 +524,6 @@ types:
 `
 		yamlDir = "yamlDir"
 	)
-
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
 
 	// Create a fresh project directory
 	projectDir, cleanup, err := dirs.TempDir(".", "")
@@ -612,9 +610,6 @@ exit 0
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 	defer ts.Close()
-
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
 
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
@@ -739,9 +734,6 @@ exit 1
 `
 	)
 
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
-
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
 	ymlDir := filepath.Join(projectDir, yamlDir)
@@ -784,8 +776,6 @@ func innerTestConjurePluginPublishAssetSpec(pluginProvider pluginapitester.Plugi
 }
 
 func TestUpgradeConfig(t *testing.T) {
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
 	pluginProvider := pluginapitester.NewPluginProvider(pluginPath)
 
 	pluginapitester.RunUpgradeConfigTest(t,
@@ -1107,9 +1097,6 @@ projects:
 `
 	)
 
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
-
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
 	ymlDir := filepath.Join(projectDir, yamlDir)
@@ -1149,9 +1136,6 @@ types:
 `
 		yamlDir = "yamlDir"
 	)
-
-	pluginPath, err := products.Bin("conjure-plugin")
-	require.NoError(t, err)
 
 	projectDir, cleanup, err := dirs.TempDir(".", "")
 	require.NoError(t, err)
