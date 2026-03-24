@@ -44,7 +44,7 @@ var (
 			pluginapi.TaskInfoCommand(runCmdName),
 			pluginapi.TaskInfoVerifyOptions(
 				// by default, run after "generate" but before next built-in task
-				pluginapi.VerifyOptionsOrdering(intVar(verifyorder.Generate+75)),
+				pluginapi.VerifyOptionsOrdering(new(verifyorder.Generate+75)),
 				pluginapi.VerifyOptionsApplyFalseArgs("--"+VerifyFlagName),
 			),
 		),
