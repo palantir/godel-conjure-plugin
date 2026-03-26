@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"maps"
 
-	"github.com/palantir/godel-conjure-plugin/v6/internal/extensionsprovider"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/extensionsprovider"
 	"github.com/palantir/pkg/safejson"
 )
 

@@ -21,8 +21,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/palantir/godel-conjure-plugin/v6/internal/extensionsprovider"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/extensionsprovider"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/tempfilecreator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

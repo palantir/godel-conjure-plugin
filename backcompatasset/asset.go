@@ -15,8 +15,8 @@
 package backcompatasset
 
 import (
-	"github.com/palantir/godel-conjure-plugin/v6/assetapi"
-	assetapiinternal "github.com/palantir/godel-conjure-plugin/v6/internal/assetapi"
+	"github.com/palantir/godel-conjure-plugin/v7/assetapi"
+	assetapiinternal "github.com/palantir/godel-conjure-plugin/v7/internal/assetapi"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

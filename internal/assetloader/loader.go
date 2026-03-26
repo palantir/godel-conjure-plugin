@@ -20,10 +20,10 @@ import (
 	"os/exec"
 	"slices"
 
-	"github.com/palantir/godel-conjure-plugin/v6/assetapi"
-	assetapiinternal "github.com/palantir/godel-conjure-plugin/v6/internal/assetapi"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/backcompatasset"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/cmdutils"
+	"github.com/palantir/godel-conjure-plugin/v7/assetapi"
+	assetapiinternal "github.com/palantir/godel-conjure-plugin/v7/internal/assetapi"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/backcompatasset"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/cmdutils"
 	pkgerrors "github.com/pkg/errors"
 )
 

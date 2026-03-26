@@ -22,8 +22,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
+	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/tempfilecreator"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
+	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config/internal/validate"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"

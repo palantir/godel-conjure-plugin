@@ -17,8 +17,8 @@ package v1_test
 import (
 	"testing"
 
-	v1 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v1"
-	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
+	v1 "github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config/internal/v1"
+	v2 "github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
