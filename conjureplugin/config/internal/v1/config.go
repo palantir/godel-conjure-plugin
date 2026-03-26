@@ -17,7 +17,7 @@ package v1
 import (
 	"path/filepath"
 
-	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
+	v2 "github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config/internal/v2"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"

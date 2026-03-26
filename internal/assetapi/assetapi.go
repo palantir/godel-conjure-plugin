@@ -17,7 +17,7 @@ package assetapi
 import (
 	"encoding/json"
 
-	"github.com/palantir/godel-conjure-plugin/v6/assetapi"
+	"github.com/palantir/godel-conjure-plugin/v7/assetapi"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

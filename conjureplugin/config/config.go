@@ -21,9 +21,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	v2 "github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/v2"
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config/internal/validate"
+	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin"
+	v2 "github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config/internal/v2"
+	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config/internal/validate"
 	pkgerror "github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )

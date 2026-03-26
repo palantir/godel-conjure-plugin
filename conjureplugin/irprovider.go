@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
+	"github.com/palantir/godel-conjure-plugin/v7/ir-gen-cli-bundler/conjureircli"
 	"github.com/palantir/pkg/safehttp"
 	"github.com/pkg/errors"
 )

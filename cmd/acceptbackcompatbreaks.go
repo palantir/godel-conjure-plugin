@@ -20,7 +20,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin"
 	"github.com/spf13/cobra"
 )
 

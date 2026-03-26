@@ -19,7 +19,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/asset"
+	"github.com/palantir/godel-conjure-plugin/v7/ir-gen-cli-bundler/conjureircli/asset"
 	"github.com/palantir/pkg/clipackager"
 	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"

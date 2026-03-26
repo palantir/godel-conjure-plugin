@@ -23,7 +23,7 @@ import (
 	"github.com/palantir/distgo/distgo"
 	gitversioner "github.com/palantir/distgo/projectversioner/git"
 	"github.com/palantir/distgo/publisher/artifactory"
-	"github.com/palantir/godel-conjure-plugin/v6/internal/extensionsprovider"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/extensionsprovider"
 	"github.com/pkg/errors"
 )
 

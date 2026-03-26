@@ -19,7 +19,7 @@ import (
 	"maps"
 	"os/exec"
 
-	"github.com/palantir/godel-conjure-plugin/v6/internal/tempfilecreator"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/tempfilecreator"
 	"github.com/palantir/pkg/safejson"
 )
 

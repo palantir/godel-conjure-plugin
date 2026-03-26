@@ -19,8 +19,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin"
-	"github.com/palantir/godel-conjure-plugin/v6/conjureplugin/config"
+	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
