@@ -21,9 +21,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/palantir/conjure-go/v6/conjure"
-	conjurego "github.com/palantir/conjure-go/v6/conjure"
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure"
+	conjurego "github.com/palantir/conjure-go/v7/conjure"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
 	"github.com/palantir/pkg/matcher"
 	"github.com/pkg/errors"
 )
@@ -49,8 +49,6 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			GenerateServer:       currParam.Server,
 			GenerateCLI:          currParam.CLI,
 			GenerateFuncsVisitor: currParam.AcceptFuncs,
-			CGRModuleVersion:     currParam.CGRModuleVersion,
-			WGSModuleVersion:     currParam.WGSModuleVersion,
 			ExportErrorDecoder:   currParam.ExportErrorDecoder,
 		}
 

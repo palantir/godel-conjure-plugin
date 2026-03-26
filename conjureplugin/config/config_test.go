@@ -54,32 +54,6 @@ projects:
 		},
 		{
 			`
-cgr-module-version: 3
-wgs-module-version: 3
-projects:
-  project:
-    output-dir: outputDir
-    ir-locator: local/yaml-dir
-`,
-			config.ConjurePluginConfig{
-				CGRModuleVersion: new(3),
-				WGSModuleVersion: new(3),
-				ProjectConfigs: v2.ConjureProjectConfigs{
-					{
-						Name: "project",
-						Config: v2.SingleConjureConfig{
-							OutputDir: "outputDir",
-							IRLocator: v2.IRLocatorConfig{
-								Type:    v2.LocatorTypeAuto,
-								Locator: "local/yaml-dir",
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			`
 projects:
  project:
    output-dir: outputDir
@@ -393,13 +367,11 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 			},
 			conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 			},
 		},
@@ -421,13 +393,11 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 			},
 			conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("input.yml"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input.yml"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 			},
 		},
@@ -450,12 +420,10 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 			},
 			conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalFileIRProvider("input.json"),
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
+					AcceptFuncs: true,
 				},
 			},
 		},
@@ -477,72 +445,10 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 			},
 			conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalFileIRProvider("input.json"),
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
-				},
-			},
-		},
-		{
-			config.ConjurePluginConfig{
-				CGRModuleVersion: new(3),
-				WGSModuleVersion: new(3),
-				ProjectConfigs: v2.ConjureProjectConfigs{
-					{
-						Name: "project-1",
-						Config: v2.SingleConjureConfig{
-							OutputDir: "outputDir",
-							IRLocator: v2.IRLocatorConfig{
-								Type:    v2.LocatorTypeAuto,
-								Locator: "input.json",
-							},
-							OmitTopLevelProjectDir: true,
-						},
-					},
-				},
-			},
-			conjureplugin.ConjureProjectParams{
-				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalFileIRProvider("input.json"),
-					AcceptFuncs:      true,
-					CGRModuleVersion: 3,
-					WGSModuleVersion: 3,
-				},
-			},
-		},
-		{
-			config.ConjurePluginConfig{
-				CGRModuleVersion: new(2),
-				WGSModuleVersion: new(2),
-				ProjectConfigs: v2.ConjureProjectConfigs{
-					{
-						Name: "project-1",
-						Config: v2.SingleConjureConfig{
-							OutputDir:        "outputDir",
-							CGRModuleVersion: new(3),
-							WGSModuleVersion: new(3),
-							IRLocator: v2.IRLocatorConfig{
-								Type:    v2.LocatorTypeAuto,
-								Locator: "input.json",
-							},
-							OmitTopLevelProjectDir: true,
-						},
-					},
-				},
-			},
-			conjureplugin.ConjureProjectParams{
-				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalFileIRProvider("input.json"),
-					AcceptFuncs:      true,
-					CGRModuleVersion: 3,
-					WGSModuleVersion: 3,
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalFileIRProvider("input.json"),
+					AcceptFuncs: true,
 				},
 			},
 		},
@@ -569,8 +475,6 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 					OutputDir:          "outputDir",
 					IRProvider:         conjureplugin.NewLocalFileIRProvider("input.json"),
 					AcceptFuncs:        true,
-					CGRModuleVersion:   2,
-					WGSModuleVersion:   2,
 					ExportErrorDecoder: true,
 				},
 			},
@@ -608,13 +512,11 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 			},
 			want: conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 			},
 			wantWarnings: nil,
@@ -649,22 +551,18 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 			},
 			want: conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 				{
-					ProjectName:      "project-2",
-					OutputDir:        "outputDir-2",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
+					ProjectName: "project-2",
+					OutputDir:   "outputDir-2",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local-2/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
 				},
 			},
 			wantWarnings: nil,
@@ -708,8 +606,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 				{
 					ProjectName:              "project-2",
@@ -718,8 +614,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 			},
 			wantWarnings: []string{
@@ -766,8 +660,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 				{
 					ProjectName:              "project-2",
@@ -776,8 +668,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 			},
 			wantWarnings: []string{
@@ -848,8 +738,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 				{
 					ProjectName:              "project-2",
@@ -858,8 +746,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 				{
 					ProjectName:              "project-3",
@@ -868,8 +754,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 				{
 					ProjectName:              "project-4",
@@ -878,8 +762,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 			},
 			wantWarnings: []string{
@@ -928,8 +810,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 				{
 					ProjectName:              "project-2",
@@ -938,8 +818,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 			},
 			wantWarnings: []string{
@@ -985,8 +863,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 				{
 					ProjectName:              "project-2",
@@ -995,8 +871,6 @@ func TestConjurePluginConfigToParam_Warnings(t *testing.T) {
 					Publish:                  true,
 					AcceptFuncs:              true,
 					SkipDeleteGeneratedFiles: true,
-					CGRModuleVersion:         2,
-					WGSModuleVersion:         2,
 				},
 			},
 			wantWarnings: []string{
@@ -1261,86 +1135,6 @@ func TestConjurePluginConfigToParam_Errors(t *testing.T) {
 			},
 			wantError: `project name cannot be ".."`,
 		},
-		{
-			name: "Error for invalid plugin-level cgr-module-version",
-			in: config.ConjurePluginConfig{
-				CGRModuleVersion: new(4),
-				ProjectConfigs: v2.ConjureProjectConfigs{
-					{
-						Name: "project-1",
-						Config: v2.SingleConjureConfig{
-							OutputDir: "outputDir",
-							IRLocator: v2.IRLocatorConfig{
-								Type:    v2.LocatorTypeAuto,
-								Locator: "local/yaml-dir",
-							},
-							OmitTopLevelProjectDir: true,
-						},
-					},
-				},
-			},
-			wantError: "plugin configuration has invalid cgr-module-version value 4: valid values are [2 3]",
-		},
-		{
-			name: "Error for invalid plugin-level wgs-module-version",
-			in: config.ConjurePluginConfig{
-				WGSModuleVersion: new(5),
-				ProjectConfigs: v2.ConjureProjectConfigs{
-					{
-						Name: "project-1",
-						Config: v2.SingleConjureConfig{
-							OutputDir: "outputDir",
-							IRLocator: v2.IRLocatorConfig{
-								Type:    v2.LocatorTypeAuto,
-								Locator: "local/yaml-dir",
-							},
-							OmitTopLevelProjectDir: true,
-						},
-					},
-				},
-			},
-			wantError: "plugin configuration has invalid wgs-module-version value 5: valid values are [2 3]",
-		},
-		{
-			name: "Error for invalid project-level cgr-module-version",
-			in: config.ConjurePluginConfig{
-				ProjectConfigs: v2.ConjureProjectConfigs{
-					{
-						Name: "project-1",
-						Config: v2.SingleConjureConfig{
-							OutputDir:        "outputDir",
-							CGRModuleVersion: new(1),
-							IRLocator: v2.IRLocatorConfig{
-								Type:    v2.LocatorTypeAuto,
-								Locator: "local/yaml-dir",
-							},
-							OmitTopLevelProjectDir: true,
-						},
-					},
-				},
-			},
-			wantError: `project "project-1" configuration has invalid cgr-module-version value 1: valid values are [2 3]`,
-		},
-		{
-			name: "Error for invalid project-level wgs-module-version",
-			in: config.ConjurePluginConfig{
-				ProjectConfigs: v2.ConjureProjectConfigs{
-					{
-						Name: "project-1",
-						Config: v2.SingleConjureConfig{
-							OutputDir:        "outputDir",
-							WGSModuleVersion: new(10),
-							IRLocator: v2.IRLocatorConfig{
-								Type:    v2.LocatorTypeAuto,
-								Locator: "local/yaml-dir",
-							},
-							OmitTopLevelProjectDir: true,
-						},
-					},
-				},
-			},
-			wantError: `project "project-1" configuration has invalid wgs-module-version value 10: valid values are [2 3]`,
-		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			got, gotWarnings, err := tc.in.ToParams()
@@ -1482,14 +1276,12 @@ func TestGroupIDToParams(t *testing.T) {
 			},
 			want: conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
-					GroupID:          "com.palantir.signals",
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "com.palantir.signals",
 				},
 			},
 		},
@@ -1514,14 +1306,12 @@ func TestGroupIDToParams(t *testing.T) {
 			},
 			want: conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
-					GroupID:          "com.palantir.override",
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "com.palantir.override",
 				},
 			},
 		},
@@ -1544,14 +1334,12 @@ func TestGroupIDToParams(t *testing.T) {
 			},
 			want: conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
-					GroupID:          "",
+					ProjectName: "project-1",
+					OutputDir:   "outputDir",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("local/yaml-dir"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "",
 				},
 			},
 		},
@@ -1587,24 +1375,20 @@ func TestGroupIDToParams(t *testing.T) {
 			},
 			want: conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:      "project-1",
-					OutputDir:        "outputDir1",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("input1.yml"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
-					GroupID:          "com.palantir.default",
+					ProjectName: "project-1",
+					OutputDir:   "outputDir1",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input1.yml"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "com.palantir.default",
 				},
 				{
-					ProjectName:      "project-2",
-					OutputDir:        "outputDir2",
-					IRProvider:       conjureplugin.NewLocalYAMLIRProvider("input2.yml"),
-					Publish:          true,
-					AcceptFuncs:      true,
-					CGRModuleVersion: 2,
-					WGSModuleVersion: 2,
-					GroupID:          "com.palantir.custom",
+					ProjectName: "project-2",
+					OutputDir:   "outputDir2",
+					IRProvider:  conjureplugin.NewLocalYAMLIRProvider("input2.yml"),
+					Publish:     true,
+					AcceptFuncs: true,
+					GroupID:     "com.palantir.custom",
 				},
 			},
 		},

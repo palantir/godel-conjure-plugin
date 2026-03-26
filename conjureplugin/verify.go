@@ -21,7 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/palantir/conjure-go/v6/conjure"
+	"github.com/palantir/conjure-go/v7/conjure"
 	"github.com/palantir/godel/v2/pkg/dirchecksum"
 	"github.com/pkg/errors"
 )

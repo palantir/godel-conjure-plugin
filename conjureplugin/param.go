@@ -50,12 +50,6 @@ type ConjureProjectParam struct {
 	// When false (default), deletes all Conjure-generated files in the output directory tree before regenerating.
 	// When true, preserves v1 behavior (no cleanup).
 	SkipDeleteGeneratedFiles bool
-	// CGRModuleVersion specifies which module version of conjure-go-runtime to use in generated code.
-	// If not specified, does not specify a version and uses the default chosen by the conjure-go generator
-	CGRModuleVersion int `yaml:"cgr-module-version,omitempty"`
-	// WGSModuleVersion specifies which module version of witchcraft-go-server to use in generated code.
-	// If not specified, does not specify a version and uses the default chosen by the conjure-go generator
-	WGSModuleVersion int `yaml:"wgs-module-version,omitempty"`
 	// ExportErrorDecoder generates a top-level conjureerrors package that re-exports
 	// the Decoder function from the internal conjureerrors package.
 	ExportErrorDecoder bool
