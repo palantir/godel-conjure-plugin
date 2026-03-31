@@ -4,9 +4,10 @@ github.com/STARRY-S/zip
 # github.com/VividCortex/ewma v1.2.0
 ## explicit; go 1.12
 github.com/VividCortex/ewma
-# github.com/andybalholm/brotli v1.2.0
+# github.com/andybalholm/brotli v1.2.1
 ## explicit; go 1.22
 github.com/andybalholm/brotli
+github.com/andybalholm/brotli/flate
 github.com/andybalholm/brotli/matchfinder
 # github.com/bodgit/plumbing v1.3.0
 ## explicit; go 1.13
