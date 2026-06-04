@@ -82,8 +82,8 @@ github.com/palantir/distgo v1.97.0 h1:NF1qa3pKe697mR1Lq68/Pfmm+M6QdmeRoPA+MmzLZA
 github.com/palantir/distgo v1.97.0/go.mod h1:bkb8uPUo0LgpRnQvefzJQ0oXEYHcwAowcpsKu6aFWrY=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
 github.com/palantir/distgo/pkg/git v1.0.0/go.mod h1:eXrr3SOmf/sWTYmtiubYVxSaVegTlMGgRgBUFMFFedw=
-github.com/palantir/go-ptimports/v2 v2.49.0 h1:MLbvKxAPinTH0MCdl/2UEHKkKALQ5L/VMeYagpH49Ig=
-github.com/palantir/go-ptimports/v2 v2.49.0/go.mod h1:A/plGjvkvPxBwBPk2vvRREpKOz1uRrIasfWuP6ydEz4=
+github.com/palantir/go-ptimports/v2 v2.50.0 h1:3AsHcUFPvn4JxTNPcR4vPXKzh2DIJNVgLfeR7Svh1Cc=
+github.com/palantir/go-ptimports/v2 v2.50.0/go.mod h1:BLQ8aQyc4YldGtsIy7qhI3MPgiZ7Iea1FkkpyZl3WH4=
 github.com/palantir/godel/v2 v2.156.0 h1:UCTVMPwTEd6JebzGvTpbzfNIUzMUE9y0y9RQkcmHO6A=
 github.com/palantir/godel/v2 v2.156.0/go.mod h1:TRODDy1+PrCYqO0K0uGo7YCHE721gVI4IkjlLI8ot9o=
 github.com/palantir/pkg v1.1.0 h1:0EhrSUP8oeeh3MUvk7V/UU7WmsN1UiJNTvNj0sN9Cpo=
