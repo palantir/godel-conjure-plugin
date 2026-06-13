@@ -117,7 +117,7 @@ github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.1.3
 ## explicit
 github.com/nwaples/rardecode
-# github.com/nwaples/rardecode/v2 v2.2.3
+# github.com/nwaples/rardecode/v2 v2.2.5
 ## explicit; go 1.21
 github.com/nwaples/rardecode/v2
 # github.com/palantir/conjure-go/v7 v7.3.0
