@@ -53,4 +53,8 @@ type ConjureProjectParam struct {
 	// ExportErrorDecoder generates a top-level conjureerrors package that re-exports
 	// the Decoder function from the internal conjureerrors package.
 	ExportErrorDecoder bool
+	// ErrorParameterFormatJSON, when true, causes generated service clients to send the
+	// "Accept-Conjure-Error-Parameter-Format: JSON" header so that servers which support it serialize
+	// error parameters as JSON rather than the legacy string form.
+	ErrorParameterFormatJSON bool
 }

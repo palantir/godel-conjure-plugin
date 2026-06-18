@@ -99,6 +99,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			SkipConjureBackcompat:    currConfig.SkipBackCompat,
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
 			ExportErrorDecoder:       currConfig.ExportErrorDecoder,
+			ErrorParameterFormatJSON: currConfig.ErrorParameterFormatJSON,
 		})
 	}
 	var err error

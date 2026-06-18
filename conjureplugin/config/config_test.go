@@ -336,6 +336,32 @@ projects:
 				},
 			},
 		},
+		{
+			`
+projects:
+ project:
+   output-dir: outputDir
+   ir-locator:
+     type: remote
+     locator: localhost:8080/ir.json
+   error-parameter-format-json: true
+`,
+			config.ConjurePluginConfig{
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							OutputDir: "outputDir",
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeRemote,
+								Locator: "localhost:8080/ir.json",
+							},
+							ErrorParameterFormatJSON: true,
+						},
+					},
+				},
+			},
+		},
 	} {
 		var got config.ConjurePluginConfig
 		err := yaml.Unmarshal([]byte(tc.in), &got)
@@ -463,19 +489,21 @@ func TestConjurePluginConfigToParam(t *testing.T) {
 								Type:    v2.LocatorTypeAuto,
 								Locator: "input.json",
 							},
-							OmitTopLevelProjectDir: true,
-							ExportErrorDecoder:     true,
+							OmitTopLevelProjectDir:   true,
+							ExportErrorDecoder:       true,
+							ErrorParameterFormatJSON: true,
 						},
 					},
 				},
 			},
 			conjureplugin.ConjureProjectParams{
 				{
-					ProjectName:        "project-1",
-					OutputDir:          "outputDir",
-					IRProvider:         conjureplugin.NewLocalFileIRProvider("input.json"),
-					AcceptFuncs:        true,
-					ExportErrorDecoder: true,
+					ProjectName:              "project-1",
+					OutputDir:                "outputDir",
+					IRProvider:               conjureplugin.NewLocalFileIRProvider("input.json"),
+					AcceptFuncs:              true,
+					ExportErrorDecoder:       true,
+					ErrorParameterFormatJSON: true,
 				},
 			},
 		},
