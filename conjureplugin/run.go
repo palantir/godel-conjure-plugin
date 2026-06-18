@@ -45,11 +45,12 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 		}
 
 		outputConf := conjure.OutputConfiguration{
-			OutputDir:            filepath.Join(projectDir, outputDir),
-			GenerateServer:       currParam.Server,
-			GenerateCLI:          currParam.CLI,
-			GenerateFuncsVisitor: currParam.AcceptFuncs,
-			ExportErrorDecoder:   currParam.ExportErrorDecoder,
+			OutputDir:                filepath.Join(projectDir, outputDir),
+			GenerateServer:           currParam.Server,
+			GenerateCLI:              currParam.CLI,
+			GenerateFuncsVisitor:     currParam.AcceptFuncs,
+			ExportErrorDecoder:       currParam.ExportErrorDecoder,
+			ErrorParameterFormatJSON: currParam.ErrorParameterFormatJSON,
 		}
 
 		conjureFilesToGenerate, err := conjure.GenerateOutputFiles(conjureDef, outputConf)

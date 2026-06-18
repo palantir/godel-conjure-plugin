@@ -123,6 +123,10 @@ type SingleConjureConfig struct {
 	// ExportErrorDecoder generates a top-level conjureerrors package that re-exports
 	// the Decoder function from the internal conjureerrors package.
 	ExportErrorDecoder bool `yaml:"export-error-decoder,omitempty"`
+	// ErrorParameterFormatJSON, when true, causes generated service clients to send the
+	// "Accept-Conjure-Error-Parameter-Format: JSON" header on every request so that servers which
+	// support it serialize error parameters as JSON rather than the legacy string form.
+	ErrorParameterFormatJSON bool `yaml:"error-parameter-format-json,omitempty"`
 }
 
 // OutputDirConflicts detects output directory conflicts between projects.
