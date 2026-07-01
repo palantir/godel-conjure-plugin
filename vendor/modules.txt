@@ -129,7 +129,7 @@ github.com/palantir/conjure-go/v7/conjure/snip
 github.com/palantir/conjure-go/v7/conjure/transforms
 github.com/palantir/conjure-go/v7/conjure/types
 github.com/palantir/conjure-go/v7/cycles
-# github.com/palantir/distgo v1.99.0
+# github.com/palantir/distgo v1.100.0
 ## explicit; go 1.26.0
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/distgotaskprovider
