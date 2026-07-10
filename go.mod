@@ -7,7 +7,7 @@ toolchain go1.26.4
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.4.0
-	github.com/palantir/distgo v1.100.0
+	github.com/palantir/distgo v1.101.0
 	github.com/palantir/godel/v2 v2.158.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.3.0
