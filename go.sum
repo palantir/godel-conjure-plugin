@@ -111,8 +111,8 @@ github.com/palantir/pkg/transform v1.2.0 h1:ngTydiV5SUG9mfGxkYk1tH3Xi3vsohjqYqW8
 github.com/palantir/pkg/transform v1.2.0/go.mod h1:p5lGLs0ah/iyB31ODlWIMp0SZibQV6HxSyJaM1L26dw=
 github.com/palantir/witchcraft-go-error v1.46.0 h1:gthiwObOaPcCgpB95dXrnIPYDPf8OVvOCkYfdsFpdek=
 github.com/palantir/witchcraft-go-error v1.46.0/go.mod h1:hcf52XH04l/1YXBBQQL/FJkS/isx90jcL9c67XdwVYc=
-github.com/palantir/witchcraft-go-params v1.42.0 h1:f2FbZvKGLqCM+X/KGd6YaLMnX0WpVuPsjoI0dq8KAEM=
-github.com/palantir/witchcraft-go-params v1.42.0/go.mod h1:qUHLdZyGnhMOVC2CHthEN0w1pHwP2L0O0+K4oaEuPMg=
+github.com/palantir/witchcraft-go-params v1.43.0 h1:h+/MaedNBSMtCk5uK8I4LlIc6viRL/LVbChFt4jl4OE=
+github.com/palantir/witchcraft-go-params v1.43.0/go.mod h1:1iVdjQHq5wYD8/3O8XVEv7OkczWENtLeHVwAv8vHaBY=
 github.com/pierrec/lz4/v4 v4.1.2/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pierrec/lz4/v4 v4.1.27 h1:+PhzhWDrjRj89TH2sw43nE3+4+W8lSxIuQadEHZyjUk=
 github.com/pierrec/lz4/v4 v4.1.27/go.mod h1:EoQMVJgeeEOMsCqCzqFm2O0cJvljX2nGZjcRIPL34O4=
