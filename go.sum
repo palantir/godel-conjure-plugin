@@ -78,8 +78,8 @@ github.com/nwaples/rardecode/v2 v2.2.5 h1:L5doqgGfQwI7qADJMqnkrSB86rpPsqQDrHeO0H
 github.com/nwaples/rardecode/v2 v2.2.5/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
 github.com/palantir/conjure-go/v7 v7.5.0 h1:5Xjp0Gpro/Sz7yhBhgIx2FBmNVWoflbrP2EqTlZYl1w=
 github.com/palantir/conjure-go/v7 v7.5.0/go.mod h1:hB2VPqdwGhVJYFgBEn/juFTgS2WM9rGS9UMrub0TEac=
-github.com/palantir/distgo v1.105.0 h1:rBdcQY+KlndLxs/8+iqhlDCIjoH/dU2B4pvx6UaQXSQ=
-github.com/palantir/distgo v1.105.0/go.mod h1:B5sjchIuoekKwbJ4MiRoaaAJlQFAqKTiRRFFdZkAr44=
+github.com/palantir/distgo v1.106.0 h1:4cTxWKMi/o2yuX9AnNef78Elk7PaPNBJKFXujbzKwVY=
+github.com/palantir/distgo v1.106.0/go.mod h1:nVhpE5+/I+MxvSpChlg03qlEoJCrnqPYJB2rzF9qNn8=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
 github.com/palantir/distgo/pkg/git v1.0.0/go.mod h1:eXrr3SOmf/sWTYmtiubYVxSaVegTlMGgRgBUFMFFedw=
 github.com/palantir/go-ptimports/v2 v2.51.0 h1:jbRANd4Dk08r+xP29w8dcGFwo2olRCZuCBcSDG54bfM=
