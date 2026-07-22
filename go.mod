@@ -8,7 +8,7 @@ require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.5.0
 	github.com/palantir/distgo v1.105.0
-	github.com/palantir/godel/v2 v2.160.0
+	github.com/palantir/godel/v2 v2.163.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.3.0
 	github.com/palantir/pkg/matcher v1.3.0
