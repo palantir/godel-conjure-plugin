@@ -33,6 +33,8 @@ github.com/golang/snappy v1.0.0/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEW
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
+github.com/google/go-containerregistry v0.21.7 h1:/vPFuVXDjtFREsVArW+0h1CIl5urnOhzei4X2DMW9IU=
+github.com/google/go-containerregistry v0.21.7/go.mod h1:kjSbt7/zMsKLWfnHrIvKvhXHUw91jbe9DNjPPJ32gXE=
 github.com/hashicorp/golang-lru/v2 v2.0.7 h1:a+bsQ5rvGLjzHuww6tVxozPZFVghXaHOwFs4luLUK2k=
 github.com/hashicorp/golang-lru/v2 v2.0.7/go.mod h1:QeFd9opnmA6QUJc5vARoKUSoFhyfM2/ZepoAG6RGpeM=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
@@ -78,8 +80,8 @@ github.com/nwaples/rardecode/v2 v2.2.5 h1:L5doqgGfQwI7qADJMqnkrSB86rpPsqQDrHeO0H
 github.com/nwaples/rardecode/v2 v2.2.5/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
 github.com/palantir/conjure-go/v7 v7.6.0 h1:2EwWY4rgf8Sh2q5KUQqMUvRQa3XqN5+pA8NaAWoUCjU=
 github.com/palantir/conjure-go/v7 v7.6.0/go.mod h1:zWSi/AjbR5Qc5NtRBv4sIefBiZ0jPwjCykdzS/ip6YU=
-github.com/palantir/distgo v1.106.0 h1:4cTxWKMi/o2yuX9AnNef78Elk7PaPNBJKFXujbzKwVY=
-github.com/palantir/distgo v1.106.0/go.mod h1:nVhpE5+/I+MxvSpChlg03qlEoJCrnqPYJB2rzF9qNn8=
+github.com/palantir/distgo v1.107.0 h1:pRYH+Nb4hF7N3hM7vhhjT15YbpwRV4ptglH/j4KLMqw=
+github.com/palantir/distgo v1.107.0/go.mod h1:ak96naZjDdvMEaIEoEy8gRCQ4szkercmlBmfTBE6iOU=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
 github.com/palantir/distgo/pkg/git v1.0.0/go.mod h1:eXrr3SOmf/sWTYmtiubYVxSaVegTlMGgRgBUFMFFedw=
 github.com/palantir/go-ptimports/v2 v2.51.0 h1:jbRANd4Dk08r+xP29w8dcGFwo2olRCZuCBcSDG54bfM=

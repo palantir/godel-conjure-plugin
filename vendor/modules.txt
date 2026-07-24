@@ -59,6 +59,10 @@ github.com/fatih/color
 # github.com/golang/snappy v1.0.0
 ## explicit
 github.com/golang/snappy
+# github.com/google/go-containerregistry v0.21.7
+## explicit; go 1.25.0
+github.com/google/go-containerregistry/pkg/v1
+github.com/google/go-containerregistry/pkg/v1/types
 # github.com/hashicorp/golang-lru/v2 v2.0.7
 ## explicit; go 1.18
 github.com/hashicorp/golang-lru/v2
@@ -129,7 +133,7 @@ github.com/palantir/conjure-go/v7/conjure/snip
 github.com/palantir/conjure-go/v7/conjure/transforms
 github.com/palantir/conjure-go/v7/conjure/types
 github.com/palantir/conjure-go/v7/cycles
-# github.com/palantir/distgo v1.106.0
+# github.com/palantir/distgo v1.107.0
 ## explicit; go 1.26.0
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/distgotaskprovider
