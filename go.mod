@@ -7,7 +7,7 @@ toolchain go1.26.5
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.6.0
-	github.com/palantir/distgo v1.106.0
+	github.com/palantir/distgo v1.107.0
 	github.com/palantir/godel/v2 v2.163.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.3.0
@@ -34,6 +34,7 @@ require (
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
+	github.com/google/go-containerregistry v0.21.7 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.19.1 // indirect
