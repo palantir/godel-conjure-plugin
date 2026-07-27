@@ -453,7 +453,7 @@ projects:
 	_, err = pluginapitester.RunPlugin(pluginapitester.NewPluginProvider(pluginPath), nil, "conjure", []string{"--verify"}, projectDir, false, outputBuf)
 	assert.Error(t, err, "modified file did not trigger verify fail")
 	stdout := outputBuf.String()
-	assert.True(t, strings.Contains(stdout, structsFile+": checksum changed"), "Unexpected standard out: %s", stdout)
+	assert.True(t, strings.Contains(stdout, structsFile+": out of date"), "Unexpected standard out: %s", stdout)
 }
 
 func TestConjurePluginVerifyDoesNotDetectStaleFilesWhenDeleteSkipped(t *testing.T) {
@@ -569,7 +569,7 @@ projects:
 
 	assert.Equal(t, stdout, `Conjure output differs from what currently exists for 1 project(s)
   project-1:
-    internal/generated/conjure/project-1/base/api/oldfile.conjure.go: extra
+    internal/generated/conjure/project-1/base/api/oldfile.conjure.go: no longer generated
 Error: conjure verify failed
 `)
 }
@@ -1369,6 +1369,12 @@ projects:
 [WARNING]: project "project-2" and "project-1" have the same output directory "conjure-output"
 [WARNING]: project "project-3" and "project-4" have the same output directory "conjure-output-2"
 [WARNING]: project "project-4" and "project-3" have the same output directory "conjure-output-2"
+writing file conjure-output/conjure/test/api/structs.conjure.go
+writing file conjure-output/conjure/test/api/unions.conjure.go
+writing file conjure-output/conjure/test/api/unions_generics.conjure.go
+writing file conjure-output-2/conjure/test/api/structs.conjure.go
+writing file conjure-output-2/conjure/test/api/unions.conjure.go
+writing file conjure-output-2/conjure/test/api/unions_generics.conjure.go
 `, outputBuf.String())
 }
 

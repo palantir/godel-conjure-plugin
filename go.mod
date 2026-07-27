@@ -12,6 +12,7 @@ require (
 	github.com/palantir/godel/v2 v2.208.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.4.0
+	github.com/palantir/pkg/codegenfiles v1.0.0
 	github.com/palantir/pkg/matcher v1.3.0
 	github.com/palantir/pkg/safehttp v1.2.0
 	github.com/palantir/pkg/safejson v1.3.0
@@ -66,7 +67,6 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/stangelandcl/ppmd v0.1.1 // indirect
-	github.com/termie/go-shutil v0.0.0-20140729215957-bcacb06fecae // indirect
 	github.com/ulikunitz/xz v0.5.17 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/zeebo/xxh3 v1.1.1-0.20260908150653-f7225998cebf // indirect
