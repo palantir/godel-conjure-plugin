@@ -59,6 +59,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		_ = os.RemoveAll(tmpDir)
 	}()
 
+	var publishInputs []distgo.ProductPublishInfo
 	for _, param := range paramsToPublish {
 		conjureProjectName := param.ProjectName
 		currDir := filepath.Join(tmpDir, fmt.Sprintf("conjure-%s", conjureProjectName))
@@ -121,12 +122,16 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		if err := publisher.RunPublish(distgo.ProductTaskOutputInfo{
-			Project: projectInfo,
-			Product: productOutputInfo,
-		}, nil, flagVals, dryRun, stdout); err != nil {
-			return err
-		}
+		publishInputs = append(publishInputs, distgo.ProductPublishInfo{
+			ProductTaskOutputInfo: distgo.ProductTaskOutputInfo{
+				Project: projectInfo,
+				Product: productOutputInfo,
+			},
+		})
+	}
+
+	if err := publisher.RunPublish(publishInputs, flagVals, dryRun, stdout); err != nil {
+		return err
 	}
 	return nil
 }
