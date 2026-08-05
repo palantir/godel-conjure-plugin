@@ -6,7 +6,7 @@ toolchain go1.26.5
 
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v7 v7.6.0
+	github.com/palantir/conjure-go/v7 v7.7.0
 	github.com/palantir/distgo v1.110.0
 	github.com/palantir/godel/v2 v2.166.0
 	github.com/palantir/pkg/clipackager v1.1.0
