@@ -214,7 +214,7 @@ github.com/palantir/witchcraft-go-error/internal/errors
 # github.com/palantir/witchcraft-go-params v1.43.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-params
-# github.com/pierrec/lz4/v4 v4.1.27
+# github.com/pierrec/lz4/v4 v4.1.28
 ## explicit; go 1.17
 github.com/pierrec/lz4/v4
 github.com/pierrec/lz4/v4/internal/lz4block
