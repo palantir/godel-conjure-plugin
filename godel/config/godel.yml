@@ -26,3 +26,4 @@ exclude:
   paths:
     - godel
     - ir-gen-cli-bundler/conjureircli/asset
+    - ir-gen-cli-bundler/conjuretypescriptcli/asset

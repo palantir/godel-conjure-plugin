@@ -3,4 +3,11 @@ generators:
     go-generate-dir: ir-gen-cli-bundler/conjureircli/generator
     gen-paths:
       paths:
-        - ir-gen-cli-bundler/conjureircli/internal/conjure.tgz
+        - ir-gen-cli-bundler/conjureircli/asset/conjure.tgz
+        - ir-gen-cli-bundler/conjureircli/asset/version.go
+  conjuretypescriptcli:
+    go-generate-dir: ir-gen-cli-bundler/conjuretypescriptcli/generator
+    gen-paths:
+      paths:
+        - ir-gen-cli-bundler/conjuretypescriptcli/asset/conjure-typescript.tgz
+        - ir-gen-cli-bundler/conjuretypescriptcli/asset/version.go
