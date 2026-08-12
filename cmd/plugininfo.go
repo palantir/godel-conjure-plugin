@@ -51,7 +51,7 @@ var (
 		),
 		pluginapi.PluginInfoTaskInfo(
 			conjurePublishTaskName,
-			"Publish Conjure IR",
+			"Publish Conjure IR and configured TypeScript clients",
 			pluginapi.TaskInfoCommand(publishCmdName),
 		),
 		pluginapi.PluginInfoTaskInfo(

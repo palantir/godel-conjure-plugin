@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/typescript"
 	pkgerror "github.com/pkg/errors"
 )
 
@@ -167,13 +168,27 @@ func typeScriptParamFromConfig(cfg *config.TypeScriptConfig) (*TypeScriptParam, 
 	if cfg.PackageName == "" {
 		return nil, errors.New("typescript package-name must be specified")
 	}
+	if err := validateScopedNpmPackageName(cfg.PackageName); err != nil {
+		return nil, err
+	}
 
-	versionScheme := NpmVersionScheme(cfg.NpmVersionScheme)
+	versionScheme := cfg.NpmVersionScheme
 	if versionScheme == "" {
 		versionScheme = NpmVersionSchemeGit
 	}
 	if versionScheme != NpmVersionSchemeGit && versionScheme != NpmVersionSchemeGeneratorMajor {
-		return nil, errors.New("npm-version-scheme must be one of \"" + string(NpmVersionSchemeGit) + "\" or \"" + string(NpmVersionSchemeGeneratorMajor) + "\"")
+		return nil, errors.New("npm-version-scheme must be one of \"" + NpmVersionSchemeGit + "\" or \"" + NpmVersionSchemeGeneratorMajor + "\"")
+	}
+
+	publisherProvider := cfg.NpmPublisherProvider
+	if publisherProvider == "" {
+		publisherProvider = typescript.DefaultNpmPublisherProvider
+	}
+	if !typescript.IsNpmPublisherProvider(publisherProvider) {
+		return nil, errors.New("npm-publisher-provider must be one of \"" +
+			typescript.NpmPublisherProviderArtifactory + "\", \"" +
+			typescript.NpmPublisherProviderCouchDB + "\", or \"" +
+			typescript.NpmPublisherProviderNpmrc + "\"")
 	}
 
 	generateThrowingServices := true
@@ -184,12 +199,55 @@ func typeScriptParamFromConfig(cfg *config.TypeScriptConfig) (*TypeScriptParam, 
 	return &TypeScriptParam{
 		PackageName:                 cfg.PackageName,
 		NpmVersionScheme:            versionScheme,
+		NpmPublisherProvider:        publisherProvider,
 		FlavorizedAliases:           cfg.FlavorizedAliases,
 		NodeCompatibleModules:       cfg.NodeCompatibleModules,
 		ReadonlyInterfaces:          cfg.ReadonlyInterfaces,
 		GenerateThrowingServices:    generateThrowingServices,
 		GenerateNonThrowingServices: cfg.GenerateNonThrowingServices,
 	}, nil
+}
+
+// maxNpmPackageNameLength is npm's own limit, including the scope, on a package name's length.
+const maxNpmPackageNameLength = 214
+
+// validateScopedNpmPackageName requires packageName to be a full, valid scoped npm package name (e.g.
+// "@palantir/apollo-build-factory-api"), following npm's own "new package" name rules (see
+// npm/validate-npm-package-name): length, a disallowed leading "." on the name, and allowed characters -- validated
+// separately for the scope and the name after it, since npm permits characters in a scope (e.g. "~") that it
+// disallows in the name. A scope is required, not derived, to protect the npm namespace independently of
+// authentication: an unscoped name risks colliding with an unrelated public package, which an explicit, reviewed
+// scope prevents.
+func validateScopedNpmPackageName(packageName string) error {
+	invalid := fmt.Errorf("typescript package-name %q must be a full scoped npm package name, e.g. \"@scope/name\"", packageName)
+	if len(packageName) > maxNpmPackageNameLength {
+		return fmt.Errorf("typescript package-name %q exceeds npm's %d-character length limit", packageName, maxNpmPackageNameLength)
+	}
+	if !strings.HasPrefix(packageName, "@") {
+		return invalid
+	}
+	slashIndex := strings.Index(packageName, "/")
+	if slashIndex <= 1 || slashIndex == len(packageName)-1 {
+		return invalid
+	}
+	scope, name := packageName[1:slashIndex], packageName[slashIndex+1:]
+	if strings.HasPrefix(name, ".") {
+		return fmt.Errorf("typescript package-name %q must not have a name starting with \".\"", packageName)
+	}
+	for _, char := range scope {
+		if !typescript.IsNpmScopeCharacter(char) {
+			return fmt.Errorf("typescript package-name %q has an invalid npm scope", packageName)
+		}
+	}
+	for _, char := range name {
+		// A scope only needs to be URL-safe (typescript.IsNpmScopeCharacter), but npm additionally disallows
+		// "~'!()*" -- special characters encodeURIComponent leaves unescaped -- in the name after the scope.
+		isValid := char >= 'a' && char <= 'z' || char >= '0' && char <= '9' || strings.ContainsRune("-._", char)
+		if !isValid {
+			return fmt.Errorf("typescript package-name %q has an invalid npm name", packageName)
+		}
+	}
+	return nil
 }
 
 // validateProjectName validates that a project name is safe to use as part of a file path.

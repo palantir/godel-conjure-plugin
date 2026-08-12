@@ -369,6 +369,7 @@ projects:
    typescript:
      package-name: "@palantir/example-api"
      npm-version-scheme: generator-major
+     npm-publisher-provider: couchdb
      flavorized-aliases: true
 `,
 			config.ConjurePluginConfig{
@@ -381,9 +382,10 @@ projects:
 								Locator: "local/yaml-dir",
 							},
 							TypeScript: &v2.TypeScriptConfig{
-								PackageName:       "@palantir/example-api",
-								NpmVersionScheme:  "generator-major",
-								FlavorizedAliases: true,
+								PackageName:          "@palantir/example-api",
+								NpmVersionScheme:     "generator-major",
+								NpmPublisherProvider: "couchdb",
+								FlavorizedAliases:    true,
 							},
 						},
 					},

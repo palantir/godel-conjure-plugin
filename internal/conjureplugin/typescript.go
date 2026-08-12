@@ -282,7 +282,7 @@ func isPathSegment(value string) bool {
 	return value != "." && filepath.IsLocal(value) && filepath.Base(value) == value
 }
 
-func npmPackageVersion(scheme NpmVersionScheme, gitVersion string) (string, error) {
+func npmPackageVersion(scheme string, gitVersion string) (string, error) {
 	switch scheme {
 	case "", NpmVersionSchemeGit:
 		return gitVersion, nil

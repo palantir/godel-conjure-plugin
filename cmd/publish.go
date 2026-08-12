@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/palantir/distgo/distgo"
 	"github.com/palantir/distgo/publisher"
@@ -29,6 +30,10 @@ import (
 
 const (
 	publishCmdName = "publish"
+
+	publishTypeScriptNpmUsernameEnv = "CONJURE_TYPESCRIPT_NPM_USERNAME"
+	publishTypeScriptNpmPasswordEnv = "CONJURE_TYPESCRIPT_NPM_PASSWORD"
+	publishTypeScriptNpmTokenEnv    = "CONJURE_TYPESCRIPT_NPM_TOKEN"
 )
 
 var (
@@ -39,17 +44,30 @@ var (
 	repositoryFlagVal string
 	mavenNoPOMFlagVal bool
 	dryRunFlagVal     bool
+
+	publishTypeScriptPublishRegistryFlagVal string
+	publishTypeScriptInstallRegistryFlagVal string
+	publishTypeScriptNpmUsernameFlagVal     string
+	publishTypeScriptNpmPasswordFlagVal     string
+	publishTypeScriptNpmTokenFlagVal        string
+	publishTypeScriptNpmrcFileFlagVal       string
+	publishTypeScriptOutputDirFlagVal       string
+	publishTypeScriptPackageVersionFlagVal  string
 )
 
 var publishCmd = &cobra.Command{
 	Use:   publishCmdName,
-	Short: "Publish Conjure IR",
+	Short: "Publish Conjure IR and configured TypeScript clients",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}
-		if err := os.Chdir(projectDirFlagVal); err != nil {
+		absProjectDir, err := filepath.Abs(projectDirFlagVal)
+		if err != nil {
+			return errors.Wrap(err, "failed to resolve project directory")
+		}
+		if err := os.Chdir(absProjectDir); err != nil {
 			return errors.Wrapf(err, "failed to set working directory")
 		}
 
@@ -71,17 +89,45 @@ var publishCmd = &cobra.Command{
 			flagVals[currFlag.Name] = val
 		}
 
+		extensionsProvider := extensionsprovider.NewAssetsExtensionsProvider(
+			loadedAssets.ConjureIRExtensionsProviders, configFileFlagVal, urlFlagVal)
+
 		publishOptions := conjureplugin.PublishParamOptions{
-			ProjectDir:         projectDirFlagVal,
-			ExtensionsProvider: extensionsprovider.NewAssetsExtensionsProvider(loadedAssets.ConjureIRExtensionsProviders, configFileFlagVal, urlFlagVal),
+			ProjectDir:         absProjectDir,
+			ExtensionsProvider: extensionsProvider,
 			GroupIDOverride:    groupIDFlagVal,
 		}
 		publishParam, err := conjureplugin.NewPublishParam(projectParams, publishOptions)
 		if err != nil {
 			return err
 		}
-		return conjureplugin.Publish(publishParam, flagVals, dryRunFlagVal, cmd.OutOrStdout())
+		if err := conjureplugin.Publish(publishParam, flagVals, dryRunFlagVal, cmd.OutOrStdout()); err != nil {
+			return err
+		}
+
+		var typeScriptExtensionsProvider extensionsprovider.ExtensionsProvider
+		if urlFlagVal != "" && len(loadedAssets.ConjureIRExtensionsProviders) > 0 {
+			typeScriptExtensionsProvider = extensionsProvider
+		}
+		return conjureplugin.PublishTypeScript(projectParams, absProjectDir, conjureplugin.PublishTypeScriptOptions{
+			PublishRegistry: publishTypeScriptPublishRegistryFlagVal,
+			InstallRegistry: publishTypeScriptInstallRegistryFlagVal,
+			NpmUsername:     flagOrEnvironment(publishTypeScriptNpmUsernameFlagVal, publishTypeScriptNpmUsernameEnv),
+			NpmPassword:     flagOrEnvironment(publishTypeScriptNpmPasswordFlagVal, publishTypeScriptNpmPasswordEnv),
+			NpmToken:        flagOrEnvironment(publishTypeScriptNpmTokenFlagVal, publishTypeScriptNpmTokenEnv),
+			NpmrcFile:       publishTypeScriptNpmrcFileFlagVal,
+			OutputDir:       publishTypeScriptOutputDirFlagVal,
+			PackageVersion:  publishTypeScriptPackageVersionFlagVal,
+			DryRun:          dryRunFlagVal,
+		}, cmd.OutOrStdout(), cmd.ErrOrStderr(), typeScriptExtensionsProvider, groupIDFlagVal)
 	},
+}
+
+func flagOrEnvironment(flagValue, environmentVariable string) string {
+	if flagValue != "" {
+		return flagValue
+	}
+	return os.Getenv(environmentVariable)
 }
 
 func init() {
@@ -93,5 +139,13 @@ func init() {
 	publishCmd.Flags().StringVar(&usernameFlagVal, string(publisher.ConnectionInfoUsernameFlag.Name), "", publisher.ConnectionInfoUsernameFlag.Description)
 	publishCmd.Flags().StringVar(&passwordFlagVal, string(publisher.ConnectionInfoPasswordFlag.Name), "", publisher.ConnectionInfoPasswordFlag.Description)
 	publishCmd.Flags().BoolVar(&mavenNoPOMFlagVal, string(maven.NoPOMFlag.Name), false, maven.NoPOMFlag.Description)
+	publishCmd.Flags().StringVar(&publishTypeScriptPublishRegistryFlagVal, "publish-registry", "", "npm registry URL to publish configured TypeScript packages to")
+	publishCmd.Flags().StringVar(&publishTypeScriptInstallRegistryFlagVal, "install-registry", "", "npm registry URL used to install TypeScript build dependencies (defaults to the publish registry)")
+	publishCmd.Flags().StringVar(&publishTypeScriptNpmUsernameFlagVal, "npm-username", "", "npm registry username (prefer "+publishTypeScriptNpmUsernameEnv+" in CI)")
+	publishCmd.Flags().StringVar(&publishTypeScriptNpmPasswordFlagVal, "npm-password", "", "npm registry password (prefer "+publishTypeScriptNpmPasswordEnv+" in CI)")
+	publishCmd.Flags().StringVar(&publishTypeScriptNpmTokenFlagVal, "npm-token", "", "npm registry authentication token (prefer "+publishTypeScriptNpmTokenEnv+" in CI)")
+	publishCmd.Flags().StringVar(&publishTypeScriptNpmrcFileFlagVal, "npmrc-file", "", "existing npm configuration file used by TypeScript projects configured with the npmrc publisher provider")
+	publishCmd.Flags().StringVar(&publishTypeScriptOutputDirFlagVal, "output-dir", "", "directory in which to write published npm package tarballs (defaults to a new temporary directory)")
+	publishCmd.Flags().StringVar(&publishTypeScriptPackageVersionFlagVal, "package-version", "", "exact npm package version override")
 	rootCmd.AddCommand(publishCmd)
 }

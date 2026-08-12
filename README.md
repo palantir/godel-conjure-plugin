@@ -12,7 +12,7 @@ Tasks
 -----
 * `conjure`: runs Go Conjure generation. Runs for all of the entries specified in the configuration in order. The
   working directory is set to be the project directory.
-* `conjure-publish`: publishes IR to a specified destination.
+* `conjure-publish`: publishes IR and packages and publishes opted-in TypeScript clients.
 * `conjure-typescript`: generates, builds, and packages TypeScript clients for opted-in projects without publishing.
 
 Verify
@@ -69,10 +69,11 @@ The supported types are `remote`, `yaml` and `ir-file`.
 
 Publish
 -------
-The `conjure-publish` task publishes Conjure IR to a location based on the provided arguments. The Conjure IR files that
-can be published are determined based on the projects defined in `conjure-projects` block. By default, YAML locator types
-are considered as possible to publish (because publish workflow most commonly publish IR generated from local YAML).
-However, `publish: true` can be set on a project explicitly to allow it to publish its IR.
+The `conjure-publish` task publishes Conjure IR and any TypeScript clients opted in through a `typescript` block. The
+Conjure IR files that can be published are determined based on the projects defined in the `projects` block. By default,
+YAML locator types are considered publishable because publishing most commonly uses IR generated from local YAML.
+However, `publish: true` can be set on a project explicitly to allow it to publish its IR. TypeScript publication is
+independently opted in by the presence of its `typescript` block.
 
 The `publish` command uses the Git versioner of [`distgo`](https://github.com/palantir/distgo) to determine the version
 for the IR and uses distgo's Artifactory publisher to publish the IR to an Artifactory destination.
@@ -87,8 +88,9 @@ The `--dry-run` flag can be added to print the operation that would be performed
 
 Package TypeScript
 ------------------
-TypeScript generation is opt-in for each project and is performed only by the dedicated `conjure-typescript` task. The
-normal `conjure` task and verification remain Go-only, so they do not require Node, npm, or registry access.
+TypeScript generation is opt-in for each project and is performed by the dedicated `conjure-typescript` task or as part
+of `conjure-publish`. The normal `conjure` task and verification remain Go-only, so they do not require Node, npm, or
+registry access.
 
 ```yaml
 version: 2
@@ -106,10 +108,14 @@ projects:
       package-name: "@example/api"
       # Optional: prefix the Git version with the conjure-typescript generator major.
       npm-version-scheme: generator-major
+      # Optional: artifactory (default), couchdb, or npmrc.
+      npm-publisher-provider: artifactory
 ```
 
-`package-name` is required and must include the complete npm package name, including its scope. It is
-not derived from the project key because the key may not contain the scope or suffix used by npm consumers.
+`package-name` is required and must be a full scoped npm package name (e.g. `"@scope/name"`). It is not derived from
+the project key because the key may not contain the scope or suffix used by npm consumers. A scope is required, not
+optional, to protect the npm namespace: an unscoped name risks colliding with an unrelated public package. This is
+validated at config time, not left as a runtime assumption.
 
 Product dependencies are read only from the Conjure IR used for TypeScript generation. If `--url` is supplied and the
 plugin has configured Conjure IR extension-provider assets, the task runs those providers first and reads the resolved
@@ -136,6 +142,53 @@ By default, `--output-dir` is a newly created temporary directory. Local YAML in
 packaging requires `node` and `npm` on `PATH` and access to the registries needed to install the generated project's
 dependencies.
 
+Publish TypeScript
+------------------
+For projects with a `typescript` block, `conjure-publish` calls the same `PackageTypeScript` operation as
+`conjure-typescript`, then passes each exact returned tarball to `npm publish`. `--publish-registry` is the npm
+publication destination. The optional `--install-registry` selects a different repository for build dependencies and
+defaults to the publish registry. These npm inputs are distinct from `--url`, which remains the Conjure IR publication
+and extension-provider URL.
+
+`npm-publisher-provider` selects the username/password authentication exchange for each TypeScript project:
+
+* `artifactory` (default) sends a GET request with HTTP Basic authentication to
+  `<publish-registry>/auth/<scope>`. Its response is treated as opaque npmrc content. Projects are authenticated and
+  packaged per distinct scope, so responses for different scopes do not need to be identical.
+* `couchdb` implements the standard npm login exchange used by Gradle's `GenerateNpmrcTask`: it sends the username and
+  password to `<publish-registry>/-/user/org.couchdb.user:<username>` and uses the returned token.
+* `npmrc` uses the file supplied by `--npmrc-file` verbatim for both dependency installation and publication. This is
+  the escape hatch for authentication conventions the plugin does not implement. The caller retains ownership of the
+  file.
+
+A direct npm token bypasses the configured username/password exchange. In CI, inject credentials through
+`CONJURE_TYPESCRIPT_NPM_TOKEN`, or through `CONJURE_TYPESCRIPT_NPM_USERNAME` and
+`CONJURE_TYPESCRIPT_NPM_PASSWORD`, to keep secrets out of command arguments. Equivalent `--npm-token`,
+`--npm-username`, and `--npm-password` flags are available for other environments.
+
+For generated Artifactory and CouchDB configuration, publish credentials are never attached to a distinct install
+registry, so that registry must be usable without those credentials. Generated npm configuration is written to a
+temporary mode-`0600` file outside the generated project and supplied through `NPM_CONFIG_USERCONFIG`. The file is
+removed after publication, never written into the package, and never logged.
+
+```sh
+export CONJURE_TYPESCRIPT_NPM_USERNAME="$NPM_USERNAME"
+export CONJURE_TYPESCRIPT_NPM_PASSWORD="$NPM_PASSWORD"
+
+./godelw conjure-publish \
+  --url https://conjure.example.com \
+  --group-id com.example \
+  --repository "$CONJURE_REPOSITORY" \
+  --username "$ARTIFACTORY_USERNAME" \
+  --password "$ARTIFACTORY_PASSWORD" \
+  --publish-registry https://registry.example.com/api/npm/internal-release \
+  --install-registry https://registry.example.com/api/npm/all-npm
+```
+
+As with packaging, extension providers receive the raw Git/SLS project version even when `--package-version` overrides
+the npm version or the project uses `generator-major` versioning. By default, `--output-dir` is a newly created
+temporary directory.
+
 Assets
 ======
 `godel-conjure-plugin` supports the use of [assets](https://github.com/palantir/godel/wiki/Plugins#assets) to extend its
@@ -150,8 +203,9 @@ This asset is invoked by the `conjure-backcompat` task (integrated into `./godel
 See [backcompatasset/asset.go](backcompatasset/asset.go) for the asset API that can be used to implement backcompat checking assets.
 
 ### Conjure IR Extensions Asset
-The `"conjure-ir-extensions-provider"` asset type allows key-value pairs to be added to the [`extensions`](https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions) block of the Conjure IR **as part of the
-`publish` command (the `conjure-publish` godel task)**.
+The `"conjure-ir-extensions-provider"` asset type allows key-value pairs to be added to the [`extensions`](https://github.com/palantir/conjure/blob/master/docs/spec/intermediate_representation.md#extensions) block of the Conjure IR as part of the
+`publish` command (the `conjure-publish` godel task), including before TypeScript packaging during publish, or before
+standalone TypeScript packaging when `conjure-typescript` is invoked with `--url`.
 
 ### Requirements
 

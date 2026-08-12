@@ -15,9 +15,11 @@
 package conjureplugin
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/typescript"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -284,8 +286,29 @@ projects:
 		assert.Equal(t, &TypeScriptParam{
 			PackageName:              "@palantir/example-api",
 			NpmVersionScheme:         NpmVersionSchemeGit,
+			NpmPublisherProvider:     typescript.NpmPublisherProviderArtifactory,
 			GenerateThrowingServices: true,
 		}, params[0].TypeScript)
+	})
+
+	t.Run("accepts a scope containing characters npm disallows in the name", func(t *testing.T) {
+		// npm's own package name validation permits "~" (and other encodeURIComponent-safe characters) in the scope
+		// even though it disallows them in the name after the scope.
+		cfg, err := config.ReadConfigFromBytes([]byte(`
+version: 2
+projects:
+  project-1:
+    output-dir: outputDir
+    ir-locator: input.yml
+    typescript:
+      package-name: "@scope~/example-api"
+`))
+		require.NoError(t, err)
+
+		params, _, err := ParamsFromConfig(&cfg)
+		require.NoError(t, err)
+		require.Len(t, params, 1)
+		assert.Equal(t, "@scope~/example-api", params[0].TypeScript.PackageName)
 	})
 
 	t.Run("preserves explicit values", func(t *testing.T) {
@@ -298,6 +321,7 @@ projects:
     typescript:
       package-name: "@palantir/example-api"
       npm-version-scheme: generator-major
+      npm-publisher-provider: couchdb
       flavorized-aliases: true
       node-compatible-modules: true
       readonly-interfaces: true
@@ -312,6 +336,7 @@ projects:
 		assert.Equal(t, &TypeScriptParam{
 			PackageName:                 "@palantir/example-api",
 			NpmVersionScheme:            NpmVersionSchemeGeneratorMajor,
+			NpmPublisherProvider:        typescript.NpmPublisherProviderCouchDB,
 			FlavorizedAliases:           true,
 			NodeCompatibleModules:       true,
 			ReadonlyInterfaces:          true,
@@ -367,6 +392,91 @@ projects:
 		_, _, err = ParamsFromConfig(&cfg)
 		require.ErrorContains(t, err, "npm-version-scheme must be one of")
 	})
+
+	t.Run("unknown publisher provider", func(t *testing.T) {
+		cfg, err := config.ReadConfigFromBytes([]byte(`
+version: 2
+projects:
+  project-1:
+    output-dir: outputDir
+    ir-locator: input.yml
+    typescript:
+      package-name: "@palantir/example-api"
+      npm-publisher-provider: unknown
+`))
+		require.NoError(t, err)
+
+		_, _, err = ParamsFromConfig(&cfg)
+		require.ErrorContains(t, err, "npm-publisher-provider must be one of")
+	})
+
+	for _, tc := range []struct {
+		name        string
+		packageName string
+		wantError   string
+	}{
+		{
+			name:        "unscoped package name",
+			packageName: "example-api",
+			wantError:   "must be a full scoped npm package name",
+		},
+		{
+			name:        "empty scope",
+			packageName: "@/example-api",
+			wantError:   "must be a full scoped npm package name",
+		},
+		{
+			name:        "scope with no package name",
+			packageName: "@palantir/",
+			wantError:   "must be a full scoped npm package name",
+		},
+		{
+			name:        "invalid scope character",
+			packageName: "@Palantir/example-api",
+			wantError:   "invalid npm scope",
+		},
+		{
+			name:        "invalid name character",
+			packageName: "@palantir/Example-API",
+			wantError:   "invalid npm name",
+		},
+		{
+			name:        "name with an extra slash",
+			packageName: "@palantir/example/api",
+			wantError:   "invalid npm name",
+		},
+		{
+			name:        "name starting with a dot",
+			packageName: "@palantir/.example-api",
+			wantError:   `must not have a name starting with "."`,
+		},
+		{
+			name:        "name with a disallowed special character",
+			packageName: "@palantir/example~api",
+			wantError:   "invalid npm name",
+		},
+		{
+			name:        "package name exceeds npm's length limit",
+			packageName: "@palantir/" + strings.Repeat("a", 214),
+			wantError:   "exceeds npm's 214-character length limit",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg, err := config.ReadConfigFromBytes([]byte(`
+version: 2
+projects:
+  project-1:
+    output-dir: outputDir
+    ir-locator: input.yml
+    typescript:
+      package-name: "` + tc.packageName + `"
+`))
+			require.NoError(t, err)
+
+			_, _, err = ParamsFromConfig(&cfg)
+			require.ErrorContains(t, err, tc.wantError)
+		})
+	}
 }
 
 func TestParamsFromConfig(t *testing.T) {

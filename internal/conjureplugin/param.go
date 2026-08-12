@@ -42,7 +42,8 @@ type ConjureProjectParam struct {
 	CLI bool
 	// AcceptFuncs will optionally generate lambda based visitor code for unions specified in this project.
 	AcceptFuncs bool
-	// Publish specifies whether or not this Conjure project should be included in the "publish" operation.
+	// Publish specifies whether this project's Conjure IR should be published. TypeScript publication is independently
+	// enabled by a non-nil TypeScript configuration.
 	Publish bool
 	// SkipConjureBackcompat specifies whether or not backcompat checks should be skipped for this Conjure project.
 	SkipConjureBackcompat bool
@@ -57,20 +58,17 @@ type ConjureProjectParam struct {
 	// "Accept-Conjure-Error-Parameter-Format: JSON" header so that servers which support it serialize
 	// error parameters as JSON rather than the legacy string form.
 	ErrorParameterFormatJSON bool
-	// TypeScript, when non-nil, opts this project into the dedicated "conjure-typescript" task.
+	// TypeScript, when non-nil, opts this project into TypeScript packaging and publication.
 	TypeScript *TypeScriptParam
 }
 
-// NpmVersionScheme selects how the npm package version is derived from the Git project version. The only valid
-// values are NpmVersionSchemeGit and NpmVersionSchemeGeneratorMajor.
-type NpmVersionScheme string
-
 const (
-	// NpmVersionSchemeGit uses the raw Git project version as the npm package version.
-	NpmVersionSchemeGit NpmVersionScheme = "git"
+	// NpmVersionSchemeGit uses the raw Git project version as the npm package version. Valid values for a project's
+	// npm version scheme are NpmVersionSchemeGit and NpmVersionSchemeGeneratorMajor.
+	NpmVersionSchemeGit = "git"
 	// NpmVersionSchemeGeneratorMajor formats the version as "{conjure-typescript major}0{Git version}". For example,
 	// Git version "0.604.0" packaged with a 5.x conjure-typescript generator becomes "500.604.0".
-	NpmVersionSchemeGeneratorMajor NpmVersionScheme = "generator-major"
+	NpmVersionSchemeGeneratorMajor = "generator-major"
 )
 
 // TypeScriptParam specifies the parameters for generating and packaging a Conjure project's TypeScript client.
@@ -78,7 +76,10 @@ type TypeScriptParam struct {
 	// PackageName is the full npm package name, including any scope.
 	PackageName string
 	// NpmVersionScheme selects how the npm package version is derived from the Git project version.
-	NpmVersionScheme NpmVersionScheme
+	NpmVersionScheme string
+	// NpmPublisherProvider selects how conjure-publish obtains npm credentials. It is resolved to a non-empty value
+	// when configuration is loaded.
+	NpmPublisherProvider string
 
 	FlavorizedAliases           bool
 	NodeCompatibleModules       bool
