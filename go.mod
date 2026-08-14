@@ -6,7 +6,7 @@ toolchain go1.26.5
 
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v7 v7.7.0
+	github.com/palantir/conjure-go/v7 v7.8.0
 	github.com/palantir/distgo v1.111.0
 	github.com/palantir/godel/v2 v2.169.0
 	github.com/palantir/pkg/clipackager v1.1.0
@@ -50,7 +50,7 @@ require (
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/nwaples/rardecode/v2 v2.3.0 // indirect
 	github.com/palantir/distgo/pkg/git v1.0.0 // indirect
-	github.com/palantir/go-ptimports/v2 v2.51.0 // indirect
+	github.com/palantir/go-ptimports/v2 v2.52.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.2.0 // indirect
@@ -74,7 +74,7 @@ require (
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
-	golang.org/x/tools v0.48.0 // indirect
+	golang.org/x/tools v0.49.1-0.20260813165158-3c18a2d52646 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
