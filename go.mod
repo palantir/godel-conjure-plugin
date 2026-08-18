@@ -16,7 +16,7 @@ require (
 	github.com/palantir/pkg/safejson v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -30,7 +30,6 @@ require (
 	github.com/cheggaaa/pb/v3 v3.2.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/dave/jennifer v1.7.1 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
@@ -59,7 +58,6 @@ require (
 	github.com/palantir/witchcraft-go-error v1.47.0 // indirect
 	github.com/palantir/witchcraft-go-params v1.44.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.28 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect
 	github.com/sorairolake/lzip-go v0.3.8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
