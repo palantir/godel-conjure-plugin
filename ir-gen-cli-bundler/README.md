@@ -24,5 +24,8 @@ To update the Conjure IR CLI:
 * Update the `conjureTGZVersion` constant in `conjureircli/generator/generate.go`.
 * Run `./godelw generate` to embed the updated version in source.
 
-To update the conjure-typescript CLI, select a version available from Maven Central, update the
-`conjureTypeScriptTGZVersion` constant in `conjuretypescriptcli/generator/generate.go`, and run `./godelw generate`.
+To update the conjure-typescript CLI:
+
+* Select a conjure-typescript version available from Maven Central.
+* Update the `conjureTypeScriptTGZVersion` constant in `conjuretypescriptcli/generator/generate.go`.
+* Run `./godelw generate` to embed the updated version in source.
