@@ -7,10 +7,7 @@ version: 2.1
 orbs:
   go-jobs: palantir/go-jobs@0.10.0
 
-image-version: &image-version "cimg/go:1.26.0-browsers"
-
-go-version: &go-version
-  go_version: go1.26.0
+image-version: &image-version "cimg/go:1.26.6-browsers"
 
 java-version-setup_steps: &java-version-setup_steps
   setup_steps:
@@ -60,13 +57,11 @@ workflows:
       - go-jobs/godel_build:
           name: "build"
           executor: "standard-executor"
-          <<: *go-version
           <<: *java-version-setup_steps
           <<: *all-tags-filter
       - go-jobs/godel_verify:
           name: "verify"
           executor: "standard-executor"
-          <<: *go-version
           <<: *java-version-setup_steps
           skip_tests: true
           requires:
@@ -75,7 +70,6 @@ workflows:
       - go-jobs/godel_test:
           name: "test"
           executor: "standard-executor"
-          <<: *go-version
           <<: *java-version-setup_steps
           requires:
             - build
@@ -83,7 +77,6 @@ workflows:
       - go-jobs/godel_dist:
           name: "dist"
           executor: "standard-executor"
-          <<: *go-version
           <<: *java-version-setup_steps
           requires:
             - build
