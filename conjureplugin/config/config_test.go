@@ -362,6 +362,35 @@ projects:
 				},
 			},
 		},
+		{
+			`
+projects:
+  project:
+   ir-locator: local/yaml-dir
+   typescript:
+     package-name: "@palantir/example-api"
+     npm-version-scheme: generator-major
+     flavorized-aliases: true
+`,
+			config.ConjurePluginConfig{
+				ProjectConfigs: v2.ConjureProjectConfigs{
+					{
+						Name: "project",
+						Config: v2.SingleConjureConfig{
+							IRLocator: v2.IRLocatorConfig{
+								Type:    v2.LocatorTypeAuto,
+								Locator: "local/yaml-dir",
+							},
+							TypeScript: &v2.TypeScriptConfig{
+								PackageName:       "@palantir/example-api",
+								NpmVersionScheme:  "generator-major",
+								FlavorizedAliases: true,
+							},
+						},
+					},
+				},
+			},
+		},
 	} {
 		var got config.ConjurePluginConfig
 		err := yaml.Unmarshal([]byte(tc.in), &got)
@@ -1425,4 +1454,126 @@ func TestGroupIDToParams(t *testing.T) {
 		require.NoError(t, err, "Case %d: %s", i, tc.name)
 		assert.Equal(t, tc.want, got, "Case %d: %s", i, tc.name)
 	}
+}
+
+func TestTypeScriptToParams(t *testing.T) {
+	t.Run("defaults version scheme and generator service modes", func(t *testing.T) {
+		cfg := config.ConjurePluginConfig{
+			ProjectConfigs: v2.ConjureProjectConfigs{{
+				Name: "project-1",
+				Config: v2.SingleConjureConfig{
+					OutputDir: "outputDir",
+					IRLocator: v2.IRLocatorConfig{
+						Type:    v2.LocatorTypeAuto,
+						Locator: "input.yml",
+					},
+					TypeScript: &v2.TypeScriptConfig{
+						PackageName: "@palantir/example-api",
+					},
+				},
+			}},
+		}
+		params, _, err := cfg.ToParams()
+		require.NoError(t, err)
+		require.Len(t, params, 1)
+		assert.Equal(t, &conjureplugin.TypeScriptParam{
+			PackageName:              "@palantir/example-api",
+			NpmVersionScheme:         conjureplugin.NpmVersionSchemeGit,
+			GenerateThrowingServices: true,
+		}, params[0].TypeScript)
+	})
+
+	t.Run("preserves explicit values", func(t *testing.T) {
+		cfg := config.ConjurePluginConfig{
+			ProjectConfigs: v2.ConjureProjectConfigs{{
+				Name: "project-1",
+				Config: v2.SingleConjureConfig{
+					OutputDir: "outputDir",
+					IRLocator: v2.IRLocatorConfig{
+						Type:    v2.LocatorTypeAuto,
+						Locator: "input.yml",
+					},
+					TypeScript: &v2.TypeScriptConfig{
+						PackageName:                 "@palantir/example-api",
+						NpmVersionScheme:            conjureplugin.NpmVersionSchemeGeneratorMajor,
+						FlavorizedAliases:           true,
+						NodeCompatibleModules:       true,
+						ReadonlyInterfaces:          true,
+						GenerateThrowingServices:    new(false),
+						GenerateNonThrowingServices: true,
+					},
+				},
+			}},
+		}
+		params, _, err := cfg.ToParams()
+		require.NoError(t, err)
+		require.Len(t, params, 1)
+		assert.Equal(t, &conjureplugin.TypeScriptParam{
+			PackageName:                 "@palantir/example-api",
+			NpmVersionScheme:            conjureplugin.NpmVersionSchemeGeneratorMajor,
+			FlavorizedAliases:           true,
+			NodeCompatibleModules:       true,
+			ReadonlyInterfaces:          true,
+			GenerateThrowingServices:    false,
+			GenerateNonThrowingServices: true,
+		}, params[0].TypeScript)
+	})
+
+	t.Run("absent block does not opt in", func(t *testing.T) {
+		cfg := config.ConjurePluginConfig{
+			ProjectConfigs: v2.ConjureProjectConfigs{{
+				Name: "project-1",
+				Config: v2.SingleConjureConfig{
+					OutputDir: "outputDir",
+					IRLocator: v2.IRLocatorConfig{
+						Type:    v2.LocatorTypeAuto,
+						Locator: "input.yml",
+					},
+				},
+			}},
+		}
+		params, _, err := cfg.ToParams()
+		require.NoError(t, err)
+		require.Len(t, params, 1)
+		assert.Nil(t, params[0].TypeScript)
+	})
+
+	t.Run("missing package name", func(t *testing.T) {
+		cfg := config.ConjurePluginConfig{
+			ProjectConfigs: v2.ConjureProjectConfigs{{
+				Name: "project-1",
+				Config: v2.SingleConjureConfig{
+					OutputDir: "outputDir",
+					IRLocator: v2.IRLocatorConfig{
+						Type:    v2.LocatorTypeAuto,
+						Locator: "input.yml",
+					},
+					TypeScript: new(v2.TypeScriptConfig),
+				},
+			}},
+		}
+		_, _, err := cfg.ToParams()
+		require.ErrorContains(t, err, "typescript package-name must be specified")
+	})
+
+	t.Run("unknown version scheme", func(t *testing.T) {
+		cfg := config.ConjurePluginConfig{
+			ProjectConfigs: v2.ConjureProjectConfigs{{
+				Name: "project-1",
+				Config: v2.SingleConjureConfig{
+					OutputDir: "outputDir",
+					IRLocator: v2.IRLocatorConfig{
+						Type:    v2.LocatorTypeAuto,
+						Locator: "input.yml",
+					},
+					TypeScript: &v2.TypeScriptConfig{
+						PackageName:      "@palantir/example-api",
+						NpmVersionScheme: "unknown",
+					},
+				},
+			}},
+		}
+		_, _, err := cfg.ToParams()
+		require.ErrorContains(t, err, "npm-version-scheme must be one of")
+	})
 }

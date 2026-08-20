@@ -6,13 +6,14 @@ godel-conjure-plugin
 ====================
 godel-conjure-plugin is a [godel](https://github.com/palantir/godel) plugin for [conjure-go](https://github.com/palantir/conjure-go/).
 The plugin runs conjure-go based on project configuration. It also runs as part of the `--verify` task and verifies that
-the running the task would not alter the content of the output directory.
+Go generation would not alter the content of the output directory.
 
 Tasks
 -----
-* `conjure`: runs Conjure generation. Runs for all of the entries specified in the configuration in order. The working
-  directory is set to be the project directory.
+* `conjure`: runs Go Conjure generation. Runs for all of the entries specified in the configuration in order. The
+  working directory is set to be the project directory.
 * `conjure-publish`: publishes IR to a specified destination.
+* `conjure-typescript`: generates, builds, and packages TypeScript clients for opted-in projects without publishing.
 
 Verify
 ------
@@ -83,6 +84,57 @@ Here is an example invocation to publish a Conjure definition:
 ```
 
 The `--dry-run` flag can be added to print the operation that would be performed (including the upload URL).
+
+Package TypeScript
+------------------
+TypeScript generation is opt-in for each project and is performed only by the dedicated `conjure-typescript` task. The
+normal `conjure` task and verification remain Go-only, so they do not require Node, npm, or registry access.
+
+```yaml
+version: 2
+projects:
+  api:
+    ir-locator: api/src/main/conjure
+    # Existing Conjure IR extension. The configured extension provider computes minimum-version.
+    extensions:
+      recommended-product-dependencies:
+        - product-group: com.example
+          product-name: service
+          maximum-version: 2.x.x
+          optional: true
+    typescript:
+      package-name: "@example/api"
+      # Optional: prefix the Git version with the conjure-typescript generator major.
+      npm-version-scheme: generator-major
+```
+
+`package-name` is required and must include the complete npm package name, including its scope. It is
+not derived from the project key because the key may not contain the scope or suffix used by npm consumers.
+
+Product dependencies are read only from the Conjure IR used for TypeScript generation. If `--url` is supplied and the
+plugin has configured Conjure IR extension-provider assets, the task runs those providers first and reads the resolved
+`extensions.recommended-product-dependencies` value from the enriched IR. `--group-id` overrides the project's group, matching `conjure-publish`.
+Without `--url`, extension providers are skipped and the package is generated without product dependencies.
+
+The default `git` version scheme uses the project's Git version unchanged. The `generator-major` scheme uses
+`{conjure-typescript generator major}0{Git version}`, for example, Git version `0.604.0` with the 5.x generator becomes
+`500.604.0`. The leading `5` is the `conjure-typescript` major, not the godel plugin major. Upgrading the generator to
+6.x would produce `600.604.0`. `--package-version` bypasses the configured scheme with an exact version, and
+`--output-dir` overrides the distribution output root. Extension providers always receive the raw Git version (for
+example, `0.604.0`), even when the npm package version is overridden or uses the generator-major scheme.
+
+```sh
+./godelw conjure-typescript
+
+# Resolve configured IR extensions before packaging.
+./godelw conjure-typescript --url https://artifactory.example.com --group-id com.example
+```
+
+The task generates each configured TypeScript project, runs `npm install --no-package-lock --no-production`, compiles
+it, and runs `npm pack`. Tarballs use distgo's distribution layout at
+`out/dist/<conjure-project>/<npm-version>/npm` by default. Local YAML input also requires Java for Conjure compilation,
+while TypeScript packaging requires `node` and `npm` on `PATH` and access to the registries needed to install the
+generated project's dependencies.
 
 Assets
 ======

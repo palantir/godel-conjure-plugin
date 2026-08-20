@@ -57,4 +57,28 @@ type ConjureProjectParam struct {
 	// "Accept-Conjure-Error-Parameter-Format: JSON" header so that servers which support it serialize
 	// error parameters as JSON rather than the legacy string form.
 	ErrorParameterFormatJSON bool
+	// TypeScript, when non-nil, opts this project into the dedicated "conjure-typescript" task.
+	TypeScript *TypeScriptParam
+}
+
+const (
+	// NpmVersionSchemeGit uses the raw Git project version as the npm package version.
+	NpmVersionSchemeGit = "git"
+	// NpmVersionSchemeGeneratorMajor formats the version as "{conjure-typescript major}0{Git version}". For example,
+	// Git version "0.604.0" packaged with a 5.x conjure-typescript generator becomes "500.604.0".
+	NpmVersionSchemeGeneratorMajor = "generator-major"
+)
+
+// TypeScriptParam specifies the parameters for generating and packaging a Conjure project's TypeScript client.
+type TypeScriptParam struct {
+	// PackageName is the full npm package name, including any scope.
+	PackageName string
+	// NpmVersionScheme selects how the npm package version is derived from the Git project version.
+	NpmVersionScheme string
+
+	FlavorizedAliases           bool
+	NodeCompatibleModules       bool
+	ReadonlyInterfaces          bool
+	GenerateThrowingServices    bool
+	GenerateNonThrowingServices bool
 }

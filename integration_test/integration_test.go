@@ -16,6 +16,7 @@ package integration_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -649,6 +650,141 @@ exit 0
 
 	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta(ts.URL+"/artifactory/test-repo/com/palantir/test-group/") + ".*?" + regexp.QuoteMeta(".pom")
 	assert.Regexp(t, wantRegexp, lines[1])
+}
+
+func TestConjureTypeScriptTask(t *testing.T) {
+	const (
+		extensionsURL = "https://example.com/conjure"
+		conjureIR     = `{
+  "version": 1,
+  "errors": [],
+  "types": [],
+  "services": [],
+  "extensions": {}
+}`
+		extensionsAsset = `#!/bin/sh
+set -eu
+
+if [ "$#" -ne 1 ]; then
+    exit 1
+fi
+
+if [ "$1" = "conjure-plugin-asset-type" ]; then
+    printf '%s\n' '"conjure-ir-extensions-provider"'
+    exit 0
+fi
+
+if [ "$1" = "_assetInfo" ]; then
+    printf '%s\n' '{"type":"conjure-ir-extensions-provider"}'
+    exit 0
+fi
+
+printf '%s\n' "$1" > "$EXTENSIONS_PROVIDER_ARGS_CAPTURE_FILE"
+printf '%s\n' '{"recommended-product-dependencies":[{"product-group":"com.palantir.test","product-name":"dependency","minimum-version":"1.0.0","maximum-version":"1.x.x"}]}'
+`
+	)
+
+	extensionsAssetFile := tempfilecreator.MustWriteBytesToTempFile([]byte(extensionsAsset))
+	require.NoError(t, os.Chmod(extensionsAssetFile, 0700))
+	setupFakeNpmExecutable(t)
+
+	for _, testCase := range []struct {
+		name                  string
+		provideURL            bool
+		wantProductDependency bool
+	}{
+		{
+			name: "without URL skips extension provider",
+		},
+		{
+			name:                  "with URL resolves product dependencies",
+			provideURL:            true,
+			wantProductDependency: true,
+		},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			projectDir, cleanup, err := dirs.TempDir(".", "")
+			require.NoError(t, err)
+			defer cleanup()
+
+			configDir := filepath.Join(projectDir, "godel", "config")
+			require.NoError(t, os.MkdirAll(configDir, 0755))
+			configContents := `
+version: 2
+projects:
+  api:
+    group-id: com.palantir.test
+    ir-locator:
+      type: ir-file
+      locator: ir.json
+    typescript:
+      package-name: "@palantir/test-api"
+`
+			require.NoError(t, os.WriteFile(filepath.Join(configDir, "conjure-plugin.yml"), []byte(configContents), 0644))
+			require.NoError(t, os.WriteFile(filepath.Join(projectDir, "ir.json"), []byte(conjureIR), 0644))
+
+			packageJSONCapturePath := filepath.Join(t.TempDir(), "package.json")
+			extensionsProviderArgsCapturePath := filepath.Join(t.TempDir(), "extensions-provider-args")
+			t.Setenv("NPM_PACKAGE_JSON_CAPTURE_FILE", packageJSONCapturePath)
+			t.Setenv("EXTENSIONS_PROVIDER_ARGS_CAPTURE_FILE", extensionsProviderArgsCapturePath)
+
+			args := []string{
+				"--assets=" + extensionsAssetFile,
+				"--package-version=1.2.3",
+			}
+			if testCase.provideURL {
+				args = append(args, "--url="+extensionsURL)
+			}
+			outputBuf := &bytes.Buffer{}
+			runPluginCleanup, err := pluginapitester.RunPlugin(
+				pluginapitester.NewPluginProvider(pluginPath),
+				nil,
+				"conjure-typescript",
+				args,
+				projectDir,
+				false,
+				outputBuf,
+			)
+			defer runPluginCleanup()
+			require.NoError(t, err, outputBuf.String())
+
+			assert.FileExists(t, filepath.Join(projectDir, "out", "dist", "api", "1.2.3", "npm", "palantir-test-api-1.2.3.tgz"))
+			packageJSONBytes, err := os.ReadFile(packageJSONCapturePath)
+			require.NoError(t, err)
+			var packageJSON struct {
+				SLS struct {
+					Dependencies map[string]json.RawMessage `json:"dependencies"`
+				} `json:"sls"`
+			}
+			require.NoError(t, json.Unmarshal(packageJSONBytes, &packageJSON))
+			_, hasProductDependency := packageJSON.SLS.Dependencies["com.palantir.test:dependency"]
+			assert.Equal(t, testCase.wantProductDependency, hasProductDependency)
+
+			if testCase.provideURL {
+				providerArgs, err := os.ReadFile(extensionsProviderArgsCapturePath)
+				require.NoError(t, err)
+				assert.Contains(t, string(providerArgs), extensionsURL)
+			} else {
+				_, err := os.Stat(extensionsProviderArgsCapturePath)
+				assert.True(t, os.IsNotExist(err), "extension provider should not be invoked without --url")
+			}
+		})
+	}
+}
+
+func setupFakeNpmExecutable(t *testing.T) {
+	t.Helper()
+	binDir := t.TempDir()
+	script := `#!/bin/sh
+set -eu
+cp package.json "$NPM_PACKAGE_JSON_CAPTURE_FILE"
+if [ "${1:-}" = "pack" ]; then
+    touch "palantir-test-api-1.2.3.tgz"
+    printf '%s\n' '[{"filename":"palantir-test-api-1.2.3.tgz","files":[{"path":"package.json"},{"path":"index.js"}]}]'
+fi
+`
+	require.NoError(t, os.WriteFile(filepath.Join(binDir, "npm"), []byte(script), 0700))
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 }
 
 func TestConjurePluginPublishAssetSpec(t *testing.T) {
