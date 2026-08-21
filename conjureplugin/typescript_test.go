@@ -116,13 +116,14 @@ func TestPackageTypeScript(t *testing.T) {
 	require.Equal(t, expectedPackages, packages)
 }
 
-func TestPackageTypeScript_UsesDistgoOutputLayoutByDefault(t *testing.T) {
+func TestPackageTypeScript_DefaultsToTemporaryOutputDir(t *testing.T) {
 	projectDir := t.TempDir()
 	conjureProjectParams := ConjureProjectParams{{
 		ProjectName: "api",
 		IRProvider:  staticTypeScriptIRProvider(`{"version":1}`),
 		TypeScript:  &TypeScriptParam{PackageName: "@palantir/api"},
 	}}
+	var gotOutputDir string
 	_, err := packageTypeScript(
 		conjureProjectParams,
 		projectDir,
@@ -130,13 +131,21 @@ func TestPackageTypeScript_UsesDistgoOutputLayoutByDefault(t *testing.T) {
 		io.Discard,
 		io.Discard,
 		func(_ []byte, _ typescript.Params, packageOutputDir string, _ io.Writer) (string, error) {
-			assert.Equal(t, filepath.Join(projectDir, "out", "dist", "api", "1.2.3", "npm"), packageOutputDir)
+			gotOutputDir = packageOutputDir
 			return filepath.Join(packageOutputDir, "palantir-api-1.2.3.tgz"), nil
 		},
 		nil,
 		"",
 	)
 	require.NoError(t, err)
+	root := filepath.Dir(filepath.Dir(filepath.Dir(gotOutputDir)))
+	t.Cleanup(func() { _ = os.RemoveAll(root) })
+
+	assert.False(t, strings.HasPrefix(gotOutputDir, projectDir), "default output dir %q should not be rooted under the project directory %q", gotOutputDir, projectDir)
+	assert.Equal(t, filepath.Join(root, "api", "1.2.3", "npm"), gotOutputDir)
+	info, err := os.Stat(root)
+	require.NoError(t, err)
+	assert.True(t, info.IsDir())
 }
 
 func TestPackageTypeScript_RejectsUnspecifiedGitVersion(t *testing.T) {

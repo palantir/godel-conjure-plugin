@@ -1495,7 +1495,7 @@ func TestTypeScriptToParams(t *testing.T) {
 					},
 					TypeScript: &v2.TypeScriptConfig{
 						PackageName:                 "@palantir/example-api",
-						NpmVersionScheme:            conjureplugin.NpmVersionSchemeGeneratorMajor,
+						NpmVersionScheme:            string(conjureplugin.NpmVersionSchemeGeneratorMajor),
 						FlavorizedAliases:           true,
 						NodeCompatibleModules:       true,
 						ReadonlyInterfaces:          true,

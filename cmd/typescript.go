@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -51,13 +52,20 @@ var typeScriptCmd = &cobra.Command{
 		if err := os.Chdir(absProjectDir); err != nil {
 			return errors.Wrap(err, "failed to set working directory")
 		}
+		// Conjure IR extension-provider assets need a base URL to resolve against (matching conjure-publish),
+		// so they are only invoked when both a URL and at least one asset is configured. It is valid to run
+		// without the URL/extensions-provider, but the package will be generated without embedded product dependencies.
 		var extensionsProvider extensionsprovider.ExtensionsProvider
-		if typeScriptURLFlagVal != "" && len(loadedAssets.ConjureIRExtensionsProviders) > 0 {
-			extensionsProvider = extensionsprovider.NewAssetsExtensionsProvider(
-				loadedAssets.ConjureIRExtensionsProviders,
-				configFileFlagVal,
-				typeScriptURLFlagVal,
-			)
+		if len(loadedAssets.ConjureIRExtensionsProviders) > 0 {
+			if typeScriptURLFlagVal == "" {
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "[WARNING]: %d Conjure IR extension provider asset(s) configured but --url not provided, packaging without resolving product dependencies\n", len(loadedAssets.ConjureIRExtensionsProviders))
+			} else {
+				extensionsProvider = extensionsprovider.NewAssetsExtensionsProvider(
+					loadedAssets.ConjureIRExtensionsProviders,
+					configFileFlagVal,
+					typeScriptURLFlagVal,
+				)
+			}
 		}
 
 		opts := conjureplugin.PackageTypeScriptOptions{
@@ -70,7 +78,7 @@ var typeScriptCmd = &cobra.Command{
 }
 
 func init() {
-	typeScriptCmd.Flags().StringVar(&typeScriptOutputDirFlagVal, "output-dir", conjureplugin.DefaultTypeScriptOutputDir, "dist output root beneath which to write npm package tarballs")
+	typeScriptCmd.Flags().StringVar(&typeScriptOutputDirFlagVal, "output-dir", "", "output directory to write npm package tarballs (defaults to a new temporary directory)")
 	typeScriptCmd.Flags().StringVar(&typeScriptPackageVersionFlagVal, "package-version", "", "exact npm package version override")
 	typeScriptCmd.Flags().StringVar(&typeScriptGroupIDFlagVal, string(publisher.GroupIDFlag.Name), "", "group ID passed to Conjure IR extension providers (overrides project configuration)")
 	typeScriptCmd.Flags().StringVar(&typeScriptURLFlagVal, string(publisher.ConnectionInfoURLFlag.Name), "", "base URL passed to Conjure IR extension providers (providers are skipped when omitted)")

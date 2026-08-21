@@ -119,9 +119,9 @@ Without `--url`, extension providers are skipped and the package is generated wi
 The default `git` version scheme uses the project's Git version unchanged. The `generator-major` scheme uses
 `{conjure-typescript generator major}0{Git version}`, for example, Git version `0.604.0` with the 5.x generator becomes
 `500.604.0`. The leading `5` is the `conjure-typescript` major, not the godel plugin major. Upgrading the generator to
-6.x would produce `600.604.0`. `--package-version` bypasses the configured scheme with an exact version, and
-`--output-dir` overrides the distribution output root. Extension providers always receive the raw Git version (for
-example, `0.604.0`), even when the npm package version is overridden or uses the generator-major scheme.
+6.x would produce `600.604.0`. `--package-version` bypasses the configured scheme with an exact version. Extension
+providers always receive the raw Git version (for example, `0.604.0`), even when the npm package version is
+overridden or uses the generator-major scheme.
 
 ```sh
 ./godelw conjure-typescript
@@ -131,10 +131,10 @@ example, `0.604.0`), even when the npm package version is overridden or uses the
 ```
 
 The task generates each configured TypeScript project, runs `npm install --no-package-lock --no-production`, compiles
-it, and runs `npm pack`. Tarballs use distgo's distribution layout at
-`out/dist/<conjure-project>/<npm-version>/npm` by default. Local YAML input also requires Java for Conjure compilation,
-while TypeScript packaging requires `node` and `npm` on `PATH` and access to the registries needed to install the
-generated project's dependencies.
+it, and runs `npm pack`. Tarballs use distgo's distribution layout, `<output-dir>/<conjure-project>/<npm-version>/npm`.
+By default, `--output-dir` is a newly created temporary directory. Local YAML input also requires Java for Conjure compilation, while TypeScript
+packaging requires `node` and `npm` on `PATH` and access to the registries needed to install the generated project's
+dependencies.
 
 Assets
 ======

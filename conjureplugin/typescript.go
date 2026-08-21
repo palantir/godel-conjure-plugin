@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -31,13 +32,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-// DefaultTypeScriptOutputDir is the distgo distribution root used by the conjure-typescript task.
-const DefaultTypeScriptOutputDir = "out/dist"
-
 const typeScriptNpmDistID = distgo.DistID("npm")
 
 // PackageTypeScriptOptions configures generation of npm package tarballs for projects with TypeScript configuration.
 type PackageTypeScriptOptions struct {
+	// OutputDir to write npm package tarballs. If empty, a new temporary directory is created and used.
 	OutputDir      string
 	PackageVersion string
 	// NpmUserConfigPath, when non-empty, selects an npm user configuration file for install, build, and pack. It is
@@ -106,11 +105,14 @@ func packageTypeScriptWithVersioner(
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to resolve project directory")
 	}
-	if opts.OutputDir == "" {
-		opts.OutputDir = DefaultTypeScriptOutputDir
-	}
 	packageRoot := opts.OutputDir
-	if !filepath.IsAbs(packageRoot) {
+	switch {
+	case packageRoot == "":
+		packageRoot, err = os.MkdirTemp("", "conjure-typescript-")
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to create temporary output directory")
+		}
+	case !filepath.IsAbs(packageRoot):
 		packageRoot = filepath.Join(projectDir, packageRoot)
 	}
 
@@ -243,7 +245,7 @@ func isPathSegment(value string) bool {
 	return value != "." && filepath.IsLocal(value) && filepath.Base(value) == value
 }
 
-func npmPackageVersion(scheme, gitVersion string) (string, error) {
+func npmPackageVersion(scheme NpmVersionScheme, gitVersion string) (string, error) {
 	switch scheme {
 	case "", NpmVersionSchemeGit:
 		return gitVersion, nil

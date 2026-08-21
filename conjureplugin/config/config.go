@@ -144,12 +144,12 @@ func toTypeScriptParam(cfg *v2.TypeScriptConfig) (*conjureplugin.TypeScriptParam
 		return nil, errors.New("typescript package-name must be specified")
 	}
 
-	versionScheme := cfg.NpmVersionScheme
+	versionScheme := conjureplugin.NpmVersionScheme(cfg.NpmVersionScheme)
 	if versionScheme == "" {
 		versionScheme = conjureplugin.NpmVersionSchemeGit
 	}
 	if versionScheme != conjureplugin.NpmVersionSchemeGit && versionScheme != conjureplugin.NpmVersionSchemeGeneratorMajor {
-		return nil, errors.New("npm-version-scheme must be one of \"" + conjureplugin.NpmVersionSchemeGit + "\" or \"" + conjureplugin.NpmVersionSchemeGeneratorMajor + "\"")
+		return nil, errors.New("npm-version-scheme must be one of \"" + string(conjureplugin.NpmVersionSchemeGit) + "\" or \"" + string(conjureplugin.NpmVersionSchemeGeneratorMajor) + "\"")
 	}
 
 	generateThrowingServices := true

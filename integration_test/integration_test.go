@@ -728,9 +728,11 @@ projects:
 			t.Setenv("NPM_PACKAGE_JSON_CAPTURE_FILE", packageJSONCapturePath)
 			t.Setenv("EXTENSIONS_PROVIDER_ARGS_CAPTURE_FILE", extensionsProviderArgsCapturePath)
 
+			outputDir := t.TempDir()
 			args := []string{
 				"--assets=" + extensionsAssetFile,
 				"--package-version=1.2.3",
+				"--output-dir=" + outputDir,
 			}
 			if testCase.provideURL {
 				args = append(args, "--url="+extensionsURL)
@@ -748,7 +750,7 @@ projects:
 			defer runPluginCleanup()
 			require.NoError(t, err, outputBuf.String())
 
-			assert.FileExists(t, filepath.Join(projectDir, "out", "dist", "api", "1.2.3", "npm", "palantir-test-api-1.2.3.tgz"))
+			assert.FileExists(t, filepath.Join(outputDir, "api", "1.2.3", "npm", "palantir-test-api-1.2.3.tgz"))
 			packageJSONBytes, err := os.ReadFile(packageJSONCapturePath)
 			require.NoError(t, err)
 			var packageJSON struct {
