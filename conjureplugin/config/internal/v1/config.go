@@ -209,9 +209,9 @@ func (v1cfg *ConjurePluginConfig) ToV2() *v2.ConjurePluginConfig {
 
 	// Create v2 config with intelligent field mapping
 	v2cfg := v2.ConjurePluginConfig{
-		ConfigWithVersion: versionedconfig.ConfigWithVersion{Version: "2"},
-		GroupID:           v1cfg.GroupID,
-		ProjectConfigs:    *v1cfg.ProjectConfigs.ToV2(),
+		Version:        "2",
+		GroupID:        v1cfg.GroupID,
+		ProjectConfigs: *v1cfg.ProjectConfigs.ToV2(),
 	}
 
 	// Check if we need to allow conflicting output directories.
