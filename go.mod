@@ -1,15 +1,13 @@
 module github.com/palantir/godel-conjure-plugin/v7
 
-go 1.26.0
-
-toolchain go1.26.6
+go 1.27.0
 
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.9.0
-	github.com/palantir/distgo v1.112.0
+	github.com/palantir/distgo v1.113.0
 	github.com/palantir/distgo/pkg/git v1.0.0
-	github.com/palantir/godel/v2 v2.170.0
+	github.com/palantir/godel/v2 v2.173.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.3.0
 	github.com/palantir/pkg/matcher v1.3.0
@@ -28,7 +26,7 @@ require (
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.6.5 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
-	github.com/cheggaaa/pb/v3 v3.2.0 // indirect
+	github.com/cheggaaa/pb/v3 v3.2.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/dave/jennifer v1.7.1 // indirect
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
@@ -56,7 +54,7 @@ require (
 	github.com/palantir/pkg/specdir v1.3.0 // indirect
 	github.com/palantir/pkg/transform v1.2.0 // indirect
 	github.com/palantir/witchcraft-go-error v1.47.0 // indirect
-	github.com/palantir/witchcraft-go-params v1.44.0 // indirect
+	github.com/palantir/witchcraft-go-params v1.45.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.29 // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect
 	github.com/sorairolake/lzip-go v0.3.8 // indirect

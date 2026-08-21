@@ -32,7 +32,7 @@ github.com/bodgit/sevenzip/internal/zstd
 # github.com/bodgit/windows v1.0.1
 ## explicit; go 1.13
 github.com/bodgit/windows
-# github.com/cheggaaa/pb/v3 v3.2.0
+# github.com/cheggaaa/pb/v3 v3.2.1
 ## explicit; go 1.25.0
 github.com/cheggaaa/pb/v3
 github.com/cheggaaa/pb/v3/termutil
@@ -130,7 +130,7 @@ github.com/palantir/conjure-go/v7/conjure/snip
 github.com/palantir/conjure-go/v7/conjure/transforms
 github.com/palantir/conjure-go/v7/conjure/types
 github.com/palantir/conjure-go/v7/cycles
-# github.com/palantir/distgo v1.112.0
+# github.com/palantir/distgo v1.113.0
 ## explicit; go 1.26.0
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/distgotaskprovider
@@ -147,7 +147,7 @@ github.com/palantir/distgo/pkg/git
 # github.com/palantir/go-ptimports/v2 v2.52.0
 ## explicit; go 1.26.0
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel/v2 v2.170.0
+# github.com/palantir/godel/v2 v2.173.0
 ## explicit; go 1.26.0
 github.com/palantir/godel/v2/framework/artifactresolver
 github.com/palantir/godel/v2/framework/builtintasks
@@ -208,7 +208,7 @@ github.com/palantir/pkg/transform
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-params v1.44.0
+# github.com/palantir/witchcraft-go-params v1.45.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-params
 # github.com/pierrec/lz4/v4 v4.1.29
