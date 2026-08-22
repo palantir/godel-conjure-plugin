@@ -93,6 +93,8 @@ github.com/palantir/pkg/clipackager v1.1.0 h1:dVB/0+6kBzSwVHWWIdgGI8lCkAE5WwIij3
 github.com/palantir/pkg/clipackager v1.1.0/go.mod h1:lhPSNfUzR13rCVymR7/27f75/CQHugkpYjUklksaA10=
 github.com/palantir/pkg/cobracli v1.3.0 h1:PZhMQGNA3Ij1am+hDTzYhzLtgYgiKNUnpK7kmRADDWs=
 github.com/palantir/pkg/cobracli v1.3.0/go.mod h1:w+uRAI4mLL3OW92zbm/8OAI94iNXevjUyyV8/0dbEIA=
+github.com/palantir/pkg/codegenfiles v0.0.0-20260727173115-26ef973d1261 h1:gueXOJbg//BDqxhVwCh0gvrHIvwjEF98cFrna+RydZM=
+github.com/palantir/pkg/codegenfiles v0.0.0-20260727173115-26ef973d1261/go.mod h1:71F0x95TAJ9zAV3GZRxPkofrHoVH/d1nSJ3DVUNHjt8=
 github.com/palantir/pkg/gittest v1.0.0/go.mod h1:M49S4TsX5sh7lYJmOF+pFzcB4fJNOylzN8tOdpSq958=
 github.com/palantir/pkg/gittest v1.3.0 h1:JkoXNT3MWhlmmDyNhpkYJlQG4Boe99d9M15QJcIFlns=
 github.com/palantir/pkg/gittest v1.3.0/go.mod h1:sfzWndTEU0HBZ8XZHFAsFZx9DH5Ere+hfYK13USLjbg=

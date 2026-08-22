@@ -17,18 +17,24 @@ package conjureplugin
 import (
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/palantir/conjure-go/v7/conjure"
 	conjurego "github.com/palantir/conjure-go/v7/conjure"
 	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
+	"github.com/palantir/pkg/codegenfiles"
 	"github.com/palantir/pkg/matcher"
 	"github.com/pkg/errors"
 )
 
 const indentLen = 2
+
+// generatedFileMatcher matches the files Conjure owns within an output directory. Ownership is
+// established by the ".conjure." infix rather than by a marker inside the file, because a
+// .conjure.json output cannot carry a comment; a Project therefore leaves ContentsMatcher unset and
+// relies on this instead.
+var generatedFileMatcher = matcher.Name(`.*\.conjure\.(go|json)$`)
 
 func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.Writer) error {
 	type verifyFailedInfo struct {
@@ -38,14 +44,13 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 	var verifyFailedInfos []verifyFailedInfo
 
 	for _, currParam := range params {
-		outputDir := currParam.OutputDir
 		conjureDef, err := conjureDefinitionFromParam(currParam)
 		if err != nil {
 			return err
 		}
 
 		outputConf := conjure.OutputConfiguration{
-			OutputDir:                filepath.Join(projectDir, outputDir),
+			OutputDir:                filepath.Join(projectDir, currParam.OutputDir),
 			GenerateServer:           currParam.Server,
 			GenerateCLI:              currParam.CLI,
 			GenerateFuncsVisitor:     currParam.AcceptFuncs,
@@ -53,44 +58,36 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			ErrorParameterFormatJSON: currParam.ErrorParameterFormatJSON,
 		}
 
-		conjureFilesToGenerate, err := conjure.GenerateOutputFiles(conjureDef, outputConf)
+		out, err := renderOutput(conjureDef, outputConf)
 		if err != nil {
-			return errors.Wrapf(err, "failed to generate conjure output")
+			return err
 		}
 
-		var filesToDelete []string
-		if !currParam.SkipDeleteGeneratedFiles {
-			filesToDelete, err = computeFilesToDelete(outputConf.OutputDir, conjureFilesToGenerate)
-			if err != nil {
-				return err
-			}
+		// Each Conjure project owns its own output directory and decides for itself whether obsolete
+		// output is removed, so each is reconciled as a separate project. Dir is the project directory
+		// rather than the output directory so that reported paths are the ones a developer recognizes;
+		// the matcher, not Dir, is what confines the project to its own output.
+		p := &codegenfiles.Project{
+			Dir:         projectDir,
+			FileMatcher: matcher.All(matcher.Path(currParam.OutputDir), generatedFileMatcher),
+			DeleteStale: !currParam.SkipDeleteGeneratedFiles,
+		}
+		changes, err := p.Plan(out)
+		if err != nil {
+			return errors.Wrapf(err, "failed to reconcile Conjure output for %s", currParam.ProjectName)
 		}
 
 		if verify {
-			// get files to checksum, which is combination of files that will be generated and files that will be deleted
-			filesToChecksum := append(getOutputFileAbsPaths(conjureFilesToGenerate), filesToDelete...)
-			diff, err := diffOnDisk(projectDir, filesToChecksum, conjureFilesToGenerate)
-			if err != nil {
-				return err
-			}
-			if len(diff.Diffs) > 0 {
-				// set RootDir to empty so that output will be relative path
-				diff.RootDir = ""
+			if !changes.Empty() {
 				verifyFailedInfos = append(verifyFailedInfos, verifyFailedInfo{
 					name:       currParam.ProjectName,
-					diffOutput: diff.String(),
+					diffOutput: changes.String(),
 				})
 			}
-		} else {
-			// delete files marked for deletion
-			for _, fileToDelete := range filesToDelete {
-				if err := os.Remove(fileToDelete); err != nil {
-					return errors.Wrapf(err, "failed to delete generated file %s", fileToDelete)
-				}
-			}
-			if err := conjure.Generate(conjureDef, outputConf); err != nil {
-				return err
-			}
+			continue
+		}
+		if err := changes.Apply(); err != nil {
+			return errors.Wrapf(err, "failed to write Conjure output for %s", currParam.ProjectName)
 		}
 	}
 
@@ -107,12 +104,24 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 	return nil
 }
 
-func getOutputFileAbsPaths(files []*conjure.OutputFile) []string {
-	var out []string
-	for _, currFile := range files {
-		out = append(out, currFile.AbsPath())
+// renderOutput renders every file the definition produces into a single Output. Rendering is what
+// conjure.Generate does before writing, so the content is identical; collecting it up front is what
+// allows the output directory to be reconciled rather than overwritten in place.
+func renderOutput(conjureDef spec.ConjureDefinition, outputConf conjure.OutputConfiguration) (*codegenfiles.Output, error) {
+	files, err := conjure.GenerateOutputFiles(conjureDef, outputConf)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to generate conjure output")
 	}
-	return out
+	out := codegenfiles.NewOutput()
+	for _, file := range files {
+		rendered, err := file.Render()
+		if err != nil {
+			return nil, err
+		}
+		// Conjure reports absolute paths; Plan resolves them against the output directory.
+		out.Add(file.AbsPath(), rendered)
+	}
+	return out, nil
 }
 
 func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefinition, error) {
@@ -125,66 +134,4 @@ func conjureDefinitionFromParam(param ConjureProjectParam) (spec.ConjureDefiniti
 		return spec.ConjureDefinition{}, err
 	}
 	return conjureDefinition, nil
-}
-
-// computeFilesToDelete returns the absolute paths to Conjure-generated files within outputDir that are not contained
-// within filesToGenerate.
-//
-// It does so by getting the absolute paths of all Conjure-generated files currently on disk in the output directory
-// and removing all the absolute paths returned by the AbsPath function of the files in filesToGenerate.
-func computeFilesToDelete(outputDir string, filesToGenerate []*conjure.OutputFile) ([]string, error) {
-	existingFiles, err := getAllGeneratedFiles(outputDir)
-	if err != nil {
-		return nil, err
-	}
-
-	// Build a set of file paths that will be generated
-	generatedPaths := make(map[string]struct{}, len(filesToGenerate))
-	for _, file := range filesToGenerate {
-		generatedPaths[file.AbsPath()] = struct{}{}
-	}
-
-	// Find files that exist but won't be regenerated
-	var obsoleteFiles []string
-	for _, existingFile := range existingFiles {
-		if _, willBeGenerated := generatedPaths[existingFile]; !willBeGenerated {
-			obsoleteFiles = append(obsoleteFiles, existingFile)
-		}
-	}
-
-	return obsoleteFiles, nil
-}
-
-// getAllGeneratedFiles returns the absolute paths of all Conjure-generated files
-// (files ending in .conjure.go or .conjure.json) within the specified output directory.
-func getAllGeneratedFiles(outputDir string) ([]string, error) {
-	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
-		return nil, nil
-	} else if err != nil {
-		return nil, errors.Wrapf(err, "failed to stat output directory %s", outputDir)
-	}
-
-	// Match files ending in .conjure.go or .conjure.json
-	include := matcher.Name(`.*\.conjure\.(go|json)$`)
-
-	relPaths, err := matcher.ListFiles(outputDir, include, nil)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to list files in output directory %s", outputDir)
-	}
-
-	// Convert to absolute paths, filtering out directories
-	// (matcher.ListFiles can return both files and directories that match)
-	var absPaths []string
-	for _, relPath := range relPaths {
-		absPath := filepath.Join(outputDir, relPath)
-		fileInfo, err := os.Stat(absPath)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to stat %s", absPath)
-		}
-		if !fileInfo.IsDir() {
-			absPaths = append(absPaths, absPath)
-		}
-	}
-
-	return absPaths, nil
 }
