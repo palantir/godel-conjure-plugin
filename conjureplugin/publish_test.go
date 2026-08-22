@@ -70,14 +70,17 @@ projects:
 	params, _, err := cfg.ToParams()
 	require.NoError(t, err, "failed to parse config set")
 
+	publishParam, err := conjureplugin.NewPublishParam(params, conjureplugin.PublishParamOptions{
+		ProjectDir:      tmpDir,
+		GroupIDOverride: "com.palantir.foo",
+	})
+	require.NoError(t, err, "failed to resolve publish parameters")
+
 	outputBuf := &bytes.Buffer{}
-	err = conjureplugin.Publish(params, tmpDir, map[distgo.PublisherFlagName]any{
+	err = conjureplugin.Publish(publishParam, map[distgo.PublisherFlagName]any{
 		publisher.ConnectionInfoURLFlag.Name:     "http://artifactory.domain.com",
-		publisher.GroupIDFlag.Name:               "com.palantir.foo",
 		artifactory.PublisherRepositoryFlag.Name: "repo",
-	}, true, outputBuf, func(_ []byte, _, _, _ string) (map[string]any, error) {
-		return nil, nil
-	}, "")
+	}, true, outputBuf)
 	require.NoError(t, err, "failed to publish Conjure")
 
 	lines := strings.Split(outputBuf.String(), "\n")
@@ -88,4 +91,38 @@ projects:
 
 	wantRegexp = regexp.QuoteMeta("[DRY RUN]") + " Uploading to " + regexp.QuoteMeta("http://artifactory.domain.com/artifactory/repo/com/palantir/foo/") + ".*?" + regexp.QuoteMeta(".pom")
 	assert.Regexp(t, wantRegexp, lines[1])
+}
+
+func TestPublish_EmptyParam(t *testing.T) {
+	var stdout bytes.Buffer
+	require.NoError(t, conjureplugin.Publish(conjureplugin.PublishParam{}, nil, true, &stdout))
+	assert.Empty(t, stdout.String())
+}
+
+func TestPublish_UsesResolvedGroupID(t *testing.T) {
+	for _, groupID := range []string{"com.palantir.project", "com.palantir.override"} {
+		t.Run(groupID, func(t *testing.T) {
+			var stdout bytes.Buffer
+
+			err := conjureplugin.Publish(
+				conjureplugin.PublishParam{
+					Version: "1.2.3",
+					ConjureIR: []conjureplugin.ConjureIRPublishParam{{
+						ProjectName: "project",
+						IR:          `{}`,
+						GroupID:     groupID,
+					}},
+				},
+				map[distgo.PublisherFlagName]any{
+					publisher.ConnectionInfoURLFlag.Name:     "http://artifactory.example.com",
+					publisher.GroupIDFlag.Name:               "com.palantir.conflicting",
+					artifactory.PublisherRepositoryFlag.Name: "repository",
+				},
+				true,
+				&stdout,
+			)
+			require.NoError(t, err)
+			assert.Contains(t, stdout.String(), "/repository/"+strings.ReplaceAll(groupID, ".", "/")+"/project/")
+		})
+	}
 }
