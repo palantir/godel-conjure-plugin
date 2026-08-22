@@ -22,6 +22,7 @@ import (
 const (
 	conjureTaskName                       = "conjure"
 	conjurePublishTaskName                = "conjure-publish"
+	conjureTypeScriptTaskName             = "conjure-typescript"
 	conjureBackcompatTaskName             = "conjure-backcompat"
 	conjureAcceptBackCompatBreaksTaskName = "conjure-accept-backcompat-breaks"
 )
@@ -52,6 +53,11 @@ var (
 			conjurePublishTaskName,
 			"Publish Conjure IR",
 			pluginapi.TaskInfoCommand(publishCmdName),
+		),
+		pluginapi.PluginInfoTaskInfo(
+			conjureTypeScriptTaskName,
+			"Generate and package Conjure TypeScript clients as npm packages",
+			pluginapi.TaskInfoCommand(typeScriptCmdName),
 		),
 		pluginapi.PluginInfoTaskInfo(
 			conjureBackcompatTaskName,
