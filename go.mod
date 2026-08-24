@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go/v7 v7.9.0
+	github.com/palantir/conjure-go/v7 v7.10.0
 	github.com/palantir/distgo v1.113.0
 	github.com/palantir/distgo/pkg/git v1.0.0
 	github.com/palantir/godel/v2 v2.173.0
@@ -46,7 +46,7 @@ require (
 	github.com/minio/minlz v1.2.0 // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
-	github.com/nwaples/rardecode/v2 v2.3.0 // indirect
+	github.com/nwaples/rardecode/v2 v2.4.1 // indirect
 	github.com/palantir/go-ptimports/v2 v2.52.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect
@@ -54,7 +54,7 @@ require (
 	github.com/palantir/pkg/specdir v1.3.0 // indirect
 	github.com/palantir/pkg/transform v1.2.0 // indirect
 	github.com/palantir/witchcraft-go-error v1.47.0 // indirect
-	github.com/palantir/witchcraft-go-params v1.45.0 // indirect
+	github.com/palantir/witchcraft-go-params v1.46.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.29 // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect
 	github.com/sorairolake/lzip-go v0.3.8 // indirect

@@ -75,10 +75,10 @@ github.com/nmiyake/pkg/gofiles v1.2.0/go.mod h1:aPXiVvXPwxNanRNuFIRVPYn6eTC4qxjD
 github.com/nwaples/rardecode v1.1.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
 github.com/nwaples/rardecode v1.1.3 h1:cWCaZwfM5H7nAD6PyEdcVnczzV8i/JtotnyW/dD9lEc=
 github.com/nwaples/rardecode v1.1.3/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
-github.com/nwaples/rardecode/v2 v2.3.0 h1:CtgyxWm8ClLcSh1u4M58fOz6lmeb/j4V7KpaEi/6UtM=
-github.com/nwaples/rardecode/v2 v2.3.0/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
-github.com/palantir/conjure-go/v7 v7.9.0 h1:uiahunjKXFw24AJQbwrlDqELT0R9CE5NABsH3hLVCLQ=
-github.com/palantir/conjure-go/v7 v7.9.0/go.mod h1:RZQ0yYiQeHbHAVP3FXtP3zBwGWhbrjAbejeOxAnjz/Q=
+github.com/nwaples/rardecode/v2 v2.4.1 h1:F7zNW2LdAuuBThHWXQaiFUGVD/sef299NfWSB1nHAl4=
+github.com/nwaples/rardecode/v2 v2.4.1/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
+github.com/palantir/conjure-go/v7 v7.10.0 h1:DKGNS9cHi/4sZmvtems9+qfNS5eVixjG8FNcQo6oG1I=
+github.com/palantir/conjure-go/v7 v7.10.0/go.mod h1:VdH5skFja9m7dxPMn6CtiAzOMe7ArfQolf0FMMoc85Q=
 github.com/palantir/distgo v1.113.0 h1:CT7Ki/YNo7hb254ij5LoKx78ECnQ+8+Dq9aYG+2/B4Y=
 github.com/palantir/distgo v1.113.0/go.mod h1:u7GKeZF/wkhY3U38eBvUK4eRdjnBAvvHU+IQtyZ841M=
 github.com/palantir/distgo/pkg/git v1.0.0 h1:bryRJ9ZdJapz5tGzd/snv6U66tLxyb1b4PbPya/aqD4=
@@ -112,8 +112,8 @@ github.com/palantir/pkg/transform v1.2.0 h1:ngTydiV5SUG9mfGxkYk1tH3Xi3vsohjqYqW8
 github.com/palantir/pkg/transform v1.2.0/go.mod h1:p5lGLs0ah/iyB31ODlWIMp0SZibQV6HxSyJaM1L26dw=
 github.com/palantir/witchcraft-go-error v1.47.0 h1:PCsDDVCD0lD5eWI4TpI2vZwXNnNKvmJOx9Ad53wp8vo=
 github.com/palantir/witchcraft-go-error v1.47.0/go.mod h1:bOFeal/mgaHA/0xLLbnJl4Rm8rfZsoGOQdo0zduqWjA=
-github.com/palantir/witchcraft-go-params v1.45.0 h1:J1gJYvIzv0d/LzlmuYSXqSl6Z0r4IyqZYQ2G+uz+KG0=
-github.com/palantir/witchcraft-go-params v1.45.0/go.mod h1:g8yBKlKoLL7WpuLmueA6KYCN1ausuxhFnPA2vKyf/FU=
+github.com/palantir/witchcraft-go-params v1.46.0 h1:yWKG+COZAKZEpr4aWp1ngneCZ2f2F403v2WL2HupOa0=
+github.com/palantir/witchcraft-go-params v1.46.0/go.mod h1:uXTr9aeU7ev10e10GLqXKq6Ohw6Ib/0QYRvCbLa3LI4=
 github.com/pierrec/lz4/v4 v4.1.2/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pierrec/lz4/v4 v4.1.29 h1:CDQY6qZOLI4DW0Nx6R1vRrifrCeQHnNXkMb0hZWXFjg=
 github.com/pierrec/lz4/v4 v4.1.29/go.mod h1:EoQMVJgeeEOMsCqCzqFm2O0cJvljX2nGZjcRIPL34O4=
