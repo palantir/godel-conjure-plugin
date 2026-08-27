@@ -5,7 +5,7 @@ go 1.27.0
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.10.0
-	github.com/palantir/distgo v1.113.0
+	github.com/palantir/distgo v1.114.0
 	github.com/palantir/godel/v2 v2.176.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.3.0
