@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Replace bindata with go:embed; upgrade Conjure to 4.25.0
-  links:
-  - https://github.com/palantir/godel-conjure-plugin/pull/172

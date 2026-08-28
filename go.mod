@@ -5,9 +5,9 @@ go 1.27.0
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.10.0
-	github.com/palantir/distgo v1.113.0
+	github.com/palantir/distgo v1.114.0
 	github.com/palantir/distgo/pkg/git v1.0.0
-	github.com/palantir/godel/v2 v2.173.0
+	github.com/palantir/godel/v2 v2.176.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.3.0
 	github.com/palantir/pkg/matcher v1.3.0
@@ -22,7 +22,7 @@ require (
 require (
 	github.com/STARRY-S/zip v0.2.3 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
-	github.com/andybalholm/brotli v1.2.2 // indirect
+	github.com/andybalholm/brotli v1.2.3 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.6.5 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
@@ -32,7 +32,7 @@ require (
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
-	github.com/google/go-containerregistry v0.21.9 // indirect
+	github.com/google/go-containerregistry v0.22.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.19.2 // indirect
@@ -47,13 +47,13 @@ require (
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/nwaples/rardecode/v2 v2.4.1 // indirect
-	github.com/palantir/go-ptimports/v2 v2.52.0 // indirect
+	github.com/palantir/go-ptimports/v2 v2.53.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.2.0 // indirect
 	github.com/palantir/pkg/specdir v1.3.0 // indirect
 	github.com/palantir/pkg/transform v1.2.0 // indirect
-	github.com/palantir/witchcraft-go-error v1.47.0 // indirect
+	github.com/palantir/witchcraft-go-error v1.48.0 // indirect
 	github.com/palantir/witchcraft-go-params v1.46.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.29 // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect

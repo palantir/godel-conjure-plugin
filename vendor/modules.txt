@@ -4,10 +4,9 @@ github.com/STARRY-S/zip
 # github.com/VividCortex/ewma v1.2.0
 ## explicit; go 1.12
 github.com/VividCortex/ewma
-# github.com/andybalholm/brotli v1.2.2
+# github.com/andybalholm/brotli v1.2.3
 ## explicit; go 1.22
 github.com/andybalholm/brotli
-github.com/andybalholm/brotli/flate
 github.com/andybalholm/brotli/matchfinder
 # github.com/bodgit/plumbing v1.3.0
 ## explicit; go 1.13
@@ -56,7 +55,7 @@ github.com/fatih/color
 # github.com/golang/snappy v1.0.0
 ## explicit
 github.com/golang/snappy
-# github.com/google/go-containerregistry v0.21.9
+# github.com/google/go-containerregistry v0.22.0
 ## explicit; go 1.25.0
 github.com/google/go-containerregistry/pkg/v1
 github.com/google/go-containerregistry/pkg/v1/types
@@ -130,8 +129,8 @@ github.com/palantir/conjure-go/v7/conjure/snip
 github.com/palantir/conjure-go/v7/conjure/transforms
 github.com/palantir/conjure-go/v7/conjure/types
 github.com/palantir/conjure-go/v7/cycles
-# github.com/palantir/distgo v1.113.0
-## explicit; go 1.26.0
+# github.com/palantir/distgo v1.114.0
+## explicit; go 1.27.0
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/distgotaskprovider
 github.com/palantir/distgo/internal/assetapi
@@ -144,11 +143,11 @@ github.com/palantir/distgo/publisher/maven
 # github.com/palantir/distgo/pkg/git v1.0.0
 ## explicit; go 1.13
 github.com/palantir/distgo/pkg/git
-# github.com/palantir/go-ptimports/v2 v2.52.0
+# github.com/palantir/go-ptimports/v2 v2.53.0
 ## explicit; go 1.26.0
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel/v2 v2.173.0
-## explicit; go 1.26.0
+# github.com/palantir/godel/v2 v2.176.0
+## explicit; go 1.27.0
 github.com/palantir/godel/v2/framework/artifactresolver
 github.com/palantir/godel/v2/framework/builtintasks
 github.com/palantir/godel/v2/framework/builtintasks/githooks
@@ -204,7 +203,7 @@ github.com/palantir/pkg/specdir
 # github.com/palantir/pkg/transform v1.2.0
 ## explicit; go 1.25.0
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.47.0
+# github.com/palantir/witchcraft-go-error v1.48.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
