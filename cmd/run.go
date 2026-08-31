@@ -19,8 +19,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/conjureplugin"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -59,7 +59,7 @@ func toProjectParams(cfgFile string, stdout io.Writer) (conjureplugin.ConjurePro
 	if err != nil {
 		return conjureplugin.ConjureProjectParams{}, err
 	}
-	params, warnings, err := cfg.ToParams()
+	params, warnings, err := conjureplugin.ParamsFromConfig(&cfg)
 	if err != nil {
 		return conjureplugin.ConjureProjectParams{}, err
 	}

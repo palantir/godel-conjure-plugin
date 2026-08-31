@@ -19,7 +19,7 @@ import (
 	"os/exec"
 
 	"github.com/palantir/godel-conjure-plugin/v7/backcompatasset"
-	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/conjureplugin"
 )
 
 // BackCompatChecker represents a wrapper around a backcompat asset executable.
