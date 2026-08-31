@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 
 	"github.com/palantir/distgo/publisher"
-	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin"
+	"github.com/palantir/godel-conjure-plugin/v7/internal/conjureplugin"
 	"github.com/palantir/godel-conjure-plugin/v7/internal/extensionsprovider"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"

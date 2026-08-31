@@ -17,8 +17,8 @@ package v2
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
-	"github.com/palantir/godel-conjure-plugin/v7/conjureplugin/config/internal/validate"
 	"github.com/palantir/godel/v2/pkg/versionedconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -170,13 +170,24 @@ func (c *ConjurePluginConfig) OutputDirConflicts() map[string][]error {
 
 			if p1Dir == p2Dir {
 				result[p1.Name] = append(result[p1.Name], fmt.Errorf("project %q and %q have the same output directory %q", p1.Name, p2.Name, p1Dir))
-			} else if validate.IsSubdirectory(p1Dir, p2Dir) {
+			} else if isSubdirectory(p1Dir, p2Dir) {
 				result[p1.Name] = append(result[p1.Name], fmt.Errorf("output directory %q of project %q is a subdirectory of output directory %q of project %q", p2Dir, p2.Name, p1Dir, p1.Name))
 			}
 		}
 	}
 
 	return result
+}
+
+// isSubdirectory returns true if potentialSubDir is a subdirectory of parent, false otherwise. This determination is
+// made by normalizing both paths using filepath.Clean and using filepath.Rel to determine if one path is a
+// subdirectory of the other. Returns false if filepath.Rel returns an error (for example, if one path is absolute
+// and the other is relative). Does not resolve symlinks.
+func isSubdirectory(parent, potentialSubDir string) bool {
+	parent = filepath.Clean(parent)
+	potentialSubDir = filepath.Clean(potentialSubDir)
+	rel, err := filepath.Rel(parent, potentialSubDir)
+	return err == nil && !strings.HasPrefix(rel, "..") && rel != "."
 }
 
 // ResolvedOutputDir returns the final output directory path where generated code will be written.
