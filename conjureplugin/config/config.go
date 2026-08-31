@@ -86,6 +86,10 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 		if currConfig.AcceptFuncs != nil {
 			acceptFuncsFlag = *currConfig.AcceptFuncs
 		}
+		typeScript, err := toTypeScriptParam(currConfig.TypeScript)
+		if err != nil {
+			return nil, nil, pkgerror.Wrapf(err, "invalid typescript configuration for project %q", projectName)
+		}
 
 		params = append(params, conjureplugin.ConjureProjectParam{
 			ProjectName:              projectName,
@@ -100,6 +104,7 @@ func (c *ConjurePluginConfig) ToParams() (_ conjureplugin.ConjureProjectParams, 
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
 			ExportErrorDecoder:       currConfig.ExportErrorDecoder,
 			ErrorParameterFormatJSON: currConfig.ErrorParameterFormatJSON,
+			TypeScript:               typeScript,
 		})
 	}
 	var err error
@@ -123,6 +128,44 @@ type SingleConjureConfig v2.SingleConjureConfig
 
 func ToSingleConjureConfig(in *SingleConjureConfig) *v2.SingleConjureConfig {
 	return (*v2.SingleConjureConfig)(in)
+}
+
+type TypeScriptConfig v2.TypeScriptConfig
+
+func ToTypeScriptConfig(in *TypeScriptConfig) *v2.TypeScriptConfig {
+	return (*v2.TypeScriptConfig)(in)
+}
+
+func toTypeScriptParam(cfg *v2.TypeScriptConfig) (*conjureplugin.TypeScriptParam, error) {
+	if cfg == nil {
+		return nil, nil
+	}
+	if cfg.PackageName == "" {
+		return nil, errors.New("typescript package-name must be specified")
+	}
+
+	versionScheme := conjureplugin.NpmVersionScheme(cfg.NpmVersionScheme)
+	if versionScheme == "" {
+		versionScheme = conjureplugin.NpmVersionSchemeGit
+	}
+	if versionScheme != conjureplugin.NpmVersionSchemeGit && versionScheme != conjureplugin.NpmVersionSchemeGeneratorMajor {
+		return nil, errors.New("npm-version-scheme must be one of \"" + string(conjureplugin.NpmVersionSchemeGit) + "\" or \"" + string(conjureplugin.NpmVersionSchemeGeneratorMajor) + "\"")
+	}
+
+	generateThrowingServices := true
+	if cfg.GenerateThrowingServices != nil {
+		generateThrowingServices = *cfg.GenerateThrowingServices
+	}
+
+	return &conjureplugin.TypeScriptParam{
+		PackageName:                 cfg.PackageName,
+		NpmVersionScheme:            versionScheme,
+		FlavorizedAliases:           cfg.FlavorizedAliases,
+		NodeCompatibleModules:       cfg.NodeCompatibleModules,
+		ReadonlyInterfaces:          cfg.ReadonlyInterfaces,
+		GenerateThrowingServices:    generateThrowingServices,
+		GenerateNonThrowingServices: cfg.GenerateNonThrowingServices,
+	}, nil
 }
 
 type LocatorType v2.LocatorType

@@ -6,6 +6,7 @@ require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.10.0
 	github.com/palantir/distgo v1.114.0
+	github.com/palantir/distgo/pkg/git v1.0.0
 	github.com/palantir/godel/v2 v2.178.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.3.0
@@ -46,7 +47,6 @@ require (
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/nwaples/rardecode/v2 v2.4.1 // indirect
-	github.com/palantir/distgo/pkg/git v1.0.0 // indirect
 	github.com/palantir/go-ptimports/v2 v2.53.0 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect

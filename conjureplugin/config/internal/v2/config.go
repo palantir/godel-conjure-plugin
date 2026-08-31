@@ -127,6 +127,26 @@ type SingleConjureConfig struct {
 	// "Accept-Conjure-Error-Parameter-Format: JSON" header on every request so that servers which
 	// support it serialize error parameters as JSON rather than the legacy string form.
 	ErrorParameterFormatJSON bool `yaml:"error-parameter-format-json,omitempty"`
+	// TypeScript, when present, opts this project into the dedicated "conjure-typescript" task.
+	TypeScript *TypeScriptConfig `yaml:"typescript,omitempty"`
+}
+
+// TypeScriptConfig configures generation and packaging of the TypeScript client for a Conjure project.
+type TypeScriptConfig struct {
+	// PackageName is the full npm package name, including any scope, e.g. "@palantir/example-api". It is required and
+	// never derived because the project key may not contain the scope or suffix used by npm consumers.
+	PackageName string `yaml:"package-name"`
+	// NpmVersionScheme selects how the npm package version is derived from the Git project version. Valid values are
+	// "git" (default) and "generator-major".
+	NpmVersionScheme string `yaml:"npm-version-scheme,omitempty"`
+
+	FlavorizedAliases     bool `yaml:"flavorized-aliases,omitempty"`
+	NodeCompatibleModules bool `yaml:"node-compatible-modules,omitempty"`
+	ReadonlyInterfaces    bool `yaml:"readonly-interfaces,omitempty"`
+	// GenerateThrowingServices defaults to true when omitted, matching the generator default.
+	GenerateThrowingServices *bool `yaml:"generate-throwing-services,omitempty"`
+	// GenerateNonThrowingServices defaults to false when omitted, matching the generator default.
+	GenerateNonThrowingServices bool `yaml:"generate-non-throwing-services,omitempty"`
 }
 
 // OutputDirConflicts detects output directory conflicts between projects.
