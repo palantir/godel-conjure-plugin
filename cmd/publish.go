@@ -71,10 +71,16 @@ var publishCmd = &cobra.Command{
 			flagVals[currFlag.Name] = val
 		}
 
-		return conjureplugin.Publish(projectParams, projectDirFlagVal, flagVals, dryRunFlagVal, cmd.OutOrStdout(),
-			extensionsprovider.NewAssetsExtensionsProvider(loadedAssets.ConjureIRExtensionsProviders, configFileFlagVal, urlFlagVal),
-			groupIDFlagVal,
-		)
+		publishOptions := conjureplugin.PublishParamOptions{
+			ProjectDir:         projectDirFlagVal,
+			ExtensionsProvider: extensionsprovider.NewAssetsExtensionsProvider(loadedAssets.ConjureIRExtensionsProviders, configFileFlagVal, urlFlagVal),
+			GroupIDOverride:    groupIDFlagVal,
+		}
+		publishParam, err := conjureplugin.NewPublishParam(projectParams, publishOptions)
+		if err != nil {
+			return err
+		}
+		return conjureplugin.Publish(publishParam, flagVals, dryRunFlagVal, cmd.OutOrStdout())
 	},
 }
 

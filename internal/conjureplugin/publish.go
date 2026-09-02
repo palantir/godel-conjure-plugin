@@ -17,40 +17,35 @@ package conjureplugin
 import (
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path/filepath"
 
 	"github.com/palantir/distgo/distgo"
-	gitversioner "github.com/palantir/distgo/projectversioner/git"
+	"github.com/palantir/distgo/publisher"
 	"github.com/palantir/distgo/publisher/artifactory"
-	"github.com/palantir/godel-conjure-plugin/v7/internal/extensionsprovider"
 	"github.com/pkg/errors"
 )
 
-func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo.PublisherFlagName]any,
-	dryRun bool, stdout io.Writer, extensionsProvider extensionsprovider.ExtensionsProvider,
-	cliGroupID string) error {
-	var paramsToPublish []ConjureProjectParam
-	for _, param := range params {
-		if !param.Publish {
-			continue
-		}
-		paramsToPublish = append(paramsToPublish, param)
-	}
-	// nothing to publish
-	if len(paramsToPublish) == 0 {
+func Publish(param PublishParam, flagVals map[distgo.PublisherFlagName]any, dryRun bool, stdout io.Writer) error {
+	if len(param.ConjureIR) == 0 {
 		return nil
 	}
+	// distgo gives GroupIDFlag precedence over each product's PublishOutputInfo.GroupID but PublishParam has already
+	// resolved the CLI override into each project, so remove the flag to ensure the resolved value is used.
+	publishFlagVals := maps.Clone(flagVals)
+	delete(publishFlagVals, publisher.GroupIDFlag.Name)
+	return publishConjureIR(param.ConjureIR, param.Version, publishFlagVals, dryRun, stdout)
+}
 
-	// publishing at least 1 artifact: determine version. Note that this is currently hard-coded to use the Git
-	// project versioner.
-	versioner := gitversioner.New()
-	version, err := versioner.ProjectVersion(projectDir)
-	if err != nil {
-		return err
-	}
-
-	publisher := artifactory.NewArtifactoryPublisher()
+func publishConjureIR(
+	params []ConjureIRPublishParam,
+	version string,
+	flagVals map[distgo.PublisherFlagName]any,
+	dryRun bool,
+	stdout io.Writer,
+) error {
+	artifactoryPublisher := artifactory.NewArtifactoryPublisher()
 	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return errors.WithStack(err)
@@ -60,21 +55,13 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 	}()
 
 	var publishInputs []distgo.ProductPublishInfo
-	for _, param := range paramsToPublish {
+	for _, param := range params {
 		conjureProjectName := param.ProjectName
 		currDir := filepath.Join(tmpDir, fmt.Sprintf("conjure-%s", conjureProjectName))
 		irFileName := fmt.Sprintf("%s-%s.conjure.json", conjureProjectName, version)
 		keyAsDistID := distgo.DistID(conjureProjectName)
 		if err := os.Mkdir(currDir, 0755); err != nil {
 			return errors.WithStack(err)
-		}
-
-		var groupID string
-		if param.GroupID != "" {
-			groupID = param.GroupID
-		}
-		if cliGroupID != "" {
-			groupID = cliGroupID
 		}
 
 		projectInfo := distgo.ProjectInfo{
@@ -97,7 +84,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 				},
 			},
 			PublishOutputInfo: &distgo.PublishOutputInfo{
-				GroupID: groupID,
+				GroupID: param.GroupID,
 			},
 		}
 
@@ -107,18 +94,8 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 			return errors.WithStack(err)
 		}
 
-		irBytes, err := param.IRProvider.IRBytes()
-		if err != nil {
-			return err
-		}
-
-		irBytes, err = addExtensionsToIRBytes(irBytes, extensionsProvider, groupID, conjureProjectName, version)
-		if err != nil {
-			return errors.WithStack(err)
-		}
-
 		irFilePath := filepath.Join(directoryPath, irFileName)
-		if err := os.WriteFile(irFilePath, irBytes, 0644); err != nil {
+		if err := os.WriteFile(irFilePath, []byte(param.IR), 0644); err != nil {
 			return errors.WithStack(err)
 		}
 
@@ -130,7 +107,7 @@ func Publish(params ConjureProjectParams, projectDir string, flagVals map[distgo
 		})
 	}
 
-	if err := publisher.RunPublish(publishInputs, flagVals, dryRun, stdout); err != nil {
+	if err := artifactoryPublisher.RunPublish(publishInputs, flagVals, dryRun, stdout); err != nil {
 		return err
 	}
 	return nil
