@@ -11,7 +11,7 @@ require (
 	github.com/palantir/distgo/pkg/git v1.0.0
 	github.com/palantir/godel/v2 v2.180.0
 	github.com/palantir/pkg/clipackager v1.1.0
-	github.com/palantir/pkg/cobracli v1.3.0
+	github.com/palantir/pkg/cobracli v1.4.0
 	github.com/palantir/pkg/matcher v1.3.0
 	github.com/palantir/pkg/safehttp v1.2.0
 	github.com/palantir/pkg/safejson v1.2.0
