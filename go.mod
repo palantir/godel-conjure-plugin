@@ -53,7 +53,7 @@ require (
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.2.0 // indirect
-	github.com/palantir/pkg/specdir v1.3.0 // indirect
+	github.com/palantir/pkg/specdir v1.4.0 // indirect
 	github.com/palantir/pkg/transform v1.2.0 // indirect
 	github.com/palantir/witchcraft-go-error v1.48.0 // indirect
 	github.com/palantir/witchcraft-go-params v1.46.0 // indirect
