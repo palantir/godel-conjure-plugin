@@ -76,6 +76,149 @@ func TestNewPublishParam_CreatesImmutableTargetInputs(t *testing.T) {
 	assert.Same(t, irProvider, projects[0].IRProvider)
 }
 
+func TestNewPublishParam_ResolvesInputsOnceAcrossPublishTargets(t *testing.T) {
+	bothProvider := &countingIRProvider{irBytes: []byte(`{"project":"both"}`)}
+	typeScriptOnlyProvider := &countingIRProvider{irBytes: []byte(`{"project":"typescript-only"}`)}
+	skippedProvider := &countingIRProvider{irBytes: []byte(`{"project":"skipped"}`)}
+	bothTypeScript := &TypeScriptParam{PackageName: "@palantir/both", Publish: true}
+	projects := ConjureProjectParams{
+		{
+			ProjectName: "both",
+			IRProvider:  bothProvider,
+			Publish:     true,
+			TypeScript:  bothTypeScript,
+		},
+		{
+			ProjectName: "typescript-only",
+			IRProvider:  typeScriptOnlyProvider,
+			TypeScript:  &TypeScriptParam{PackageName: "@palantir/typescript-only", Publish: true},
+		},
+		{
+			ProjectName: "skipped",
+			IRProvider:  skippedProvider,
+		},
+	}
+	extensionsProviderCalls := make(map[string]int)
+	versionerCalls := 0
+
+	param, err := newPublishParam(
+		projects,
+		PublishParamOptions{
+			ExtensionsProvider: func(_ []byte, _, projectName, _ string) (map[string]any, error) {
+				extensionsProviderCalls[projectName]++
+				return map[string]any{"resolved-for": projectName}, nil
+			},
+		},
+		func(string) (string, error) {
+			versionerCalls++
+			return "1.2.3", nil
+		},
+	)
+	require.NoError(t, err)
+	require.Len(t, param.ConjureIR, 1)
+	require.Len(t, param.TypeScript, 2)
+	assert.Equal(t, "1.2.3", param.Version)
+	assert.Equal(t, "both", param.ConjureIR[0].ProjectName)
+	assert.Equal(t, "both", param.TypeScript[0].ProjectName)
+	assert.Equal(t, "typescript-only", param.TypeScript[1].ProjectName)
+	assert.Equal(t, param.ConjureIR[0].IR, param.TypeScript[0].IR)
+	assert.JSONEq(t, `{"project":"both","extensions":{"resolved-for":"both"}}`, param.TypeScript[0].IR)
+	assert.JSONEq(t, `{"project":"typescript-only","extensions":{"resolved-for":"typescript-only"}}`, param.TypeScript[1].IR)
+	assert.Equal(t, "@palantir/both", param.TypeScript[0].Config.PackageName)
+	assert.Equal(t, "@palantir/typescript-only", param.TypeScript[1].Config.PackageName)
+	assert.Equal(t, "1.2.3", param.TypeScript[0].PackageVersion)
+	assert.Equal(t, "1.2.3", param.TypeScript[1].PackageVersion)
+	assert.Equal(t, 1, versionerCalls)
+	assert.Equal(t, 1, bothProvider.irBytesCalls)
+	assert.Equal(t, 1, typeScriptOnlyProvider.irBytesCalls)
+	assert.Zero(t, skippedProvider.irBytesCalls)
+	assert.Equal(t, map[string]int{"both": 1, "typescript-only": 1}, extensionsProviderCalls)
+
+	bothTypeScript.PackageName = "mutated"
+	assert.Equal(t, "@palantir/both", param.TypeScript[0].Config.PackageName)
+}
+
+func TestNewPublishParam_ResolvesTypeScriptPackageVersion(t *testing.T) {
+	param, err := newPublishParam(
+		ConjureProjectParams{{
+			ProjectName: "api",
+			IRProvider:  &countingIRProvider{irBytes: []byte(`{}`)},
+			TypeScript: &TypeScriptParam{
+				PackageName:      "@palantir/api",
+				Publish:          true,
+				NpmVersionScheme: NpmVersionSchemeGeneratorMajor,
+			},
+		}},
+		PublishParamOptions{},
+		func(string) (string, error) { return "0.500.0", nil },
+	)
+	require.NoError(t, err)
+	require.Len(t, param.TypeScript, 1)
+	expectedVersion, err := npmPackageVersion(NpmVersionSchemeGeneratorMajor, "0.500.0")
+	require.NoError(t, err)
+	assert.Equal(t, expectedVersion, param.TypeScript[0].PackageVersion)
+}
+
+func TestNewPublishParam_RejectsUnspecifiedGitVersionForTypeScript(t *testing.T) {
+	param, err := newPublishParam(
+		ConjureProjectParams{{
+			ProjectName: "api",
+			IRProvider:  &countingIRProvider{irBytes: []byte(`{}`)},
+			TypeScript:  &TypeScriptParam{PackageName: "@palantir/api", Publish: true},
+		}},
+		PublishParamOptions{},
+		func(string) (string, error) { return "unspecified", nil },
+	)
+	require.EqualError(t, err, "unable to determine project version from Git")
+	assert.Equal(t, PublishParam{}, param)
+}
+
+func TestNewPublishParam_ExplicitPublishFalseExcludesTypeScriptButKeepsIR(t *testing.T) {
+	provider := &countingIRProvider{irBytes: []byte(`{}`)}
+
+	param, err := newPublishParam(
+		ConjureProjectParams{{
+			ProjectName: "api",
+			IRProvider:  provider,
+			Publish:     true,
+			TypeScript:  &TypeScriptParam{PackageName: "@palantir/api", Publish: false},
+		}},
+		PublishParamOptions{},
+		// An unspecified Git version would be rejected if this project's TypeScript were still enabled.
+		func(string) (string, error) { return "unspecified", nil },
+	)
+	require.NoError(t, err)
+	require.Len(t, param.ConjureIR, 1)
+	assert.Equal(t, "api", param.ConjureIR[0].ProjectName)
+	assert.Empty(t, param.TypeScript)
+}
+
+func TestNewPublishParam_RejectsDuplicateNpmPackageNameAndVersion(t *testing.T) {
+	firstProvider := &countingIRProvider{irBytes: []byte(`{}`)}
+	secondProvider := &countingIRProvider{irBytes: []byte(`{}`)}
+
+	param, err := newPublishParam(
+		ConjureProjectParams{
+			{
+				ProjectName: "first",
+				IRProvider:  firstProvider,
+				TypeScript:  &TypeScriptParam{PackageName: "@palantir/api", Publish: true},
+			},
+			{
+				ProjectName: "second",
+				IRProvider:  secondProvider,
+				TypeScript:  &TypeScriptParam{PackageName: "@palantir/api", Publish: true},
+			},
+		},
+		PublishParamOptions{},
+		func(string) (string, error) { return "1.2.3", nil },
+	)
+	require.EqualError(t, err, `projects "first" and "second" both resolve to npm package @palantir/api@1.2.3`)
+	assert.Equal(t, PublishParam{}, param)
+	assert.Zero(t, firstProvider.irBytesCalls, "duplicate check must run before any per-project IR resolution")
+	assert.Zero(t, secondProvider.irBytesCalls, "duplicate check must run before any per-project IR resolution")
+}
+
 func TestNewPublishParam_FiltersProjectsPreservesOrderAndMergesExtensions(t *testing.T) {
 	firstProvider := &countingIRProvider{
 		irBytes: []byte(`{"extensions":{"keep":"existing","replace":"old"},"other":"value"}`),

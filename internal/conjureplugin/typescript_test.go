@@ -104,7 +104,7 @@ func TestPackageTypeScript(t *testing.T) {
 		require.NoError(t, os.WriteFile(packagePath, []byte("package"), 0600))
 		return packagePath, nil
 	}
-	packages, err := packageTypeScript(conjureProjectParams, projectDir, packageOpts, io.Discard, io.Discard, packager, nil, "")
+	packages, err := packageTypeScript(conjureProjectParams, projectDir, packageOpts, io.Discard, io.Discard, nil, "", nil, packager)
 	require.NoError(t, err)
 	assert.Equal(t, 1, packageCalls)
 	expectedPackages := []TypeScriptPackage{{
@@ -114,6 +114,51 @@ func TestPackageTypeScript(t *testing.T) {
 		Path:        filepath.Join(outputDir, "api", "9.8.7", "npm", "api-9.8.7.tgz"),
 	}}
 	require.Equal(t, expectedPackages, packages)
+}
+
+func TestPackageTypeScriptInputs_UsesResolvedVersionAndIR(t *testing.T) {
+	outputDir := t.TempDir()
+	npmUserConfigPath := filepath.Join(t.TempDir(), "install.npmrc")
+	resolvedIR := `{"version":1,"extensions":{"recommended-product-dependencies":[{"product-group":"com.palantir","product-name":"dependency"}]}}`
+	inputs := []TypeScriptPackageInput{{
+		ProjectName:    "api",
+		IR:             resolvedIR,
+		PackageVersion: "500.500.0",
+		Config: TypeScriptParam{
+			PackageName:                 "@palantir/api",
+			NpmVersionScheme:            NpmVersionSchemeGeneratorMajor,
+			FlavorizedAliases:           true,
+			NodeCompatibleModules:       true,
+			ReadonlyInterfaces:          true,
+			GenerateThrowingServices:    true,
+			GenerateNonThrowingServices: true,
+		},
+	}}
+
+	var packageCalls int
+	packages, err := packageTypeScriptInputs(
+		inputs,
+		outputDir,
+		npmUserConfigPath,
+		io.Discard,
+		io.Discard,
+		func(irBytes []byte, params typescript.Params, packageOutputDir string, _ io.Writer) (string, error) {
+			packageCalls++
+			assert.JSONEq(t, resolvedIR, string(irBytes))
+			assert.Equal(t, "@palantir/api", params.PackageName)
+			assert.Equal(t, npmUserConfigPath, params.NpmUserConfigPath)
+			assert.JSONEq(t, `[{"product-group":"com.palantir","product-name":"dependency"}]`, string(params.ProductDependencies))
+			assert.Equal(t, "500.500.0", params.Version)
+			assert.Equal(t, filepath.Join(outputDir, "api", "500.500.0", "npm"), packageOutputDir)
+			return filepath.Join(packageOutputDir, "api.tgz"), nil
+		},
+	)
+	require.NoError(t, err)
+	require.Len(t, packages, 1)
+	assert.Equal(t, 1, packageCalls)
+	assert.Equal(t, "api", packages[0].ProjectName)
+	assert.Equal(t, "@palantir/api", packages[0].PackageName)
+	assert.Equal(t, "500.500.0", packages[0].Version)
 }
 
 func TestPackageTypeScript_DefaultsToTemporaryOutputDir(t *testing.T) {
@@ -130,12 +175,13 @@ func TestPackageTypeScript_DefaultsToTemporaryOutputDir(t *testing.T) {
 		PackageTypeScriptOptions{PackageVersion: "1.2.3"},
 		io.Discard,
 		io.Discard,
+		nil,
+		"",
+		nil,
 		func(_ []byte, _ typescript.Params, packageOutputDir string, _ io.Writer) (string, error) {
 			gotOutputDir = packageOutputDir
 			return filepath.Join(packageOutputDir, "palantir-api-1.2.3.tgz"), nil
 		},
-		nil,
-		"",
 	)
 	require.NoError(t, err)
 	root := filepath.Dir(filepath.Dir(filepath.Dir(gotOutputDir)))
@@ -163,7 +209,7 @@ func TestPackageTypeScript_RejectsUnspecifiedGitVersion(t *testing.T) {
 		return git.Unspecified, nil
 	}
 
-	_, err := packageTypeScriptWithVersioner(params, t.TempDir(), PackageTypeScriptOptions{}, io.Discard, io.Discard, packager, nil, "", versioner)
+	_, err := packageTypeScript(params, t.TempDir(), PackageTypeScriptOptions{}, io.Discard, io.Discard, nil, "", versioner, packager)
 	require.EqualError(t, err, "unable to determine project version from Git")
 	assert.Zero(t, packageCalls)
 }
@@ -211,7 +257,7 @@ func TestPackageTypeScript_ProductDependencies(t *testing.T) {
 				got = params.ProductDependencies
 				return "api-1.2.3.tgz", nil
 			}
-			_, err := packageTypeScript(conjureProjectParams, t.TempDir(), PackageTypeScriptOptions{PackageVersion: "1.2.3"}, io.Discard, io.Discard, packager, nil, "")
+			_, err := packageTypeScript(conjureProjectParams, t.TempDir(), PackageTypeScriptOptions{PackageVersion: "1.2.3"}, io.Discard, io.Discard, nil, "", nil, packager)
 			require.NoError(t, err)
 			if tc.want == nil {
 				assert.Nil(t, got)
@@ -274,7 +320,7 @@ func TestPackageTypeScript_ResolvesProductDependenciesUsingGitVersion(t *testing
 			versioner := func(string) (string, error) {
 				return "0.500.0", nil
 			}
-			packages, err := packageTypeScriptWithVersioner(conjureProjectParams, t.TempDir(), PackageTypeScriptOptions{PackageVersion: "500.500.0"}, io.Discard, io.Discard, packager, extensionsProvider, testCase.cliGroupID, versioner)
+			packages, err := packageTypeScript(conjureProjectParams, t.TempDir(), PackageTypeScriptOptions{PackageVersion: "500.500.0"}, io.Discard, io.Discard, extensionsProvider, testCase.cliGroupID, versioner, packager)
 			require.NoError(t, err)
 			require.Len(t, packages, 1)
 			assert.Equal(t, "500.500.0", packages[0].Version)

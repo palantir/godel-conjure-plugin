@@ -127,7 +127,7 @@ type SingleConjureConfig struct {
 	// "Accept-Conjure-Error-Parameter-Format: JSON" header on every request so that servers which
 	// support it serialize error parameters as JSON rather than the legacy string form.
 	ErrorParameterFormatJSON bool `yaml:"error-parameter-format-json,omitempty"`
-	// TypeScript, when present, opts this project into the dedicated "conjure-typescript" task.
+	// TypeScript, when present, opts this project into TypeScript packaging and publication.
 	TypeScript *TypeScriptConfig `yaml:"typescript,omitempty"`
 }
 
@@ -136,6 +136,9 @@ type TypeScriptConfig struct {
 	// PackageName is the full npm package name, including any scope, e.g. "@palantir/example-api". It is required and
 	// never derived because the project key may not contain the scope or suffix used by npm consumers.
 	PackageName string `yaml:"package-name"`
+	// Publish controls whether "conjure-publish" publishes this project's TypeScript client as an npm package.
+	// Defaults to true when omitted.
+	Publish *bool `yaml:"publish,omitempty"`
 	// NpmVersionScheme selects how the npm package version is derived from the Git project version. Valid values are
 	// "git" (default) and "generator-major".
 	NpmVersionScheme string `yaml:"npm-version-scheme,omitempty"`
