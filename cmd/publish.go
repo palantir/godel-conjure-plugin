@@ -39,11 +39,15 @@ var (
 	repositoryFlagVal string
 	mavenNoPOMFlagVal bool
 	dryRunFlagVal     bool
+
+	npmPublishRegistryFlagVal string
+	npmInstallRegistryFlagVal string
+	npmTokenFlagVal           string
 )
 
 var publishCmd = &cobra.Command{
 	Use:   publishCmdName,
-	Short: "Publish Conjure IR",
+	Short: "Publish Conjure IR and TypeScript npm packages",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		projectParams, err := toProjectParams(configFileFlagVal, cmd.OutOrStdout())
 		if err != nil {
@@ -80,7 +84,34 @@ var publishCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return conjureplugin.Publish(publishParam, flagVals, dryRunFlagVal, cmd.OutOrStdout())
+
+		npmUsername := usernameFlagVal
+		npmPassword := passwordFlagVal
+		if npmTokenFlagVal != "" {
+			// A token overrides the shared username/password for npm only.
+			npmUsername = ""
+			npmPassword = ""
+		}
+		publishTypescriptOpts := conjureplugin.PublishTypeScriptOptions{
+			PublishRegistry: npmPublishRegistryFlagVal,
+			InstallRegistry: npmInstallRegistryFlagVal,
+			NpmUsername:     npmUsername,
+			NpmPassword:     npmPassword,
+			NpmToken:        npmTokenFlagVal,
+		}
+		// Prepare typescript packages for publishing before publishing Conjure IR so that a misconfigured npm registry or a packaging failure
+		// is caught before any artifacts are uploaded. This is a noop if no typescript packages are declared or publishing of typescript packages is explicitly disabled.
+		preparedTypeScript, err := conjureplugin.PrepareTypeScriptPublish(publishParam.TypeScript, publishTypescriptOpts, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		if err != nil {
+			return err
+		}
+		defer preparedTypeScript.Cleanup()
+
+		if err := conjureplugin.Publish(publishParam, flagVals, dryRunFlagVal, cmd.OutOrStdout()); err != nil {
+			return err
+		}
+
+		return conjureplugin.PublishPreparedTypeScript(preparedTypeScript, dryRunFlagVal, cmd.OutOrStdout())
 	},
 }
 
@@ -93,5 +124,9 @@ func init() {
 	publishCmd.Flags().StringVar(&usernameFlagVal, string(publisher.ConnectionInfoUsernameFlag.Name), "", publisher.ConnectionInfoUsernameFlag.Description)
 	publishCmd.Flags().StringVar(&passwordFlagVal, string(publisher.ConnectionInfoPasswordFlag.Name), "", publisher.ConnectionInfoPasswordFlag.Description)
 	publishCmd.Flags().BoolVar(&mavenNoPOMFlagVal, string(maven.NoPOMFlag.Name), false, maven.NoPOMFlag.Description)
+
+	publishCmd.Flags().StringVar(&npmPublishRegistryFlagVal, "npm-publish-registry", "", "npm registry URL to publish to")
+	publishCmd.Flags().StringVar(&npmInstallRegistryFlagVal, "npm-install-registry", "", "npm registry URL used to install dependencies (defaults to the publish registry)")
+	publishCmd.Flags().StringVar(&npmTokenFlagVal, "npm-token", "", "npm registry authentication token (bypasses Artifactory authentication)")
 	rootCmd.AddCommand(publishCmd)
 }
