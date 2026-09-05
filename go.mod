@@ -9,7 +9,7 @@ require (
 	github.com/palantir/conjure-go/v7 v7.11.0
 	github.com/palantir/distgo v1.115.0
 	github.com/palantir/distgo/pkg/git v1.0.0
-	github.com/palantir/godel/v2 v2.180.0
+	github.com/palantir/godel/v2 v2.181.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.4.0
 	github.com/palantir/pkg/matcher v1.3.0
@@ -50,7 +50,7 @@ require (
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/nwaples/rardecode/v2 v2.4.1 // indirect
 	github.com/palantir/go-ptimports/v2 v2.54.0 // indirect
-	github.com/palantir/pkg v1.1.0 // indirect
+	github.com/palantir/pkg v1.2.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.2.0 // indirect
 	github.com/palantir/pkg/specdir v1.4.0 // indirect
