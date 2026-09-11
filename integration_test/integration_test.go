@@ -789,6 +789,117 @@ fi
 	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 }
 
+func TestConjurePublishIncludesTypeScript(t *testing.T) {
+	setupFakeNpmExecutable(t)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	defer cleanup()
+
+	configDir := filepath.Join(projectDir, "godel", "config")
+	require.NoError(t, os.MkdirAll(configDir, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(configDir, "conjure-plugin.yml"), []byte(`
+version: 2
+projects:
+  api:
+    group-id: com.palantir.test
+    ir-locator:
+      type: ir-file
+      locator: ir.json
+    publish: true
+    typescript:
+      package-name: "@palantir/test-api"
+`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(projectDir, "ir.json"), []byte(`{
+  "version": 1,
+  "errors": [],
+  "types": [],
+  "services": [],
+  "extensions": {}
+}`), 0644))
+	t.Setenv("NPM_PACKAGE_JSON_CAPTURE_FILE", filepath.Join(t.TempDir(), "package.json"))
+
+	outputBuf := &bytes.Buffer{}
+	runPluginCleanup, err := pluginapitester.RunPlugin(
+		pluginapitester.NewPluginProvider(pluginPath),
+		nil,
+		"conjure-publish",
+		[]string{
+			"--dry-run",
+			"--repository=conjure-release",
+			"--url=https://artifactory.example.com",
+			"--username=ir-user",
+			"--password=ir-password",
+			"--npm-publish-registry=https://registry.example.com/npm/release",
+			"--npm-token=npm-token",
+		},
+		projectDir,
+		false,
+		outputBuf,
+	)
+	defer runPluginCleanup()
+	require.NoError(t, err, outputBuf.String())
+	assert.Contains(t, outputBuf.String(), ".conjure.json")
+	assert.Contains(t, outputBuf.String(), "[DRY RUN] Publishing npm package")
+}
+
+func TestConjurePublishSkipsTypeScriptWithExplicitPublishFalse(t *testing.T) {
+	setupFakeNpmExecutable(t)
+
+	projectDir, cleanup, err := dirs.TempDir(".", "")
+	require.NoError(t, err)
+	defer cleanup()
+
+	configDir := filepath.Join(projectDir, "godel", "config")
+	require.NoError(t, os.MkdirAll(configDir, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(configDir, "conjure-plugin.yml"), []byte(`
+version: 2
+projects:
+  api:
+    group-id: com.palantir.test
+    ir-locator:
+      type: ir-file
+      locator: ir.json
+    publish: true
+    typescript:
+      package-name: "@palantir/test-api"
+      publish: false
+`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(projectDir, "ir.json"), []byte(`{
+  "version": 1,
+  "errors": [],
+  "types": [],
+  "services": [],
+  "extensions": {}
+}`), 0644))
+	npmPackageJSONCapturePath := filepath.Join(t.TempDir(), "package.json")
+	t.Setenv("NPM_PACKAGE_JSON_CAPTURE_FILE", npmPackageJSONCapturePath)
+
+	outputBuf := &bytes.Buffer{}
+	runPluginCleanup, err := pluginapitester.RunPlugin(
+		pluginapitester.NewPluginProvider(pluginPath),
+		nil,
+		"conjure-publish",
+		[]string{
+			"--dry-run",
+			"--repository=conjure-release",
+			"--url=https://artifactory.example.com",
+			"--username=ir-user",
+			"--password=ir-password",
+			"--npm-publish-registry=https://registry.example.com/npm/release",
+		},
+		projectDir,
+		false,
+		outputBuf,
+	)
+	defer runPluginCleanup()
+	require.NoError(t, err, outputBuf.String())
+	assert.Contains(t, outputBuf.String(), ".conjure.json")
+	assert.NotContains(t, outputBuf.String(), "Publishing npm package")
+	_, statErr := os.Stat(npmPackageJSONCapturePath)
+	assert.True(t, os.IsNotExist(statErr), "npm must not be invoked for a project with typescript.publish: false")
+}
+
 func TestConjurePluginPublishAssetSpec(t *testing.T) {
 	const (
 		yamlDir    = "yamlDir"

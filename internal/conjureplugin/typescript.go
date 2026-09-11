@@ -52,6 +52,15 @@ type TypeScriptPackage struct {
 	Path        string
 }
 
+// TypeScriptPackageInput contains the fully resolved inputs for packaging one project's TypeScript client.
+// IR contains the final extension-enriched JSON as an immutable string.
+type TypeScriptPackageInput struct {
+	ProjectName    string
+	IR             string
+	PackageVersion string
+	Config         TypeScriptParam
+}
+
 // PackageTypeScript builds an npm package tarball for every project with TypeScript configuration. If an extensions
 // provider is supplied, it enriches each IR using the raw Git project version before product dependencies are read.
 // cliGroupID overrides a project's configured group ID when invoking the provider. npm's own output is written to stderr.
@@ -64,10 +73,21 @@ func PackageTypeScript(
 	extensionsProvider extensionsprovider.ExtensionsProvider,
 	cliGroupID string,
 ) ([]TypeScriptPackage, error) {
-	return packageTypeScript(params, projectDir, opts, stdout, stderr, typescript.Package, extensionsProvider, cliGroupID)
+	return packageTypeScript(
+		params,
+		projectDir,
+		opts,
+		stdout,
+		stderr,
+		extensionsProvider,
+		cliGroupID,
+		gitversioner.New().ProjectVersion,
+		typescript.Package,
+	)
 }
 
 type typeScriptPackager func(irBytes []byte, params typescript.Params, outputDir string, stderr io.Writer) (string, error)
+type projectVersioner func(projectDir string) (string, error)
 
 func packageTypeScript(
 	params ConjureProjectParams,
@@ -75,28 +95,10 @@ func packageTypeScript(
 	opts PackageTypeScriptOptions,
 	stdout io.Writer,
 	stderr io.Writer,
-	packager typeScriptPackager,
-	extensionsProvider extensionsprovider.ExtensionsProvider,
-	cliGroupID string,
-) ([]TypeScriptPackage, error) {
-	return packageTypeScriptWithVersioner(params, projectDir, opts, stdout, stderr, packager, extensionsProvider, cliGroupID,
-		func(projectDir string) (string, error) {
-			return gitversioner.New().ProjectVersion(projectDir)
-		})
-}
-
-type projectVersioner func(projectDir string) (string, error)
-
-func packageTypeScriptWithVersioner(
-	params ConjureProjectParams,
-	projectDir string,
-	opts PackageTypeScriptOptions,
-	stdout io.Writer,
-	stderr io.Writer,
-	packager typeScriptPackager,
 	extensionsProvider extensionsprovider.ExtensionsProvider,
 	cliGroupID string,
 	versioner projectVersioner,
+	packager typeScriptPackager,
 ) ([]TypeScriptPackage, error) {
 	if !hasTypeScriptProjects(params) {
 		return nil, nil
@@ -127,80 +129,83 @@ func packageTypeScriptWithVersioner(
 		}
 	}
 
-	var packages []TypeScriptPackage
+	var packageInputs []TypeScriptPackageInput
 	for _, param := range params {
 		if param.TypeScript == nil {
 			continue
 		}
-		pkg, err := packageTypeScriptProject(param, packageRoot, gitVersion, opts, packager, extensionsProvider, cliGroupID, stdout, stderr)
+		irBytes, err := resolveProjectIRBytes(param, extensionsProvider, cliGroupID, gitVersion)
 		if err != nil {
 			return nil, err
 		}
-		packages = append(packages, pkg)
+		packageVersion := opts.PackageVersion
+		if packageVersion == "" {
+			packageVersion, err = npmPackageVersion(param.TypeScript.NpmVersionScheme, gitVersion)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to determine npm package version for project %q", param.ProjectName)
+			}
+		}
+		packageInputs = append(packageInputs, TypeScriptPackageInput{
+			ProjectName:    param.ProjectName,
+			IR:             string(irBytes),
+			PackageVersion: packageVersion,
+			Config:         *param.TypeScript,
+		})
 	}
-	return packages, nil
+	return packageTypeScriptInputs(packageInputs, packageRoot, opts.NpmUserConfigPath, stdout, stderr, packager)
 }
 
-// packageTypeScriptProject resolves the npm package version and product dependencies for a single project, then
-// invokes packager to generate and package its TypeScript client.
-func packageTypeScriptProject(
-	param ConjureProjectParam,
-	packageRoot string,
-	gitVersion string,
-	opts PackageTypeScriptOptions,
-	packager typeScriptPackager,
-	extensionsProvider extensionsprovider.ExtensionsProvider,
-	cliGroupID string,
+// packageTypeScriptInputs packages TypeScript clients from fully resolved inputs.
+func packageTypeScriptInputs(
+	inputs []TypeScriptPackageInput,
+	outputDir string,
+	npmUserConfigPath string,
 	stdout io.Writer,
 	stderr io.Writer,
-) (TypeScriptPackage, error) {
-	typeScriptParam := param.TypeScript
-	packageVersion := opts.PackageVersion
-	if packageVersion == "" {
-		var err error
-		packageVersion, err = npmPackageVersion(typeScriptParam.NpmVersionScheme, gitVersion)
+	packager typeScriptPackager,
+) ([]TypeScriptPackage, error) {
+	if len(inputs) == 0 {
+		return nil, nil
+	}
+
+	packages := make([]TypeScriptPackage, 0, len(inputs))
+	for _, input := range inputs {
+		projectOutputDir, err := projectPackageOutputDir(outputDir, input.ProjectName, input.PackageVersion)
 		if err != nil {
-			return TypeScriptPackage{}, errors.Wrapf(err, "failed to determine npm package version for project %q", param.ProjectName)
+			return nil, err
 		}
-	}
 
-	projectOutputDir, err := projectPackageOutputDir(packageRoot, param.ProjectName, packageVersion)
-	if err != nil {
-		return TypeScriptPackage{}, err
-	}
+		irBytes := []byte(input.IR)
+		productDependencies, err := productDependenciesFromIR(irBytes)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to read product dependencies from IR for project %q", input.ProjectName)
+		}
 
-	irBytes, err := resolveProjectIRBytes(param, extensionsProvider, cliGroupID, gitVersion)
-	if err != nil {
-		return TypeScriptPackage{}, err
-	}
-	productDependencies, err := productDependenciesFromIR(irBytes)
-	if err != nil {
-		return TypeScriptPackage{}, errors.Wrapf(err, "failed to read product dependencies from IR for project %q", param.ProjectName)
-	}
+		_, _ = fmt.Fprintf(stdout, "Packaging TypeScript client for %q (%s@%s)\n", input.ProjectName, input.Config.PackageName, input.PackageVersion)
+		packagePath, err := packager(irBytes, typescript.Params{
+			PackageName:                 input.Config.PackageName,
+			Version:                     input.PackageVersion,
+			ProductDependencies:         productDependencies,
+			NpmUserConfigPath:           npmUserConfigPath,
+			FlavorizedAliases:           input.Config.FlavorizedAliases,
+			NodeCompatibleModules:       input.Config.NodeCompatibleModules,
+			ReadonlyInterfaces:          input.Config.ReadonlyInterfaces,
+			GenerateThrowingServices:    input.Config.GenerateThrowingServices,
+			GenerateNonThrowingServices: input.Config.GenerateNonThrowingServices,
+		}, projectOutputDir, stderr)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to package TypeScript client for project %q", input.ProjectName)
+		}
+		_, _ = fmt.Fprintf(stdout, "Created npm package %s\n", packagePath)
 
-	_, _ = fmt.Fprintf(stdout, "Packaging TypeScript client for %q (%s@%s)\n", param.ProjectName, typeScriptParam.PackageName, packageVersion)
-	packagePath, err := packager(irBytes, typescript.Params{
-		PackageName:                 typeScriptParam.PackageName,
-		Version:                     packageVersion,
-		ProductDependencies:         productDependencies,
-		NpmUserConfigPath:           opts.NpmUserConfigPath,
-		FlavorizedAliases:           typeScriptParam.FlavorizedAliases,
-		NodeCompatibleModules:       typeScriptParam.NodeCompatibleModules,
-		ReadonlyInterfaces:          typeScriptParam.ReadonlyInterfaces,
-		GenerateThrowingServices:    typeScriptParam.GenerateThrowingServices,
-		GenerateNonThrowingServices: typeScriptParam.GenerateNonThrowingServices,
-	}, projectOutputDir, stderr)
-	if err != nil {
-		return TypeScriptPackage{}, errors.Wrapf(err, "failed to package TypeScript client for project %q", param.ProjectName)
+		packages = append(packages, TypeScriptPackage{
+			ProjectName: input.ProjectName,
+			PackageName: input.Config.PackageName,
+			Version:     input.PackageVersion,
+			Path:        packagePath,
+		})
 	}
-	_, _ = fmt.Fprintf(stdout, "Created npm package %s\n", packagePath)
-
-	return TypeScriptPackage{
-		ProjectName: param.ProjectName,
-		PackageName: typeScriptParam.PackageName,
-		Version:     packageVersion,
-		Path:        packagePath,
-	}, nil
+	return packages, nil
 }
 
 // resolveProjectIRBytes returns the project's Conjure IR, enriched via extensionsProvider (if provided).

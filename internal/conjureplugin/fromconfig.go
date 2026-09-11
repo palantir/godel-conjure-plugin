@@ -181,8 +181,14 @@ func typeScriptParamFromConfig(cfg *config.TypeScriptConfig) (*TypeScriptParam, 
 		generateThrowingServices = *cfg.GenerateThrowingServices
 	}
 
+	publish := true
+	if cfg.Publish != nil {
+		publish = *cfg.Publish
+	}
+
 	return &TypeScriptParam{
 		PackageName:                 cfg.PackageName,
+		Publish:                     publish,
 		NpmVersionScheme:            versionScheme,
 		FlavorizedAliases:           cfg.FlavorizedAliases,
 		NodeCompatibleModules:       cfg.NodeCompatibleModules,
