@@ -15,6 +15,8 @@
 package conjureplugin
 
 import (
+	"slices"
+
 	"github.com/palantir/distgo/pkg/git"
 	gitversioner "github.com/palantir/distgo/projectversioner/git"
 	"github.com/palantir/godel-conjure-plugin/v7/internal/extensionsprovider"
@@ -128,12 +130,7 @@ func typeScriptPublishEnabled(project ConjureProjectParam) bool {
 }
 
 func anyTypeScriptPublishEnabled(projects ConjureProjectParams) bool {
-	for _, project := range projects {
-		if typeScriptPublishEnabled(project) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(projects, typeScriptPublishEnabled)
 }
 
 // rejectDuplicateTypeScriptPackages returns an error if two projects would resolve to the same npm package name and version.
