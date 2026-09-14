@@ -283,6 +283,7 @@ projects:
 		require.Len(t, params, 1)
 		assert.Equal(t, &TypeScriptParam{
 			PackageName:              "@palantir/example-api",
+			Publish:                  true,
 			NpmVersionScheme:         NpmVersionSchemeGit,
 			GenerateThrowingServices: true,
 		}, params[0].TypeScript)
@@ -311,12 +312,37 @@ projects:
 		require.Len(t, params, 1)
 		assert.Equal(t, &TypeScriptParam{
 			PackageName:                 "@palantir/example-api",
+			Publish:                     true,
 			NpmVersionScheme:            NpmVersionSchemeGeneratorMajor,
 			FlavorizedAliases:           true,
 			NodeCompatibleModules:       true,
 			ReadonlyInterfaces:          true,
 			GenerateThrowingServices:    false,
 			GenerateNonThrowingServices: true,
+		}, params[0].TypeScript)
+	})
+
+	t.Run("explicit publish false opts out of npm publication only", func(t *testing.T) {
+		cfg, err := config.ReadConfigFromBytes([]byte(`
+version: 2
+projects:
+  project-1:
+    output-dir: outputDir
+    ir-locator: input.yml
+    typescript:
+      package-name: "@palantir/example-api"
+      publish: false
+`))
+		require.NoError(t, err)
+
+		params, _, err := ParamsFromConfig(&cfg)
+		require.NoError(t, err)
+		require.Len(t, params, 1)
+		assert.Equal(t, &TypeScriptParam{
+			PackageName:              "@palantir/example-api",
+			Publish:                  false,
+			NpmVersionScheme:         NpmVersionSchemeGit,
+			GenerateThrowingServices: true,
 		}, params[0].TypeScript)
 	})
 

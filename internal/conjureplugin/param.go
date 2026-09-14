@@ -57,7 +57,7 @@ type ConjureProjectParam struct {
 	// "Accept-Conjure-Error-Parameter-Format: JSON" header so that servers which support it serialize
 	// error parameters as JSON rather than the legacy string form.
 	ErrorParameterFormatJSON bool
-	// TypeScript, when non-nil, opts this project into the dedicated "conjure-typescript" task.
+	// TypeScript, when non-nil, opts this project into TypeScript packaging and publication.
 	TypeScript *TypeScriptParam
 }
 
@@ -77,6 +77,8 @@ const (
 type TypeScriptParam struct {
 	// PackageName is the full npm package name, including any scope.
 	PackageName string
+	// Publish controls whether "conjure-publish" publishes this project's TypeScript client as an npm package.
+	Publish bool
 	// NpmVersionScheme selects how the npm package version is derived from the Git project version.
 	NpmVersionScheme NpmVersionScheme
 

@@ -15,6 +15,7 @@
 package conjureplugin
 
 import (
+	"github.com/palantir/distgo/pkg/git"
 	gitversioner "github.com/palantir/distgo/projectversioner/git"
 	"github.com/palantir/godel-conjure-plugin/v7/internal/extensionsprovider"
 	"github.com/pkg/errors"
@@ -22,8 +23,9 @@ import (
 
 // PublishParam contains the fully resolved inputs for a publish operation.
 type PublishParam struct {
-	Version   string
-	ConjureIR []ConjureIRPublishParam
+	Version    string
+	ConjureIR  []ConjureIRPublishParam
+	TypeScript []TypeScriptPackageInput
 }
 
 // ConjureIRPublishParam contains the fully resolved inputs for publishing one project's Conjure IR.
@@ -52,7 +54,7 @@ func NewPublishParam(projects ConjureProjectParams, opts PublishParamOptions) (P
 func newPublishParam(projects ConjureProjectParams, opts PublishParamOptions, versioner publishProjectVersioner) (PublishParam, error) {
 	var selectedProjects ConjureProjectParams
 	for _, project := range projects {
-		if !project.Publish {
+		if !project.Publish && !typeScriptPublishEnabled(project) {
 			continue
 		}
 		selectedProjects = append(selectedProjects, project)
@@ -65,11 +67,14 @@ func newPublishParam(projects ConjureProjectParams, opts PublishParamOptions, ve
 	if err != nil {
 		return PublishParam{}, err
 	}
-
-	param := PublishParam{
-		Version:   version,
-		ConjureIR: make([]ConjureIRPublishParam, 0, len(selectedProjects)),
+	if version == git.Unspecified && anyTypeScriptPublishEnabled(selectedProjects) {
+		return PublishParam{}, errors.New("unable to determine project version from Git")
 	}
+	if err := rejectDuplicateTypeScriptPackages(selectedProjects, version); err != nil {
+		return PublishParam{}, err
+	}
+
+	param := PublishParam{Version: version}
 	for _, project := range selectedProjects {
 		irBytes, err := project.IRProvider.IRBytes()
 		if err != nil {
@@ -93,11 +98,63 @@ func newPublishParam(projects ConjureProjectParams, opts PublishParamOptions, ve
 			}
 		}
 
-		param.ConjureIR = append(param.ConjureIR, ConjureIRPublishParam{
-			ProjectName: project.ProjectName,
-			IR:          string(irBytes),
-			GroupID:     groupID,
-		})
+		resolvedIR := string(irBytes)
+		if project.Publish {
+			param.ConjureIR = append(param.ConjureIR, ConjureIRPublishParam{
+				ProjectName: project.ProjectName,
+				IR:          resolvedIR,
+				GroupID:     groupID,
+			})
+		}
+		if typeScriptPublishEnabled(project) {
+			packageVersion, err := npmPackageVersion(project.TypeScript.NpmVersionScheme, version)
+			if err != nil {
+				return PublishParam{}, errors.Wrapf(err, "failed to determine npm package version for project %q", project.ProjectName)
+			}
+			param.TypeScript = append(param.TypeScript, TypeScriptPackageInput{
+				ProjectName:    project.ProjectName,
+				IR:             resolvedIR,
+				PackageVersion: packageVersion,
+				Config:         *project.TypeScript,
+			})
+		}
 	}
 	return param, nil
+}
+
+// typeScriptPublishEnabled reports whether project's TypeScript client should be published as an npm package.
+func typeScriptPublishEnabled(project ConjureProjectParam) bool {
+	return project.TypeScript != nil && project.TypeScript.Publish
+}
+
+func anyTypeScriptPublishEnabled(projects ConjureProjectParams) bool {
+	for _, project := range projects {
+		if typeScriptPublishEnabled(project) {
+			return true
+		}
+	}
+	return false
+}
+
+// rejectDuplicateTypeScriptPackages returns an error if two projects would resolve to the same npm package name and version.
+func rejectDuplicateTypeScriptPackages(projects ConjureProjectParams, version string) error {
+	firstProjectForPackage := make(map[string]string, len(projects))
+	for _, project := range projects {
+		if !typeScriptPublishEnabled(project) {
+			continue
+		}
+		packageVersion, err := npmPackageVersion(project.TypeScript.NpmVersionScheme, version)
+		if err != nil {
+			return errors.Wrapf(err, "failed to determine npm package version for project %q", project.ProjectName)
+		}
+		packageAndVersion := project.TypeScript.PackageName + "@" + packageVersion
+		if firstProject, ok := firstProjectForPackage[packageAndVersion]; ok {
+			return errors.Errorf(
+				"projects %q and %q both resolve to npm package %s@%s",
+				firstProject, project.ProjectName, project.TypeScript.PackageName, packageVersion,
+			)
+		}
+		firstProjectForPackage[packageAndVersion] = project.ProjectName
+	}
+	return nil
 }
