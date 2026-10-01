@@ -118,6 +118,33 @@ func TestPrepareTypeScriptPublishSkipsWhenNoTypeScriptProjects(t *testing.T) {
 	prepared.Cleanup()
 }
 
+func TestPrepareTypeScriptPublishSkipsWhenNoRegistryProvided(t *testing.T) {
+	inputs := []TypeScriptPackageInput{
+		{
+			ProjectName:    "api",
+			IR:             `{}`,
+			PackageVersion: "1.2.3",
+			Config:         TypeScriptParam{PackageName: "@palantir/api"},
+		},
+	}
+	publishOpts := PublishTypeScriptOptions{
+		// Intentionally empty to simulate no "--npm-publish-registry" flag being provided
+		PublishRegistry: "",
+	}
+	prepared, err := prepareTypeScriptPublish(inputs, publishOpts, io.Discard, io.Discard,
+		func([]byte, typescript.Params, string, io.Writer) (string, error) {
+			t.Fatal("packager must not run")
+			return "", nil
+		},
+		func(typescript.NpmConfigOptions) (typescript.NpmConfig, error) {
+			t.Fatal("npm config resolver must not run")
+			return typescript.NpmConfig{}, nil
+		})
+	require.NoError(t, err)
+	assert.Equal(t, PreparedTypeScriptPublish{}, prepared)
+	prepared.Cleanup()
+}
+
 func TestPrepareTypeScriptPublishCleansUpOnPackagingFailure(t *testing.T) {
 	inputs := []TypeScriptPackageInput{
 		{ProjectName: "api", IR: `{}`, PackageVersion: "1.2.3", Config: TypeScriptParam{PackageName: "@palantir/api"}},

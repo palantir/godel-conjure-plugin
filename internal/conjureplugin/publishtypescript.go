@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/palantir/distgo/distgo"
 	"github.com/palantir/godel-conjure-plugin/v7/internal/typescript"
@@ -71,6 +72,12 @@ func prepareTypeScriptPublish(
 ) (PreparedTypeScriptPublish, error) {
 	packageNames := typeScriptPackageNames(inputs)
 	if len(packageNames) == 0 {
+		return PreparedTypeScriptPublish{}, nil
+	}
+	// No npm registry was configured so treat this the same as having nothing to
+	// publish rather than failing.
+	if opts.PublishRegistry == "" {
+		_, _ = fmt.Fprintf(stderr, "Skipping npm publish for TypeScript client(s) %s: no npm publish registry was provided\n", strings.Join(packageNames, ", "))
 		return PreparedTypeScriptPublish{}, nil
 	}
 
