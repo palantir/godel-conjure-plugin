@@ -31,6 +31,9 @@ github.com/bodgit/sevenzip/internal/zstd
 # github.com/bodgit/windows v1.0.1
 ## explicit; go 1.13
 github.com/bodgit/windows
+# github.com/chainguard-dev/git-urls v1.0.2
+## explicit; go 1.19
+github.com/chainguard-dev/git-urls
 # github.com/cheggaaa/pb/v3 v3.2.1
 ## explicit; go 1.25.0
 github.com/cheggaaa/pb/v3
@@ -141,8 +144,8 @@ github.com/palantir/distgo/publisher/artifactory
 github.com/palantir/distgo/publisher/artifactory/config
 github.com/palantir/distgo/publisher/artifactory/config/internal/v0
 github.com/palantir/distgo/publisher/maven
-# github.com/palantir/distgo/pkg/git v1.0.0
-## explicit; go 1.13
+# github.com/palantir/distgo/pkg/git v1.1.0
+## explicit; go 1.27.0
 github.com/palantir/distgo/pkg/git
 # github.com/palantir/go-ptimports/v2 v2.56.0
 ## explicit; go 1.27.0

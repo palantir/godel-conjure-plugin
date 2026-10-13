@@ -8,7 +8,7 @@ require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.11.0
 	github.com/palantir/distgo v1.117.0
-	github.com/palantir/distgo/pkg/git v1.0.0
+	github.com/palantir/distgo/pkg/git v1.1.0
 	github.com/palantir/godel/v2 v2.191.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.4.0
@@ -28,6 +28,7 @@ require (
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.6.5 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
+	github.com/chainguard-dev/git-urls v1.0.2 // indirect
 	github.com/cheggaaa/pb/v3 v3.2.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/dave/jennifer v1.7.1 // indirect
