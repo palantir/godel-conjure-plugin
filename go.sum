@@ -80,8 +80,8 @@ github.com/nwaples/rardecode/v2 v2.4.5 h1:e8/ULrr78nRuktZw2SmnuOjRUnDp4rpzoc+KTz
 github.com/nwaples/rardecode/v2 v2.4.5/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
 github.com/palantir/conjure-go/v7 v7.11.0 h1:nyOUBHb8pKHTKHe8h5o+xmhUo2Hiy99iOLQbqpSHOLo=
 github.com/palantir/conjure-go/v7 v7.11.0/go.mod h1:UrN3F2xFJYMDKDWdrZ9a6eVUhVnaTq+Z2Gfv3YfNZf4=
-github.com/palantir/distgo v1.117.0 h1:F1DX+bMYU9coUdlSQvrXO0D0kSH4EQVjfTMAkrGiqV8=
-github.com/palantir/distgo v1.117.0/go.mod h1:fj4FRN4spMsqNtOET1mKU+QrNlfENk2l3HPYqSDniaU=
+github.com/palantir/distgo v1.118.0 h1:BEGxfJx07lh9rZZQFuXacPcrexiyD7Q2uvPX+hBbH3g=
+github.com/palantir/distgo v1.118.0/go.mod h1:dfwkGHRwGSbrtwrn33mQPNv0CrNVbbcu14IkKbXD3C4=
 github.com/palantir/distgo/pkg/git v1.1.0 h1:8ThEUZxMeUbRHdXuKco4ytBh74V7rtE+yfwDjvug9KA=
 github.com/palantir/distgo/pkg/git v1.1.0/go.mod h1:QhKxNr5yr4nlhdpzkXcnNecYOY782BXzS1pRxDucKYA=
 github.com/palantir/go-ptimports/v2 v2.56.0 h1:PhENhST78sqCLlIajoW/Coo/2Cto/iteo5Mdo6mGduU=
@@ -151,8 +151,6 @@ github.com/ulikunitz/xz v0.5.8/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oW
 github.com/ulikunitz/xz v0.5.9/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
 github.com/ulikunitz/xz v0.5.17 h1:flR0y/x1hgM8EGV1AW3Xll6T413G0glV8UfBwR617V4=
 github.com/ulikunitz/xz v0.5.17/go.mod h1:H9Rt/W6/Qj27PGauhQc6nfCDy7vHpzsOThBSaYDoEhw=
-github.com/whilp/git-urls v1.0.0 h1:95f6UMWN5FKW71ECsXRUd3FVYiXdrE7aX4NZKcPmIjU=
-github.com/whilp/git-urls v1.0.0/go.mod h1:J16SAmobsqc3Qcy98brfl5f5+e0clUvg1krgwk/qCfE=
 github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 h1:nIPpBwaJSVYIxUFsDv3M8ofmx9yWTog9BfvIu0q41lo=
 github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8/go.mod h1:HUYIGzjTL3rfEspMxjDjgmT5uz5wzYJKVo23qUhYTos=
 github.com/xyproto/randomstring v1.0.5 h1:YtlWPoRdgMu3NZtP45drfy1GKoojuR7hmRcnhZqKjWU=
