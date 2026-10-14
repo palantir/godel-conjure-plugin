@@ -7,7 +7,7 @@ toolchain go1.27.2
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.11.0
-	github.com/palantir/distgo v1.117.0
+	github.com/palantir/distgo v1.118.0
 	github.com/palantir/distgo/pkg/git v1.1.0
 	github.com/palantir/godel/v2 v2.191.0
 	github.com/palantir/pkg/clipackager v1.1.0
@@ -66,7 +66,6 @@ require (
 	github.com/stangelandcl/ppmd v0.1.1 // indirect
 	github.com/termie/go-shutil v0.0.0-20140729215957-bcacb06fecae // indirect
 	github.com/ulikunitz/xz v0.5.17 // indirect
-	github.com/whilp/git-urls v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	go4.org v0.0.0-20260112195520-a5071408f32f // indirect
