@@ -9,7 +9,7 @@ require (
 	github.com/palantir/conjure-go/v7 v7.11.0
 	github.com/palantir/distgo v1.118.0
 	github.com/palantir/distgo/pkg/git v1.1.0
-	github.com/palantir/godel/v2 v2.192.0
+	github.com/palantir/godel/v2 v2.194.0
 	github.com/palantir/pkg/clipackager v1.1.0
 	github.com/palantir/pkg/cobracli v1.4.0
 	github.com/palantir/pkg/matcher v1.3.0
