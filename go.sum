@@ -78,8 +78,8 @@ github.com/nwaples/rardecode v1.1.3 h1:cWCaZwfM5H7nAD6PyEdcVnczzV8i/JtotnyW/dD9l
 github.com/nwaples/rardecode v1.1.3/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWkRpHbbfGS0=
 github.com/nwaples/rardecode/v2 v2.4.5 h1:e8/ULrr78nRuktZw2SmnuOjRUnDp4rpzoc+KTz7q2N8=
 github.com/nwaples/rardecode/v2 v2.4.5/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
-github.com/palantir/conjure-go/v7 v7.11.0 h1:nyOUBHb8pKHTKHe8h5o+xmhUo2Hiy99iOLQbqpSHOLo=
-github.com/palantir/conjure-go/v7 v7.11.0/go.mod h1:UrN3F2xFJYMDKDWdrZ9a6eVUhVnaTq+Z2Gfv3YfNZf4=
+github.com/palantir/conjure-go/v7 v7.12.0 h1:66pxw678xmKE/om3ZaoN+wCx0T8N4rM9Q1wgWPJk5Go=
+github.com/palantir/conjure-go/v7 v7.12.0/go.mod h1:/ktkhlUGDQHmqhiZ8StrdBuoanKgceVmW9dgaPNwP5A=
 github.com/palantir/distgo v1.118.0 h1:BEGxfJx07lh9rZZQFuXacPcrexiyD7Q2uvPX+hBbH3g=
 github.com/palantir/distgo v1.118.0/go.mod h1:dfwkGHRwGSbrtwrn33mQPNv0CrNVbbcu14IkKbXD3C4=
 github.com/palantir/distgo/pkg/git v1.1.0 h1:8ThEUZxMeUbRHdXuKco4ytBh74V7rtE+yfwDjvug9KA=
@@ -138,8 +138,8 @@ github.com/stangelandcl/ppmd v0.1.1/go.mod h1:Rrv7M+/2P5jYr/GMLhBl7Ug3uJ1bUiVzr5
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
-github.com/stretchr/objx v0.5.3 h1:jmXUvGomnU1o3W/V5h2VEradbpJDwGrzugQQvL0POH4=
-github.com/stretchr/objx v0.5.3/go.mod h1:rDQraq+vQZU7Fde9LOZLr8Tax6zZvy4kuNKF+QYS+U0=
+github.com/stretchr/objx v0.8.0 h1:rm9oMkeprG/wHifkZP4EuDww9S0mvEaQ/p9cXTNT4cw=
+github.com/stretchr/objx v0.8.0/go.mod h1:xSzHnPHkdEv7vtgdQej8atlCuU1mdX+ELge8bn0hCsE=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
