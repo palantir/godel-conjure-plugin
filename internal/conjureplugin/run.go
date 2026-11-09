@@ -51,6 +51,7 @@ func Run(params ConjureProjectParams, verify bool, projectDir string, stdout io.
 			GenerateFuncsVisitor:     currParam.AcceptFuncs,
 			ExportErrorDecoder:       currParam.ExportErrorDecoder,
 			ErrorParameterFormatJSON: currParam.ErrorParameterFormatJSON,
+			OmitNilCollections:       currParam.OmitNilCollections,
 		}
 
 		conjureFilesToGenerate, err := conjure.GenerateOutputFiles(conjureDef, outputConf)

@@ -57,6 +57,9 @@ type ConjureProjectParam struct {
 	// "Accept-Conjure-Error-Parameter-Format: JSON" header so that servers which support it serialize
 	// error parameters as JSON rather than the legacy string form.
 	ErrorParameterFormatJSON bool
+	// OmitNilCollections, when true, omits nil collection fields when serializing instead of writing empty
+	// collections, and decodes absent collection fields as nil instead of empty.
+	OmitNilCollections bool
 	// TypeScript, when non-nil, opts this project into TypeScript packaging and publication.
 	TypeScript *TypeScriptParam
 }

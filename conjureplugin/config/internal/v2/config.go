@@ -127,6 +127,9 @@ type SingleConjureConfig struct {
 	// "Accept-Conjure-Error-Parameter-Format: JSON" header on every request so that servers which
 	// support it serialize error parameters as JSON rather than the legacy string form.
 	ErrorParameterFormatJSON bool `yaml:"error-parameter-format-json,omitempty"`
+	// OmitNilCollections, when true, omits nil collection fields when serializing instead of writing empty
+	// collections, and decodes absent collection fields as nil instead of empty.
+	OmitNilCollections bool `yaml:"omit-nil-collections,omitempty"`
 	// TypeScript, when present, opts this project into TypeScript packaging and publication.
 	TypeScript *TypeScriptConfig `yaml:"typescript,omitempty"`
 }

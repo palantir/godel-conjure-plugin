@@ -95,6 +95,7 @@ func ParamsFromConfig(cfg *config.ConjurePluginConfig) (_ ConjureProjectParams, 
 			SkipDeleteGeneratedFiles: currConfig.SkipDeleteGeneratedFiles,
 			ExportErrorDecoder:       currConfig.ExportErrorDecoder,
 			ErrorParameterFormatJSON: currConfig.ErrorParameterFormatJSON,
+			OmitNilCollections:       currConfig.OmitNilCollections,
 			TypeScript:               typeScript,
 		})
 	}
