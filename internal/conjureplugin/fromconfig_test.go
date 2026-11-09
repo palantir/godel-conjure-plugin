@@ -484,6 +484,7 @@ projects:
     omit-top-level-project-dir: true
     export-error-decoder: true
     error-parameter-format-json: true
+    omit-nil-collections: true
     ir-locator: input.json
 `,
 			want: ConjureProjectParams{
@@ -494,6 +495,7 @@ projects:
 					AcceptFuncs:              true,
 					ExportErrorDecoder:       true,
 					ErrorParameterFormatJSON: true,
+					OmitNilCollections:       true,
 				},
 			},
 		},

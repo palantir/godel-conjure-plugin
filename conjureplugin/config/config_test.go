@@ -344,6 +344,7 @@ projects:
      type: remote
      locator: localhost:8080/ir.json
    error-parameter-format-json: true
+   omit-nil-collections: true
 `,
 			config.ConjurePluginConfig{
 				ProjectConfigs: v2.ConjureProjectConfigs{
@@ -356,6 +357,7 @@ projects:
 								Locator: "localhost:8080/ir.json",
 							},
 							ErrorParameterFormatJSON: true,
+							OmitNilCollections:       true,
 						},
 					},
 				},
