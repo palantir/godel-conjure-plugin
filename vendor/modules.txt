@@ -133,7 +133,7 @@ github.com/palantir/conjure-go/v7/conjure/snip
 github.com/palantir/conjure-go/v7/conjure/transforms
 github.com/palantir/conjure-go/v7/conjure/types
 github.com/palantir/conjure-go/v7/cycles
-# github.com/palantir/distgo v1.118.0
+# github.com/palantir/distgo v1.119.0
 ## explicit; go 1.27.0
 github.com/palantir/distgo/distgo
 github.com/palantir/distgo/distgotaskprovider
@@ -299,7 +299,7 @@ golang.org/x/text/internal/utf8internal
 golang.org/x/text/runes
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.52.0
+# golang.org/x/tools v0.52.1-0.20261106145633-d407941a339a
 ## explicit; go 1.26.0
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/ast/edge
