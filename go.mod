@@ -7,7 +7,7 @@ toolchain go1.27.3
 require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go/v7 v7.16.0
-	github.com/palantir/distgo v1.118.0
+	github.com/palantir/distgo v1.119.0
 	github.com/palantir/distgo/pkg/git v1.1.0
 	github.com/palantir/godel/v2 v2.204.0
 	github.com/palantir/pkg/clipackager v1.1.0
@@ -74,7 +74,7 @@ require (
 	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
-	golang.org/x/tools v0.52.0 // indirect
+	golang.org/x/tools v0.52.1-0.20261106145633-d407941a339a // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 )
