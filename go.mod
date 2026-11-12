@@ -50,7 +50,7 @@ require (
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/nwaples/rardecode/v2 v2.4.6 // indirect
-	github.com/palantir/go-ptimports/v2 v2.57.0 // indirect
+	github.com/palantir/go-ptimports/v2 v2.58.0 // indirect
 	github.com/palantir/pkg v1.3.0 // indirect
 	github.com/palantir/pkg/gotoolchain v0.1.0 // indirect
 	github.com/palantir/pkg/pkgpath v1.4.0 // indirect
