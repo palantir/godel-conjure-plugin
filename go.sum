@@ -88,8 +88,8 @@ github.com/palantir/distgo/pkg/git v1.1.0 h1:8ThEUZxMeUbRHdXuKco4ytBh74V7rtE+yfw
 github.com/palantir/distgo/pkg/git v1.1.0/go.mod h1:QhKxNr5yr4nlhdpzkXcnNecYOY782BXzS1pRxDucKYA=
 github.com/palantir/go-ptimports/v2 v2.58.0 h1:8ZXK5ilFayQy+wiqhgvMe1I7t6wtdMbbkEXsPphRrqM=
 github.com/palantir/go-ptimports/v2 v2.58.0/go.mod h1:oCJmgFsj/a5a1StyoOrgURvTuluCH6d7LkdtIueJfHM=
-github.com/palantir/godel/v2 v2.207.0 h1:m+4ShTJ16so08C3Li0jrq4SMpFZ/B91naZ+qzb9X8bI=
-github.com/palantir/godel/v2 v2.207.0/go.mod h1:wVuHEzNfraaNqwVZX3CtmJpddYTCHr417sNVtCo0vjo=
+github.com/palantir/godel/v2 v2.208.0 h1:WYcyBOa+gXiTzM8b0UvEoE3ojvIWRncrXMzNpbP7b/o=
+github.com/palantir/godel/v2 v2.208.0/go.mod h1:wVuHEzNfraaNqwVZX3CtmJpddYTCHr417sNVtCo0vjo=
 github.com/palantir/pkg v1.3.0 h1:v3n/nDkdNQjwASw9CoC5ur1ghpHT44mOmQ+bavVR3pk=
 github.com/palantir/pkg v1.3.0/go.mod h1:qB+RCNzPSp4oF6fjtZNdN6ygAjwKCCblfWgg8N/9abA=
 github.com/palantir/pkg/clipackager v1.1.0 h1:dVB/0+6kBzSwVHWWIdgGI8lCkAE5WwIij3xbq5ZhNLE=
