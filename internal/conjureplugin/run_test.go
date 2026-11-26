@@ -100,7 +100,7 @@ func (o *BaseType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 			wantErr: true,
 			wantOutput: `Conjure output differs from what currently exists for 1 project(s)
   test-project:
-    output/base/api/structs.conjure.go: checksum changed from fb94eaea4461372a002dbda263dc6cf00f50f269cb30a7763fd975799b3763ee to bf0ecbdb9b814248d086c9b69cf26182d9d4138f2ad3d0637c4555fc8cbf68e5
+    output/base/api/structs.conjure.go: out of date
 `,
 		},
 		{
@@ -119,7 +119,7 @@ func (o *BaseType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 			wantErr: true,
 			wantOutput: `Conjure output differs from what currently exists for 1 project(s)
   test-project:
-    output/base/api/extra.conjure.go: extra
+    output/base/api/extra.conjure.go: no longer generated
 `,
 		},
 		{
